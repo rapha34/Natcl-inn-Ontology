@@ -31,35 +31,37 @@ public class NatclinnService {
 		String idOld = "firstTime";
 	    String gps = null;
 	    ArrayList<String> listLabels = new ArrayList<String>();
-		while (resultSet.hasNext()) {
-			QuerySolution result = resultSet.next();
-			
-			if (idOld.contains("firstTime")) {
-				idOld = result.get("id").toString();
-			}
-			
-			id = result.get("id").toString();
-			
-			if (!id.contentEquals(idOld)) {
-				Plot plot = new Plot();
-				plot = createPlot(idOld,gps,listLabels);
-				listPlots.add(plot);
-				idOld=id;
-				gps = result.get("gps").toString();
-				listLabels.clear();
-				listLabels.add(result.get("prefLabel").toString());
-			} else {
-				gps = result.get("gps").toString();
-				listLabels.add(result.get("prefLabel").toString());
-			}
-			
-			if (!resultSet.hasNext()) {
-				Plot plot = new Plot();
-				plot = createPlot(idOld,gps,listLabels);
-				listPlots.add(plot);
-			}
-			
-		} 
+		if (resultSet != null) {
+			while (resultSet.hasNext()) {
+				QuerySolution result = resultSet.next();
+				
+				if (idOld.contains("firstTime")) {
+					idOld = result.get("id").toString();
+				}
+				
+				id = result.get("id").toString();
+				
+				if (!id.contentEquals(idOld)) {
+					Plot plot = new Plot();
+					plot = createPlot(idOld,gps,listLabels);
+					listPlots.add(plot);
+					idOld=id;
+					gps = result.get("gps").toString();
+					listLabels.clear();
+					listLabels.add(result.get("prefLabel").toString());
+				} else {
+					gps = result.get("gps").toString();
+					listLabels.add(result.get("prefLabel").toString());
+				}
+				
+				if (!resultSet.hasNext()) {
+					Plot plot = new Plot();
+					plot = createPlot(idOld,gps,listLabels);
+					listPlots.add(plot);
+				}
+				
+			} 
+		}
 		System.out.println("coucou liste");
 		return listPlots;
 	}  

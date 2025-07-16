@@ -95,7 +95,7 @@ public class CalcMakeVector extends BaseBuiltin {
 				}
 
 				// Creating a node for the output parameter
-				Node vector = NodeFactory.createLiteral(strVector);
+				Node vector = NodeFactory.createLiteralByValue(strVector, null);
 				Node vectorSize = Util.makeIntNode(nbr);;
 				// Binding the output parameter to the node
 				BindingEnvironment env = context.getEnv();

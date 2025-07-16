@@ -62,10 +62,10 @@ public class NatclinnQueryInfModel {
 		// Initialisation de la configuration
 		// Chemin d'accès, noms fichiers...
 		new NatclinnConf();
-		String afy = NatclinnConf.afy;
+		String ncl = NatclinnConf.ncl;
 
 		List<Resource> listElements = new ArrayList<Resource>();
-		Resource stucturalElementClass = m.getResource( afy + "StructuralElement" );
+		Resource stucturalElementClass = m.getResource( ncl + "StructuralElement" );
 		// On retrouve les instances de StructuralElement 
 		Iterator<Resource> stucturalElements = m.listSubjectsWithProperty(RDF.type, stucturalElementClass);
 		while (stucturalElements.hasNext()) {
@@ -85,9 +85,9 @@ public class NatclinnQueryInfModel {
 	public static List<Resource> listTermsWithLabel(InfModel m, String label) {
 		List<Resource> listTerms = new ArrayList<Resource>() ;
 		new NatclinnConf();
-		String afy = NatclinnConf.afy;
+		String ncl = NatclinnConf.ncl;
 		String skos = NatclinnConf.skos;
-		Resource TermClass = m.getResource( afy + "Term" );
+		Resource TermClass = m.getResource( ncl + "Term" );
 		StmtIterator i = m.listStatements( null, RDF.type, TermClass );
 		Property prefLabel = m.getProperty( skos + "prefLabel" );
 		while (i.hasNext()) {

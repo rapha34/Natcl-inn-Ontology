@@ -33,6 +33,7 @@ public final class NatclinnConf {
 	public static String fileNameResultsQueries = null;
 	
 	public static String folderForOntologies = null;
+	public static String folderForData = null;
 	public static String folderForRules = null;
 	public static String folderForQueries = null;
 	public static String folderForResults = null;
@@ -43,7 +44,7 @@ public final class NatclinnConf {
 	public static String fileNameTDBdatabase = null;
 	
 	//query prefix
-	public static String afy = null;
+	public static String ncl = null;
 	public static String afo = null;
 	public static String res = null;
 	public static String skos = null;
@@ -76,19 +77,21 @@ public final class NatclinnConf {
 	
 	public static String queryPrefix = null;
 	
-	public static Logger agroforestry_logger;
+	public static Logger natclinnTDB_logger;
 
 	/**
 	 * Constructor
 	*/
 	public NatclinnConf() {
-		agroforestry_logger = LogManager.getLogger(getClass());
+		natclinnTDB_logger = LogManager.getLogger(getClass());
 		Properties prop = new Properties();
 		InputStream input = null;
 		try {
 			input = getClass().getClassLoader().getResourceAsStream(NatclinnConf.filename);
 			if (input == null) {
-				agroforestry_logger.error("No file " + NatclinnConf.filename);
+				natclinnTDB_logger.error("No file " + NatclinnConf.filename);
+			} else {
+				// natclinnTDB_logger.info("Loading file " + NatclinnConf.filename);
 			}
 			prop.load(input);
 			
@@ -133,6 +136,10 @@ public final class NatclinnConf {
 			Path pathfolderForOntologies = Paths.get(mainFolderNatclinn + folderForOntologies);
 			folderForOntologies = pathfolderForOntologies.toString();
 			
+			folderForData = prop.getProperty("folderForData");
+			Path pathfolderForData = Paths.get(mainFolderNatclinn + folderForData);
+			folderForData = pathfolderForData.toString();
+
 			folderForRules = prop.getProperty("folderForRules");
 			Path pathfolderForRules = Paths.get(mainFolderNatclinn + folderForRules);
 			folderForRules = pathfolderForRules.toString();
@@ -156,7 +163,7 @@ public final class NatclinnConf {
 			folderForTDB = pathfolderForTDB.toString();
 			fileNameTDBdatabase = prop.getProperty("fileNameTDBdatabase");
 			
-			afy = prop.getProperty("afy");
+			ncl = prop.getProperty("ncl");
 			afo = prop.getProperty("afo");
 			res = prop.getProperty("res");
 			skos = prop.getProperty("skos");
@@ -190,7 +197,7 @@ public final class NatclinnConf {
 			// Prefix pour les query
 			
 			queryPrefix =  
-					"prefix afy: <" + afy + ">\n" +
+					"prefix afy: <" + ncl + ">\n" +
 					"prefix afo: <" + afo + ">\n" +	
 					"prefix afv: <" + afv + ">\n" +			
 					"prefix res: <" + res + ">\n" +
@@ -219,7 +226,9 @@ public final class NatclinnConf {
 					"prefix bfo: <" + bfo + ">\n" ;
 							
 			NatclinnConf.prop = prop;
-			input.close();
+			if (input != null) {
+				input.close();
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

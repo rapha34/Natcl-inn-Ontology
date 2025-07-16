@@ -51,7 +51,7 @@ public class CalcGiveLabelOfRessource extends BaseBuiltin {
 			label = NatclinnUtil.getBestStringLiteral(resource);
 			if (label != null) {
 			// Creating a node for the output parameter
-			resLabel = NodeFactory.createLiteral(label.getLexicalForm().toString())   ;
+			resLabel = NodeFactory.createLiteral(label.getLexicalForm(), label.getLanguage(), label.getDatatype());
 			}
 			// Binding the output parameter to the node
 			BindingEnvironment env = context.getEnv();

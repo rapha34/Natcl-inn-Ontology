@@ -24,7 +24,6 @@ import org.apache.jena.reasoner.rulesys.GenericRuleReasoner;
 import org.apache.jena.reasoner.rulesys.Rule;
 
 import natclinn.util.*;
-import openllet.jena.PelletReasonerFactory;
 
 import io.github.galbiston.geosparql_jena.configuration.GeoSPARQLConfig;
 
@@ -52,7 +51,6 @@ public class NatclinnCreateInferedModel {
 
 		Model modelTemp = ModelFactory.createDefaultModel();
 		Model modelImports = ModelFactory.createDefaultModel();
-		Model modelInfered = ModelFactory.createDefaultModel();
 
 		if (topSpatial.equalsIgnoreCase("true")) {
 			// On charge l'ontologie GeoSparql
@@ -84,13 +82,6 @@ public class NatclinnCreateInferedModel {
 		System.out.println("Runtime for loading models into memory: " + Duration.between(start0, end0).toMillis() + " millisecondes");
 
 		Instant start1 = Instant.now();
-
-		// create Pellet reasoner
-		final Reasoner reasoner = PelletReasonerFactory.theInstance().create();
-
-		modelInfered = NatclinnPelletInferences.MakeInferencesWithPellet(reasoner, modelTemp);
-
-		modelTemp.close();
 		
 		// Register custom primitive
 		BuiltinRegistry.theRegistry.register(new CalcTreeBiomass());
@@ -139,7 +130,7 @@ public class NatclinnCreateInferedModel {
 		System.out.println(pathFileRules.toString());
 		Reasoner reasonerRules = new GenericRuleReasoner(Rule.rulesFromURL(pathFileRules.toString()));
 
-		InfModel infModel = ModelFactory.createInfModel(reasonerRules, modelInfered);  
+		InfModel infModel = ModelFactory.createInfModel(reasonerRules, modelTemp);  
 		// infModel.rebind();
 		// infModel.prepare();
 

@@ -1,6 +1,7 @@
 package natclinn.util;
 
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -24,17 +25,46 @@ import org.apache.jena.tdb2.TDB2Factory;
 public class TDBUtil {
 	
 	public static Dataset CreateTDBDataset() throws Exception {
-		
-		// Initialisation de la configuration
-		// Chemin d'accès, noms fichiers...
-		new NatclinnConf();  
+    System.out.println("=== Début de createTDBDataset ===");
 
-		// Create dataset
-		Path pathDataBase = Paths.get(NatclinnConf.folderForTDB , NatclinnConf.fileNameTDBdatabase);
-		Location location = Location.create(pathDataBase.toString());
-		Dataset dataset = TDB2Factory.connectDataset(location);
-		return dataset;
+    // Étape 1 : Initialisation de la configuration
+    new NatclinnConf();
+
+    // Étape 2 : Vérification des paramètres
+    if (NatclinnConf.folderForTDB == null || NatclinnConf.fileNameTDBdatabase == null) {
+        throw new IllegalStateException("Configuration invalide : folderForTDB ou fileNameTDBdatabase est null.");
     }
+
+    // Étape 3 : Création du chemin
+    Path pathDataBase = Paths.get(NatclinnConf.folderForTDB, NatclinnConf.fileNameTDBdatabase);
+    // System.out.println("Chemin base TDB2 : " + pathDataBase.toAbsolutePath());
+
+    // Étape 4 : Vérification que le dossier existe (Jena TDB2 peut en créer un, mais on teste quand même)
+    File dbDir = pathDataBase.toFile();
+    if (!dbDir.exists()) {
+        System.out.println("⚠️ Le dossier de la base n'existe pas encore. Il sera créé si nécessaire.");
+    } else if (!dbDir.isDirectory()) {
+        throw new IllegalStateException("Le chemin TDB2 n'est pas un dossier.");
+    }
+
+    // Étape 5 : Création de l'objet Dataset
+    Location location = Location.create(pathDataBase.toString());
+    Dataset dataset = TDB2Factory.connectDataset(location);
+    // System.out.println("Dataset créé avec succès.");
+
+    // Étape 6 : Test rapide d'opération
+    dataset.begin(ReadWrite.READ);
+    try {
+        //System.out.println("Graph par défaut : " + dataset.getDefaultModel().size() + " triplets.");
+    } finally {
+        dataset.end();
+    }
+
+    System.out.println("=== Fin de createTDBDataset ===");
+    return dataset;
+}
+
+
 	
 	public static void DeleteStatementToTDBGraph(List<Statement> listStmt, String graphURI) throws Exception {
 		
