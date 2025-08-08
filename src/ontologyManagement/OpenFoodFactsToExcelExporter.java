@@ -21,7 +21,11 @@ public class OpenFoodFactsToExcelExporter {
         new NatclinnConf();
         // extractOFFToExcel("categories_tags_en", "madeleines");
         // extractOFFToExcel("code", "3835100000004");
-        extractOFFToExcel("code", "3270160865826");
+        // 3564700423196 Moussaka – Marque Repère – 300 g
+        // 3302740044786 La Moussaka Boeuf & Aubergines avec une touche de menthe douce – Fleury Michon – 300 g
+        // 3250392814908 Moussaka – Monique ranou – 300 g
+        // extractOFFToExcel("code", "3270160865826");
+        extractOFFToExcel("code", "3302740044786");
     }
 
     public static void extractOFFToExcel(String searchProperty, String searchPropertyString) throws Exception {
@@ -49,7 +53,7 @@ public class OpenFoodFactsToExcelExporter {
         Sheet nutriScoreSheet = workbook.createSheet("NutriScore");
         
 
-        createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque", "Mot-clé categories", "Categories");
+        createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque", "MotClefCategorie", "Categorie");
         createHeaders(ingredientsSheet, "IDIngredient", "NomIngredient", "Ciqual_food_code", "Ciqual_proxi_food_code");
         createHeaders(compositionsSheet, "IDProduit", "TypeComposant", "IDComposant", "Quantité", "Unité", "Pourcentage", "Rang");
         createHeaders(packagingSheet, "IDProduit", "Forme","Matériau");
@@ -90,7 +94,7 @@ public class OpenFoodFactsToExcelExporter {
                 String name = p.path("product_name").asText("");
                 String brand = p.path("brands").asText("");
                 String categories = p.path("categories").asText("");
-            
+                Boolean compositeProduct = false;
 
                 if (!nameFr.isEmpty()) name = nameFr; // Priorité au nom en français
                 if (name.isEmpty()) continue;
@@ -115,10 +119,11 @@ public class OpenFoodFactsToExcelExporter {
                 if (eanCode != null && eanCode != "") {
                     // Sinon on le convertit en entier pour l'export Excel
                     Cell cell = prodRow.createCell(2);
-                    cell.setCellValue(Long.parseLong(eanCode));          // Valeur numérique
+                    cell.setCellValue(Long.parseLong(eanCode)); // Valeur numérique
                     cell.setCellStyle(integerStyle); // Formatage sans décimale
                 }
-                prodRow.createCell(3).setCellValue("ProduitAlimentaire");
+                Cell cellTypeProduct = prodRow.createCell(3);
+                cellTypeProduct.setCellValue("SimpleProduct");
                 prodRow.createCell(4).setCellValue(brand);
                 prodRow.createCell(5).setCellValue("");
                 prodRow.createCell(6).setCellValue(categories);
@@ -192,6 +197,8 @@ public class OpenFoodFactsToExcelExporter {
                 for (Ingredient ing : parsed) {
                     if (ing.getName().isEmpty()) continue;
                     String labelIngredient = typographicalCorrection(ing.getName());
+                System.out.println("labelIngredient : '" +  labelIngredient + "'");
+                hexViewer(labelIngredient);
                     String typeIngredient = ing.getType();
                     List<Ingredient> subIngredient = ing.getSubIngredients();
                     if (typeIngredient == "Ingredient" ) {   
@@ -208,16 +215,18 @@ public class OpenFoodFactsToExcelExporter {
 
                         JsonNode structured = structuredMap.get(labelIngredient);
                         if (structured != null) {
-                        ingredientLabel = labelIngredient;    
-                        ciqualCode = structured.path("ciqual_food_code").asText("");
-                        ciqualProxy = structured.path("ciqual_proxy_food_code").asText("");
-                        hasSubs = structured.path("has_sub_ingredients").asText("");
+                            ingredientLabel = labelIngredient;    
+                            ciqualCode = structured.path("ciqual_food_code").asText("");
+                            ciqualProxy = structured.path("ciqual_proxy_food_code").asText("");
+                            hasSubs = structured.path("has_sub_ingredients").asText("");
                         } else {
                             // === Tentative de correspondance approximative ===
                             Optional<JsonNode> approx = StreamSupport.stream(structuredIngredients.spliterator(), false)
                                 .filter(node -> {
                                     String label = node.path("text").asText("");
                                     label=typographicalCorrection(label);
+                                    // System.out.println("label : '" + label + "'");
+                                    // System.out.println("labelIngredient : '" + labelIngredient + "'");
                                     return !label.isEmpty() && labelIngredient.startsWith(label);
                                 })
                                 .findFirst();
@@ -270,6 +279,7 @@ public class OpenFoodFactsToExcelExporter {
                             compRow.createCell(5).setCellValue(ing.getPercentage());
                         compRow.createCell(6).setCellValue(rank++);
                     } else if (typeIngredient != null && typeIngredient.equals("SubProduct")) { 
+                        compositeProduct = true;
                         // On place l'ingredient en temps que sous-produit dans les produits
                         long counter = NatclinnUtil.getNextProductCounterValue();
 						String paddedCounter = String.format("%013d", counter); // format 13 chiffres
@@ -278,10 +288,19 @@ public class OpenFoodFactsToExcelExporter {
                         prodRow.createCell(0).setCellValue(subProductId);
                         prodRow.createCell(1).setCellValue(labelIngredient);
                         prodRow.createCell(2).setCellValue("");
-                        prodRow.createCell(3).setCellValue("SousProduitAlimentaire");
+                        prodRow.createCell(3).setCellValue("SimpleProduct");
                         prodRow.createCell(4).setCellValue("");
                         prodRow.createCell(5).setCellValue("");
 
+                        // On met à jour la composition pour le sous-produit
+                        Row compRowsubProduct = compositionsSheet.createRow(compRowIdx++);
+                        compRowsubProduct.createCell(0).setCellValue(productId);
+                        compRowsubProduct.createCell(1).setCellValue("Product");
+                        compRowsubProduct.createCell(2).setCellValue(subProductId);
+                        if (ing.getPercentage() != null)
+                            compRowsubProduct.createCell(5).setCellValue(ing.getPercentage());
+                        compRowsubProduct.createCell(6).setCellValue(rank++);
+                        
                         // On traite les ingrédients du sous-produit
                         int subRank = 1;
                         for (Ingredient sub : subIngredient) {
@@ -296,6 +315,7 @@ public class OpenFoodFactsToExcelExporter {
                                 ingRow.createCell(0).setCellValue(ingId);
                                 ingRow.createCell(1).setCellValue(labelSubIngredient);
                             }
+                        
                             Row compRow = compositionsSheet.createRow(compRowIdx++);
                             compRow.createCell(0).setCellValue(subProductId);
                             compRow.createCell(1).setCellValue(typeSubIngredient);
@@ -305,6 +325,7 @@ public class OpenFoodFactsToExcelExporter {
                             compRow.createCell(6).setCellValue(subRank++);
                         }    
                     } else if (typeIngredient != null && typeIngredient.equals("Additif")) {
+                        compositeProduct = true;
                         // Pour les additifs
                         // On place l'additif en temps que sous-produit dans les produits
                         long counter = NatclinnUtil.getNextProductCounterValue();
@@ -314,18 +335,18 @@ public class OpenFoodFactsToExcelExporter {
                         prodRow.createCell(0).setCellValue(subProductId);
                         prodRow.createCell(1).setCellValue(labelIngredient);
                         prodRow.createCell(2).setCellValue("");
-                        prodRow.createCell(3).setCellValue("Additif");
+                        prodRow.createCell(3).setCellValue("AdditiveProduct");
                         prodRow.createCell(4).setCellValue("");
                         prodRow.createCell(5).setCellValue("");
 
                         // On met à jour la composition pour l'additif
-                        Row compRow = compositionsSheet.createRow(compRowIdx++);
-                        compRow.createCell(0).setCellValue(productId);
-                        compRow.createCell(1).setCellValue("Additif");
-                        compRow.createCell(2).setCellValue(subProductId);
+                        Row compRowAdditiveProduct = compositionsSheet.createRow(compRowIdx++);
+                        compRowAdditiveProduct.createCell(0).setCellValue(productId);
+                        compRowAdditiveProduct.createCell(1).setCellValue("AdditiveProduct");
+                        compRowAdditiveProduct.createCell(2).setCellValue(subProductId);
                         if (ing.getPercentage() != null)
-                            compRow.createCell(5).setCellValue(ing.getPercentage());
-                        compRow.createCell(6).setCellValue(rank++);
+                            compRowAdditiveProduct.createCell(5).setCellValue(ing.getPercentage());
+                        compRowAdditiveProduct.createCell(6).setCellValue(rank++);
 
                         // On traite les ingrédients de l'additif si besoin
                         int subRank = 1;
@@ -341,7 +362,8 @@ public class OpenFoodFactsToExcelExporter {
                                 ingRow.createCell(0).setCellValue(ingId);
                                 ingRow.createCell(1).setCellValue(labelSubIngredient);
                             }
-                            compRow = compositionsSheet.createRow(compRowIdx++);
+                            
+                            Row compRow = compositionsSheet.createRow(compRowIdx++);
                             compRow.createCell(0).setCellValue(subProductId);
                             compRow.createCell(1).setCellValue(typeSubIngredient);
                             compRow.createCell(2).setCellValue(ingId);
@@ -350,6 +372,7 @@ public class OpenFoodFactsToExcelExporter {
                             compRow.createCell(6).setCellValue(subRank++);
                         }    
                      } else if (typeIngredient != null && typeIngredient.equals("Arome")) {
+                        compositeProduct = true;
                         // Pour les arômes
                         // On place l'arôme en temps que sous-produit dans les produits
                         long counter = NatclinnUtil.getNextProductCounterValue();
@@ -359,14 +382,14 @@ public class OpenFoodFactsToExcelExporter {
                         prodRow.createCell(0).setCellValue(subProductId);
                         prodRow.createCell(1).setCellValue(labelIngredient);
                         prodRow.createCell(2).setCellValue("");
-                        prodRow.createCell(3).setCellValue("Arome");
+                        prodRow.createCell(3).setCellValue("AromaProduct");
                         prodRow.createCell(4).setCellValue("");
                         prodRow.createCell(5).setCellValue("");
 
                         // On met à jour la composition pour l'arôme
                         Row compRow = compositionsSheet.createRow(compRowIdx++);
                         compRow.createCell(0).setCellValue(productId);
-                        compRow.createCell(1).setCellValue("Additif");
+                        compRow.createCell(1).setCellValue("Arôme");
                         compRow.createCell(2).setCellValue(subProductId);
                         if (ing.getPercentage() != null)
                             compRow.createCell(5).setCellValue(ing.getPercentage());
@@ -397,7 +420,11 @@ public class OpenFoodFactsToExcelExporter {
                         }    
                     } else if (typeIngredient != null) {
                         System.out.println("Type d'ingrédient inconnu : " + typeIngredient + " pour l'ingrédient " + labelIngredient);
-                    }    
+                    } 
+                    if (compositeProduct) {
+                        cellTypeProduct.setCellValue("CompositeProduct");
+                    }
+                    
                 }
             }
         }
@@ -423,12 +450,13 @@ public class OpenFoodFactsToExcelExporter {
     }
 
     private static String typographicalCorrection(String label) {
-        label = label.toLowerCase().trim();
+        label = label.toLowerCase();
         label = label.replaceAll("\\*", "");
         label = label.replaceAll("œ", "oe");
         label = label.replaceAll("_([^_]+)_", "$1");
         label = label.replaceAll("\"", "");
         label = label.replaceAll("\\b([DdLlJjNnSsTtMm])’", "$1'");
+        label = label.trim();
         return label;
        
     }
@@ -460,6 +488,15 @@ public class OpenFoodFactsToExcelExporter {
         try (Scanner scanner = new Scanner(conn.getInputStream(), "UTF-8")) {
             scanner.useDelimiter("\\A");
             return scanner.hasNext() ? scanner.next() : "";
+        }
+    }
+
+    
+    private static void hexViewer(String input)  {
+        for (int i = 0; i < input.length(); i++) {
+            char ch = input.charAt(i);
+            String hex = String.format("%04x", (int) ch); // affichage sur 4 chiffres
+            System.out.println("Char: '" + ch + "' | Code point: U+" + hex);
         }
     }
 }

@@ -148,6 +148,7 @@ public class NatclinnUtil {
         input = input.replaceAll("&quot", "");
         input = input.replaceAll("\\b([DdLlJjNnSsTtMm])’", "$1'");
         input = input.replaceAll("\\bglucose\\s*-\\s*fructose\\b", "glucose-fructose");
+        input = input.replace('\u00A0', ' ').trim();
         List<String> partsList = splitRespectingParentheses(input);
         List<Ingredient> ingredients = new ArrayList<>();
         for (String part : partsList) {

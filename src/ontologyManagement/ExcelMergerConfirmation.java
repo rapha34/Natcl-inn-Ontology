@@ -1,5 +1,6 @@
 package ontologyManagement;
 
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFColor;
@@ -19,7 +20,7 @@ public class ExcelMergerConfirmation {
     }
 
     public static void removePaleGreenBackground(String sourceFilePath) throws IOException {
-
+        ZipSecureFile.setMinInflateRatio(0.001); // ou 0.0 pour désactiver la sécurité
         try (FileInputStream fis = new FileInputStream(sourceFilePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
 
@@ -28,6 +29,9 @@ public class ExcelMergerConfirmation {
 
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
+                if (sheet.getSheetName().equals("Categories")) {
+                    continue; // Ignore la feuille cachée Categories
+                }
                 removeGreenFromSheet(sheet, paleGreen);
             }
 

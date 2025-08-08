@@ -54,8 +54,18 @@ public class ExcelMerger {
                     }
                 }
 
-                // Ligne où écrire dans le fichier destination
-                int destRowIndex = destSheet.getLastRowNum() == 0 && destSheet.getRow(0) == null ? 0 : destSheet.getLastRowNum() + 1;
+                // Recherche du dernier index de ligne non vide dans la colonne A
+                int lastRowWithId = -1;
+                for (int r = 0; r <= destSheet.getLastRowNum(); r++) {
+                    Row row = destSheet.getRow(r);
+                    if (row != null) {
+                        Cell idCell = row.getCell(0);
+                        if (idCell != null && idCell.getCellType() != CellType.BLANK && !extractCellValueAsString(idCell).trim().isEmpty()) {
+                            lastRowWithId = r;
+                        }
+                    }
+                }
+                int destRowIndex = lastRowWithId + 1;
 
                 for (int r = 1; r <= sourceSheet.getLastRowNum(); r++) { // sauter l’en-tête
                     Row srcRow = sourceSheet.getRow(r);
@@ -71,12 +81,19 @@ public class ExcelMerger {
                         continue;
                     }
 
-                    // existingIds.add(id); // marquer comme ajouté
-                    Row dstRow = destSheet.createRow(destRowIndex++);
+                    Row dstRow = destSheet.getRow(destRowIndex);
+                    if (dstRow == null) {
+                        dstRow = destSheet.createRow(destRowIndex);
+                    }
+                    destRowIndex++;
 
                     for (int c = 0; c < srcRow.getLastCellNum(); c++) {
                         Cell srcCell = srcRow.getCell(c);
-                        Cell dstCell = dstRow.createCell(c);
+                        // On ne touche QUE les colonnes présentes dans srcRow
+                        Cell dstCell = dstRow.getCell(c);
+                        if (dstCell == null) {
+                            dstCell = dstRow.createCell(c);
+                        }
                         if (srcCell != null) {
                             copyCellValue(srcCell, dstCell);
                             CellStyle coloredStyle = cloneAndColorCellStyle(srcCell.getCellStyle(), destWorkbook);
@@ -87,6 +104,16 @@ public class ExcelMerger {
             }
 
             // Écriture finale
+            
+            // Recalcule toutes les formules via Apache POI
+            FormulaEvaluator evaluator = destWorkbook.getCreationHelper().createFormulaEvaluator();
+            evaluator.evaluateAll();
+
+            // Ou bien demander à Excel de recalculer à l'ouverture
+            // if (destWorkbook instanceof XSSFWorkbook) {
+            //     ((XSSFWorkbook) destWorkbook).setForceFormulaRecalculation(true);
+            // }
+
             for (int i = 0; i < destWorkbook.getNumberOfSheets(); i++) {
                 Sheet sourceSheet = destWorkbook.getSheetAt(i);
                 // Ajuster automatiquement la largeur des colonnes sur toutes les feuilles
