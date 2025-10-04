@@ -137,6 +137,8 @@ public class NatclinnUtil {
 	public static List<Ingredient> parse(String input) {
         input = removeOrphanClosingParentheses(input);
         input = truncateAfterPoint(input);
+        input = input.replaceAll("\\{/?allergene\\}", "");
+        input = input.replaceAll("(?i)origine\\s*:\\s*", "origine ");
         input = input.replaceAll("\\*", "");
         input = input.replaceAll("œ", "oe");
         input = input.replaceAll("Œ", "Oe");
@@ -144,18 +146,64 @@ public class NatclinnUtil {
         input = input.replaceAll("_([^_]+)_","$1");
         input = replaceDash(input);
         input = input.replaceAll("(\\d+),(\\d+)\\s*%", "$1.$2%");
+        // Suppression des points finaux
         input = input.replaceAll("\\.$", "");
+        // Suppression des entités HTML courantes
         input = input.replaceAll("&quot", "");
+        // Correction des apostrophes typographiques
         input = input.replaceAll("\\b([DdLlJjNnSsTtMm])’", "$1'");
+        // Gestion des espaces insécables et des tirets dans "glucose - fructose"
         input = input.replaceAll("\\bglucose\\s*-\\s*fructose\\b", "glucose-fructose");
         input = input.replace('\u00A0', ' ').trim();
         List<String> partsList = splitRespectingParentheses(input);
         List<Ingredient> ingredients = new ArrayList<>();
         for (String part : partsList) {
+            // Spécial "tomate" pour enrichir les ingrédients dérivés
+            part = factorizeTomato(part);
             Ingredient ing = parseIngredientRecursive(part.trim());
             if (ing != null) ingredients.add(ing);
         }
         return ingredients;
+    }
+
+    private static String factorizeTomato(String input) {
+        // Regex : capture "tomate" ou "tomates" + contenu entre parenthèses
+        Pattern pattern = Pattern.compile("(tomates?)([^()]*)\\(([^)]*)\\)", Pattern.CASE_INSENSITIVE);
+        Matcher matcher = pattern.matcher(input);
+
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            String base = matcher.group(1);   // "tomate" ou "tomates"
+            String prefix = matcher.group(2); // ex. " 9,5% "
+            String contenu = matcher.group(3); // ex. "concentrées, concassées et jus"
+
+            // Liste des mots-clés à enrichir avec protection "pas déjà suivi de de tomate(s)"
+            String[][] motsCles = {
+                {"(?i)\\bconcentr[ée]?(?:e|es|s)?\\b(?!\\s+de\\s+tomates?)", "concentré de " + base},
+                {"(?i)\\bconcas+[ée]?(?:e|es|s)?\\b(?!\\s+de\\s+tomates?)", "concassé de " + base},
+                {"(?i)\\bjus\\b(?!\\s+de\\s+tomates?)", "jus de " + base},
+                {"(?i)\\bpur[ée]s?\\b(?!\\s+de\\s+tomates?)", "purée de " + base},
+                {"(?i)\\bcoulis\\b(?!\\s+de\\s+tomates?)", "coulis de " + base}
+            };
+
+            // Appliquer les remplacements
+            for (String[] mc : motsCles) {
+                contenu = contenu.replaceAll(mc[0], mc[1]);
+            }
+
+            // Transformer "et" en virgule
+            contenu = contenu.replaceAll("\\s*et\\s*", ", ");
+
+            // Nettoyage : enlever doubles virgules et espaces superflus
+            contenu = contenu.replaceAll(",\\s*,", ", ");
+            contenu = contenu.replaceAll("\\s+,", ", ");
+
+            matcher.appendReplacement(sb, base + prefix + "(" + contenu + ")");
+        }
+        matcher.appendTail(sb);
+
+        return sb.toString();
     }
 
     /**

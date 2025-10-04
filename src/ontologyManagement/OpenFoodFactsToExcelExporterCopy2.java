@@ -15,7 +15,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-public class OpenFoodFactsToExcelExporter {
+public class OpenFoodFactsToExcelExporterCopy2 {
 
     public static void main(String[] args) throws Exception {
         new NatclinnConf();
@@ -26,19 +26,16 @@ public class OpenFoodFactsToExcelExporter {
         // 3250392814908 Moussaka – Monique ranou – 300 g
         // 3302740044786 La Moussaka Boeuf & Aubergines avec une touche de menthe douce – Fleury Michon – 300 g
         // extractOFFToExcel("code", "3270160865826");
-        extractOFFToExcel("code", "3302740044786");
+        extractOFFToExcel("code", "3564700423196");
     }
 
     public static void extractOFFToExcel(String searchProperty, String searchPropertyString) throws Exception {
 
-        String fieldParams = "&fields=code,product_name,brands,categories,nutriscore_grade,nutriscore_data,nutriscore_v2_data,nova_groups,nova_groups_markers,ingredients_text_fr,ingredients,packagings,origins,labels";
+        String fieldParams = "&fields=code,product_name,brands,categories,nutriscore_grade,nova_groups,nova_groups_markers,ingredients_text_fr,ingredients,packagings,origins,labels";
         int pageSize = 100;
-        String baseUrl = "https://world.openfoodfacts.org/api/v2/search?" + searchProperty + "=" + searchPropertyString + "&json=1&page_size=" + pageSize;
-        // Attention avec .net on obtient des résultats différents  
-        // String baseUrl = "https://world.openfoodfacts.net/api/v2/search?" + searchProperty + "=" + searchPropertyString + "&json=1&page_size=" + pageSize;
+        String baseUrl = "https://world.openfoodfacts.net/api/v2/search?" + searchProperty + "=" + searchPropertyString + "&json=1&page_size=" + pageSize;
 
         String initialUrl = baseUrl + "&page=1&fields=product_name";
-        System.out.println("initialUrl : '" +  initialUrl + "'");
         String initialJson = getHttpContent(initialUrl);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(initialJson);
@@ -55,7 +52,6 @@ public class OpenFoodFactsToExcelExporter {
         Sheet cleanLabelSheet = workbook.createSheet("CleanLabel");
         Sheet manufacturingProcessSheet = workbook.createSheet("ManufacturingProcess");
         Sheet nutriScoreSheet = workbook.createSheet("NutriScore");
-        Sheet nutriScoreDetailsSheet = workbook.createSheet("NutriScoreDetails");
         Sheet novaSheet = workbook.createSheet("Nova");
         
 
@@ -67,8 +63,6 @@ public class OpenFoodFactsToExcelExporter {
         createHeaders(cleanLabelSheet, "IDProduit", "CleanLabel");
         createHeaders(manufacturingProcessSheet, "IDProduit", "ManufacturingProcess");
         createHeaders(nutriScoreSheet, "IDProduit", "NutriScore");
-        createHeaders(nutriScoreDetailsSheet, "IDProduit", "PolarityComponent", "IDcomponent", "points", "points_max", "value", "unit");
-        
         createHeaders(novaSheet, "IDProduit", "GroupeNova", "Groupe1", "Groupe2", "Groupe3", "Groupe4");
         
         // Set to track unique ingredients and their IDs    
@@ -82,7 +76,6 @@ public class OpenFoodFactsToExcelExporter {
         int cleanRowIdx = 1;
         int manuRowIdx = 1;
         int nutriRowIdx = 1;
-        int nutriDetailsRowIdx = 1;
         int novaRowIdx = 1;
         int compRowIdx = 1;
         int countError = 0;
@@ -95,7 +88,6 @@ public class OpenFoodFactsToExcelExporter {
         // Pour toutes les pages de résultats
         for (int page = 1; page <= totalPages; page++) {
             String pageUrl = baseUrl + "&page=" + page + fieldParams;
-            System.out.println("pageUrl : '" +  pageUrl + "'");
             String json = getHttpContent(pageUrl);
             root = mapper.readTree(json);
             JsonNode products = root.path("products");
@@ -189,28 +181,8 @@ public class OpenFoodFactsToExcelExporter {
                     Row nutriRow = nutriScoreSheet.createRow(nutriRowIdx++);
                     nutriRow.createCell(0).setCellValue(productId);
                     nutriRow.createCell(1).setCellValue(nutriScore.toUpperCase());
-                
-                    // Maintenant, on essaie d’extraire les détails
-                    // On essaie avec “nutriscore_data” ou “nutriscore_v2_data”, selon ce qui existe
-                    JsonNode nutriData = null;
-                    if (p.has("nutriscore_data")) {
-                        nutriData = p.get("nutriscore_data");
-                    } else if (p.has("nutriscore_v2_data")) {
-                        nutriData = p.get("nutriscore_v2_data");
-                    }
-
-                    if (nutriData != null && nutriData.isObject()) {
-                        // Optionnel : extraire le score numérique
-                        int score = nutriData.path("score").asInt(Integer.MIN_VALUE);
-                        if (score != Integer.MIN_VALUE) {
-                            // stocker ce score quelque part
-                            nutriRow.createCell(2).setCellValue(score);
-                        }
-                        
-                        nutriDetailsRowIdx = writeNutriScoreComponents(p, nutriScoreDetailsSheet, productId, nutriDetailsRowIdx);
-
-                    }
                 }
+
                 // Enregistrement de la classification Nova
                 String novaScore = p.path("nova_groups").asText("");
                 // Récupération du node markers
@@ -269,7 +241,6 @@ public class OpenFoodFactsToExcelExporter {
 
                 // Composition via analyse texte
                 String ingredientsText = p.path("ingredients_text_fr").asText("");
-                System.out.println("ingredientsText : '" +  ingredientsText + "'");
                 List<Ingredient> parsed = NatclinnUtil.parse(ingredientsText);
                 int rank = 1;
                 for (Ingredient ing : parsed) {
@@ -437,6 +408,7 @@ public class OpenFoodFactsToExcelExporter {
                             compRow.createCell(6).setCellValue(subRank++);
                         }    
                     } else if (typeIngredient != null && typeIngredient.equals("Additif")) {
+                        compositeProduct = true;
                         // Pour les additifs
                         // On place l'additif dans la liste des ingredients
                         MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients, structuredMap);
@@ -560,6 +532,7 @@ public class OpenFoodFactsToExcelExporter {
                             }    
                         }    
                     } else if (typeIngredient != null && typeIngredient.equals("Arome")) {
+                        compositeProduct = true;
                         // Pour les arômes
                         // On place l'arôme en temps que sous-produit dans les produits
                         MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients, structuredMap);
@@ -762,60 +735,6 @@ public class OpenFoodFactsToExcelExporter {
         }
     }
 
-    /**
-     * Extrait les composants Nutri-Score (negative / positive) et les écrit dans une feuille Excel.
-     * Format colonnes :
-     * 0 = productId
-     * 1 = polarity ("negative" ou "positive")
-     * 2 = id (ex: "energy")
-     * 3 = points
-     * 4 = points_max
-     * 5 = value
-     * 6 = unit
-     */
-    private static int writeNutriScoreComponents(JsonNode p, Sheet sheet, String productId, int rowIdx) {
-        if (p == null || sheet == null) return rowIdx;
-    
-        // nutriscore_data ou nutriscore_v2_data
-        JsonNode nutriData = p.has("nutriscore_data") ? p.get("nutriscore_data")
-                          : p.has("nutriscore_v2_data") ? p.get("nutriscore_v2_data")
-                          : null;
-        if (nutriData == null) return rowIdx;
-    
-        JsonNode components = nutriData.path("components");
-        if (components.isMissingNode()) return rowIdx;
-    
-        // Negative
-        JsonNode negArray = components.path("negative");
-        if (negArray.isArray()) {
-            for (JsonNode item : negArray) {
-                rowIdx = writeComponent(sheet, productId, "negative", item, rowIdx);
-            }
-        }
-    
-        // Positive
-        JsonNode posArray = components.path("positive");
-        if (posArray.isArray()) {
-            for (JsonNode item : posArray) {
-                rowIdx = writeComponent(sheet, productId, "positive", item, rowIdx);
-            }
-        }
-    
-        return rowIdx;
-    }
-    
-    private static int writeComponent(Sheet sheet, String productId, String polarity, JsonNode node, int rowIdx) {
-        Row row = sheet.createRow(rowIdx++);
-        row.createCell(0).setCellValue(productId);
-        row.createCell(1).setCellValue(polarity);
-        row.createCell(2).setCellValue(node.path("id").asText(""));
-        row.createCell(3).setCellValue(node.path("points").asDouble(Double.NaN));
-        row.createCell(4).setCellValue(node.path("points_max").asDouble(Double.NaN));
-        row.createCell(5).setCellValue(node.path("value").asText(""));
-        row.createCell(6).setCellValue(node.path("unit").asText(""));
-        return rowIdx;
-    }
-    
     /**
      * Rapproche un ingrédient issu du parsing texte avec un ingrédient structuré d'Open Food Facts.
      * @param parsedIngredient ingrédient issu de l'analyse textuelle (NatclinnUtil)
