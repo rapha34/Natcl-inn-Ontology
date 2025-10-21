@@ -21,24 +21,29 @@ public class OpenFoodFactsToExcelExporter {
         new NatclinnConf();
         // extractOFFToExcel("categories_tags_en", "madeleines");
         // extractOFFToExcel("code", "3835100000004");
-        // 3270160865826 Saumon, duo de guinoa et orge, purée aux légumes verts, sauce vierge à la framboise
+        // 3270160865826 Saumon, duo de guinoa et orge, purée aux légumes verts, sauce
+        // vierge à la framboise
         // 3564700423196 Moussaka – Marque Repère – 300 g
         // 3250392814908 Moussaka – Monique ranou – 300 g
-        // 3302740044786 La Moussaka Boeuf & Aubergines avec une touche de menthe douce – Fleury Michon – 300 g
+        // 3302740044786 La Moussaka Boeuf & Aubergines avec une touche de menthe douce
+        // – Fleury Michon – 300 g
         // extractOFFToExcel("code", "3270160865826");
-        extractOFFToExcel("code", "3302740044786");
+        extractOFFToExcel("code", "3250392814908");
     }
 
     public static void extractOFFToExcel(String searchProperty, String searchPropertyString) throws Exception {
 
         String fieldParams = "&fields=code,product_name,brands,categories,nutriscore_grade,nutriscore_data,nutriscore_v2_data,nova_groups,nova_groups_markers,ingredients_text_fr,ingredients,packagings,origins,labels";
         int pageSize = 100;
-        String baseUrl = "https://world.openfoodfacts.org/api/v2/search?" + searchProperty + "=" + searchPropertyString + "&json=1&page_size=" + pageSize;
-        // Attention avec .net on obtient des résultats différents  
-        // String baseUrl = "https://world.openfoodfacts.net/api/v2/search?" + searchProperty + "=" + searchPropertyString + "&json=1&page_size=" + pageSize;
+        String baseUrl = "https://world.openfoodfacts.org/api/v2/search?" + searchProperty + "=" + searchPropertyString
+                + "&json=1&page_size=" + pageSize;
+        // Attention avec .net on obtient des résultats différents
+        // String baseUrl = "https://world.openfoodfacts.net/api/v2/search?" +
+        // searchProperty + "=" + searchPropertyString + "&json=1&page_size=" +
+        // pageSize;
 
         String initialUrl = baseUrl + "&page=1&fields=product_name";
-        System.out.println("initialUrl : '" +  initialUrl + "'");
+        System.out.println("initialUrl : '" + initialUrl + "'");
         String initialJson = getHttpContent(initialUrl);
         ObjectMapper mapper = new ObjectMapper();
         JsonNode root = mapper.readTree(initialJson);
@@ -57,21 +62,24 @@ public class OpenFoodFactsToExcelExporter {
         Sheet nutriScoreSheet = workbook.createSheet("NutriScore");
         Sheet nutriScoreDetailsSheet = workbook.createSheet("NutriScoreDetails");
         Sheet novaSheet = workbook.createSheet("Nova");
-        
 
-        createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque", "MotClefCategorie", "Categorie");
-        createHeaders(ingredientsSheet, "IDIngredient", "NomIngredient", "Ciqual_food_code", "Ciqual_proxi_food_code", "IdIngredientOFF");
-        createHeaders(compositionsSheet, "IDProduit", "TypeComposant", "IDComposant", "Quantité", "Unité", "Pourcentage", "Rang");
-        createHeaders(packagingSheet, "IDProduit", "Forme","Matériau");
+        createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque", "MotClefCategorie",
+                "Categorie");
+        createHeaders(ingredientsSheet, "IDIngredient", "NomIngredient", "Ciqual_food_code", "Ciqual_proxi_food_code",
+                "IdIngredientOFF");
+        createHeaders(compositionsSheet, "IDProduit", "TypeComposant", "IDComposant", "Quantité", "Unité",
+                "Pourcentage", "Rang");
+        createHeaders(packagingSheet, "IDProduit","Rang","Matériau", "Forme", "ContactAliment", "NombreUnité", "PoidSpécifié");
         createHeaders(controlledOriginLabelSheet, "IDProduit", "ControlledOriginLabel");
         createHeaders(cleanLabelSheet, "IDProduit", "CleanLabel");
         createHeaders(manufacturingProcessSheet, "IDProduit", "ManufacturingProcess");
         createHeaders(nutriScoreSheet, "IDProduit", "NutriScore");
-        createHeaders(nutriScoreDetailsSheet, "IDProduit", "PolarityComponent", "IDcomponent", "points", "points_max", "value", "unit");
-        
+        createHeaders(nutriScoreDetailsSheet, "IDProduit", "PolarityComponent","Rank", "IDcomponent", "points", "points_max",
+                "value", "unit");
+
         createHeaders(novaSheet, "IDProduit", "GroupeNova", "Groupe1", "Groupe2", "Groupe3", "Groupe4");
-        
-        // Set to track unique ingredients and their IDs    
+
+        // Set to track unique ingredients and their IDs
 
         Set<String> ingredientSet = new HashSet<>();
         Map<String, String> ingredientIdMap = new HashMap<>();
@@ -95,7 +103,7 @@ public class OpenFoodFactsToExcelExporter {
         // Pour toutes les pages de résultats
         for (int page = 1; page <= totalPages; page++) {
             String pageUrl = baseUrl + "&page=" + page + fieldParams;
-            System.out.println("pageUrl : '" +  pageUrl + "'");
+            System.out.println("pageUrl : '" + pageUrl + "'");
             String json = getHttpContent(pageUrl);
             root = mapper.readTree(json);
             JsonNode products = root.path("products");
@@ -108,21 +116,22 @@ public class OpenFoodFactsToExcelExporter {
                 String categories = p.path("categories").asText("");
                 Boolean compositeProduct = false;
 
-                if (!nameFr.isEmpty()) name = nameFr; // Priorité au nom en français
-                if (name.isEmpty()) continue;
-                // Test à supprimer 
+                if (!nameFr.isEmpty())
+                    name = nameFr; // Priorité au nom en français
+                if (name.isEmpty())
+                    continue;
+                // Test à supprimer
                 // if (!name.equals("Madeleines coquilles aux oeufs")) continue;
-                //if (!eanCode.equals("3178530402353")) continue;
+                // if (!eanCode.equals("3178530402353")) continue;
 
-                String productId = "" ;
+                String productId = "";
                 if (eanCode == null || eanCode.isEmpty()) {
-						long counter = NatclinnUtil.getNextProductCounterValue();
-						String paddedCounter = String.format("%013d", counter); // format 13 chiffres
-						productId = "P-" + paddedCounter;
-					} else {
-						productId = "P-" + eanCode;
-					}
-                
+                    long counter = NatclinnUtil.getNextProductCounterValue();
+                    String paddedCounter = String.format("%013d", counter); // format 13 chiffres
+                    productId = "P-" + paddedCounter;
+                } else {
+                    productId = "P-" + eanCode;
+                }
 
                 Row prodRow = productsSheet.createRow(prodRowIdx++);
                 prodRow.createCell(0).setCellValue(productId);
@@ -142,20 +151,29 @@ public class OpenFoodFactsToExcelExporter {
 
                 // Enregistrement du packaging
                 JsonNode packagingNode = p.path("packagings");
+                Integer rankPackaging = 1;
                 for (JsonNode packItem : packagingNode) {
-                    String shape = packItem.path("shape").asText("");
+                    String foodContact = packItem.path("food_contact").asText("");
                     String material = packItem.path("material").asText("");
+                    String numberOfUnits = packItem.path("number_of_units").asText("");
+                    String shape = packItem.path("shape").asText("");
+                    String weightSpecified = packItem.path("weight_specified").asText("");
                     if (!shape.isEmpty()) {
                         Row packRow = packagingSheet.createRow(packRowIdx++);
                         packRow.createCell(0).setCellValue(productId);
-                        packRow.createCell(1).setCellValue(shape);
+                        packRow.createCell(1).setCellValue(rankPackaging++);
                         packRow.createCell(2).setCellValue(material);
+                        packRow.createCell(3).setCellValue(shape);
+                        packRow.createCell(4).setCellValue(foodContact);    
+                        packRow.createCell(5).setCellValue(numberOfUnits);
+                        packRow.createCell(6).setCellValue(weightSpecified);
                     }
                 }
                 // Enregistrement de l'étiquette d'origine contrôlée
                 String controlledOriginLabel = p.path("origins").asText("");
                 if (!controlledOriginLabel.isEmpty()) {
-                    String[] origins = controlledOriginLabel.split("\\s*,\\s*"); // split sur la virgule avec espaces optionnels
+                    String[] origins = controlledOriginLabel.split("\\s*,\\s*"); // split sur la virgule avec espaces
+                                                                                 // optionnels
                     for (String origin : origins) {
                         if (!origin.isEmpty()) {
                             Row ctrlRow = controlledOriginLabelSheet.createRow(ctrlRowIdx++);
@@ -170,9 +188,9 @@ public class OpenFoodFactsToExcelExporter {
                     String[] labels = cleanLabel.split("\\s*,\\s*"); // split sur la virgule avec espaces optionnels
                     for (String label : labels) {
                         if (!label.isEmpty()) {
-                        Row cleanRow = cleanLabelSheet.createRow(cleanRowIdx++);
-                        cleanRow.createCell(0).setCellValue(productId);
-                        cleanRow.createCell(1).setCellValue(label);
+                            Row cleanRow = cleanLabelSheet.createRow(cleanRowIdx++);
+                            cleanRow.createCell(0).setCellValue(productId);
+                            cleanRow.createCell(1).setCellValue(label);
                         }
                     }
                 }
@@ -189,7 +207,7 @@ public class OpenFoodFactsToExcelExporter {
                     Row nutriRow = nutriScoreSheet.createRow(nutriRowIdx++);
                     nutriRow.createCell(0).setCellValue(productId);
                     nutriRow.createCell(1).setCellValue(nutriScore.toUpperCase());
-                
+
                     // Maintenant, on essaie d’extraire les détails
                     // On essaie avec “nutriscore_data” ou “nutriscore_v2_data”, selon ce qui existe
                     JsonNode nutriData = null;
@@ -206,8 +224,9 @@ public class OpenFoodFactsToExcelExporter {
                             // stocker ce score quelque part
                             nutriRow.createCell(2).setCellValue(score);
                         }
-                        
-                        nutriDetailsRowIdx = writeNutriScoreComponents(p, nutriScoreDetailsSheet, productId, nutriDetailsRowIdx);
+
+                        nutriDetailsRowIdx = writeNutriScoreComponents(p, nutriScoreDetailsSheet, productId,
+                                nutriDetailsRowIdx);
 
                     }
                 }
@@ -252,31 +271,33 @@ public class OpenFoodFactsToExcelExporter {
                 Map<String, JsonNode> structuredMap = new HashMap<>();
                 for (JsonNode ingNode : structuredIngredients) {
                     String label = ingNode.path("text").asText("");
-                    label=typographicalCorrection(label);
+                    label = typographicalCorrection(label);
                     if (!label.isEmpty()) {
                         structuredMap.put(label, ingNode);
-                        // dans la version V2 de l'API, on a les sous ingrédients declarés dans le champ ingrédients de ingredients ! 
+                        // dans la version V2 de l'API, on a les sous ingrédients declarés dans le champ
+                        // ingrédients de ingredients !
                         JsonNode structuredSubIngredients = ingNode.path("ingredients");
                         for (JsonNode subIngNode : structuredSubIngredients) {
                             String labelSubIng = subIngNode.path("text").asText("");
-                            labelSubIng=typographicalCorrection(labelSubIng);
+                            labelSubIng = typographicalCorrection(labelSubIng);
                             if (!labelSubIng.isEmpty()) {
                                 structuredMap.put(labelSubIng, subIngNode);
-                            }    
-                        }    
+                            }
+                        }
                     }
                 }
 
                 // Composition via analyse texte
                 String ingredientsText = p.path("ingredients_text_fr").asText("");
-                System.out.println("ingredientsText : '" +  ingredientsText + "'");
+                System.out.println("ingredientsText : '" + ingredientsText + "'");
                 List<Ingredient> parsed = NatclinnUtil.parse(ingredientsText);
                 int rank = 1;
                 for (Ingredient ing : parsed) {
-                    if (ing.getName().isEmpty()) continue;
+                    if (ing.getName().isEmpty())
+                        continue;
                     String labelIngredient = typographicalCorrection(ing.getName());
-                System.out.println("labelIngredient : '" +  labelIngredient + "'");
-                //hexViewer(labelIngredient);
+                    System.out.println("labelIngredient : '" + labelIngredient + "'");
+                    // hexViewer(labelIngredient);
                     String typeIngredient = ing.getType();
                     List<Ingredient> subIngredient = ing.getSubIngredients();
                     String ingredientLabel = "";
@@ -286,18 +307,23 @@ public class OpenFoodFactsToExcelExporter {
                     String hasSubs = "";
                     String matchType = "";
 
-                    if (typeIngredient == "Ingredient" ) {   
-                        // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
-                        String ingId = ingredientIdMap.computeIfAbsent(labelIngredient, l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
-                       
-                        // System.out.println("labelIngredient : " +  labelIngredient);
-                        // System.out.println("StructuredMap : " +  structuredMap);
+                    if (typeIngredient == "Ingredient") {
+                        // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère
+                        // un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
+                        String ingId = ingredientIdMap.computeIfAbsent(labelIngredient,
+                                l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
+
+                        // System.out.println("labelIngredient : " + labelIngredient);
+                        // System.out.println("StructuredMap : " + structuredMap);
 
                         // On vérifie si l'ingrédient est dans la map structurée
-                        MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients, structuredMap);
+                        MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients,
+                                structuredMap);
                         if (matchResult.isMatched == false) {
                             countError++;
-                            System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "+ productId +".");
+                            System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                    + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
+                                    + productId + ".");
                         } else {
                             ingredientLabel = matchResult.getIngredientLabel();
                             ingredientId = matchResult.getIngredientId();
@@ -307,17 +333,22 @@ public class OpenFoodFactsToExcelExporter {
                             matchType = matchResult.getMatchType();
 
                             if (matchType.equals("exact_match")) {
-                                System.out.println("Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
+                                System.out.println(
+                                        "Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
                             } else if (matchType.equals("approx_match")) {
-                                System.out.println("Approximation : l'ingrédient '" + labelIngredient + "' est aproximé par '" + ingredientLabel + "' dans le produit " + productId + ".");
+                                System.out.println(
+                                        "Approximation : l'ingrédient '" + labelIngredient + "' est aproximé par '"
+                                                + ingredientLabel + "' dans le produit " + productId + ".");
                             }
-                            
+
                             // Détection d’incohérence
                             if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
-                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
+                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                        + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
                             }
                             if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
-                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
+                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                        + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
                             }
                         }
 
@@ -328,31 +359,32 @@ public class OpenFoodFactsToExcelExporter {
                             // Si le code ciqual est vide, on laisse la cellule vide
                             if (!ciqualCode.isEmpty()) {
                                 // Sinon on le convertit en entier pour l'export Excel
-                                ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));   
+                                ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));
                             }
                             // Si le code ciqualProxy est vide, on laisse la cellule vide
                             if (!ciqualProxy.isEmpty()) {
                                 // Sinon on le convertit en entier pour l'export Excel
-                                ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));   
+                                ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));
                             }
                             if (!ingredientId.isEmpty()) {
-                                ingRow.createCell(4).setCellValue((ingredientId));   
-                            } 
+                                ingRow.createCell(4).setCellValue((ingredientId));
+                            }
                         }
 
                         Row compRow = compositionsSheet.createRow(compRowIdx++);
                         compRow.createCell(0).setCellValue(productId);
                         compRow.createCell(1).setCellValue(typeIngredient);
                         compRow.createCell(2).setCellValue(ingId);
-                        if (ing.getPercentage() != null)
+                        if (ing.getPercentage() != null) {
                             compRow.createCell(5).setCellValue(ing.getPercentage());
+                        }
                         compRow.createCell(6).setCellValue(rank++);
-                    } else if (typeIngredient != null && typeIngredient.equals("SubProduct")) { 
+                    } else if (typeIngredient != null && typeIngredient.equals("SubProduct")) {
                         compositeProduct = true;
                         // On place l'ingredient en temps que sous-produit dans les produits
                         long counter = NatclinnUtil.getNextProductCounterValue();
-						String paddedCounter = String.format("%013d", counter); // format 13 chiffres
-						String subProductId = "P-" + paddedCounter;
+                        String paddedCounter = String.format("%013d", counter); // format 13 chiffres
+                        String subProductId = "P-" + paddedCounter;
                         prodRow = productsSheet.createRow(prodRowIdx++);
                         prodRow.createCell(0).setCellValue(subProductId);
                         prodRow.createCell(1).setCellValue(labelIngredient);
@@ -366,25 +398,30 @@ public class OpenFoodFactsToExcelExporter {
                         compRowsubProduct.createCell(0).setCellValue(productId);
                         compRowsubProduct.createCell(1).setCellValue("Product");
                         compRowsubProduct.createCell(2).setCellValue(subProductId);
-                        if (ing.getPercentage() != null)
+                        if (ing.getPercentage() != null) {
                             compRowsubProduct.createCell(5).setCellValue(ing.getPercentage());
+                        }
                         compRowsubProduct.createCell(6).setCellValue(rank++);
-                        
+
                         // On traite les ingrédients du sous-produit
                         int subRank = 1;
                         for (Ingredient sub : subIngredient) {
                             // on traite les sous-ingrédients
-                             String labelSubIngredient = sub.getName();
-                            if (labelSubIngredient.isEmpty()) continue;
+                            String labelSubIngredient = sub.getName();
+                            if (labelSubIngredient.isEmpty())
+                                continue;
                             String typeSubIngredient = sub.getType();
                             // On vérifie si l'ingrédient est dans la map structurée
                             System.out.println("labelSubIngredient : " + labelSubIngredient);
-                            labelSubIngredient=typographicalCorrection(labelSubIngredient);
+                            labelSubIngredient = typographicalCorrection(labelSubIngredient);
 
-                            MatchResult matchResult = matchIngredient(labelSubIngredient, structuredIngredients, structuredMap);
+                            MatchResult matchResult = matchIngredient(labelSubIngredient, structuredIngredients,
+                                    structuredMap);
                             if (matchResult.isMatched == false) {
                                 countError++;
-                                System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "+ productId +".");
+                                System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                        + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
+                                        + productId + ".");
                             } else {
                                 ingredientLabel = matchResult.getIngredientLabel();
                                 ingredientId = matchResult.getIngredientId();
@@ -394,21 +431,28 @@ public class OpenFoodFactsToExcelExporter {
                                 matchType = matchResult.getMatchType();
 
                                 if (matchType.equals("exact_match")) {
-                                    System.out.println("Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
+                                    System.out.println(
+                                            "Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
                                 } else if (matchType.equals("approx_match")) {
-                                    System.out.println("Approximation : l'ingrédient '" + labelSubIngredient + "' est aproximé par '" + ingredientLabel + "' dans le produit " + productId + ".");
+                                    System.out.println("Approximation : l'ingrédient '" + labelSubIngredient
+                                            + "' est aproximé par '" + ingredientLabel + "' dans le produit "
+                                            + productId + ".");
                                 }
-                                
+
                                 // Détection d’incohérence
                                 if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
-                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
+                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                            + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
                                 }
                                 if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
-                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
+                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                            + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
                                 }
                             }
-                            // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
-                            String ingId = ingredientIdMap.computeIfAbsent(labelSubIngredient, l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
+                            // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère
+                            // un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
+                            String ingId = ingredientIdMap.computeIfAbsent(labelSubIngredient,
+                                    l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
                             if (ingredientSet.add(ingId)) {
                                 Row ingRow = ingredientsSheet.createRow(ingRowIdx++);
                                 ingRow.createCell(0).setCellValue(ingId);
@@ -416,33 +460,37 @@ public class OpenFoodFactsToExcelExporter {
                                 // Si le code ciqual est vide, on laisse la cellule vide
                                 if (!ciqualCode.isEmpty()) {
                                     // Sinon on le convertit en entier pour l'export Excel
-                                    ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));   
+                                    ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));
                                 }
                                 // Si le code ciqualProxy est vide, on laisse la cellule vide
                                 if (!ciqualProxy.isEmpty()) {
                                     // Sinon on le convertit en entier pour l'export Excel
-                                    ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));   
+                                    ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));
                                 }
                                 if (!ingredientId.isEmpty()) {
-                                    ingRow.createCell(4).setCellValue((ingredientId));   
-                                } 
+                                    ingRow.createCell(4).setCellValue((ingredientId));
+                                }
                             }
-                        
+
                             Row compRow = compositionsSheet.createRow(compRowIdx++);
                             compRow.createCell(0).setCellValue(subProductId);
                             compRow.createCell(1).setCellValue(typeSubIngredient);
                             compRow.createCell(2).setCellValue(ingId);
-                            if (sub.getPercentage() != null)
+                            if (sub.getPercentage() != null) {
                                 compRow.createCell(5).setCellValue(sub.getPercentage());
+                            }
                             compRow.createCell(6).setCellValue(subRank++);
-                        }    
+                        }
                     } else if (typeIngredient != null && typeIngredient.equals("Additif")) {
                         // Pour les additifs
                         // On place l'additif dans la liste des ingredients
-                        MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients, structuredMap);
+                        MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients,
+                                structuredMap);
                         if (matchResult.isMatched == false) {
                             countError++;
-                            System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "+ productId +".");
+                            System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                    + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
+                                    + productId + ".");
                         } else {
                             ingredientLabel = matchResult.getIngredientLabel();
                             ingredientId = matchResult.getIngredientId();
@@ -452,22 +500,29 @@ public class OpenFoodFactsToExcelExporter {
                             matchType = matchResult.getMatchType();
 
                             if (matchType.equals("exact_match")) {
-                                System.out.println("Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
+                                System.out.println(
+                                        "Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
                             } else if (matchType.equals("approx_match")) {
-                                System.out.println("Approximation : l'ingrédient '" + labelIngredient + "' est aproximé par '" + ingredientLabel + "' dans le produit " + productId + ".");
+                                System.out.println(
+                                        "Approximation : l'ingrédient '" + labelIngredient + "' est aproximé par '"
+                                                + ingredientLabel + "' dans le produit " + productId + ".");
                             }
-                            
+
                             // Détection d’incohérence
                             if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
-                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
+                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                        + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
                             }
                             if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
-                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
+                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                        + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
                             }
                         }
-                        // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
-                        String ingAddId = ingredientIdMap.computeIfAbsent(labelIngredient, l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
-  
+                        // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère
+                        // un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
+                        String ingAddId = ingredientIdMap.computeIfAbsent(labelIngredient,
+                                l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
+
                         if (ingredientSet.add(ingAddId)) {
                             Row ingRow = ingredientsSheet.createRow(ingRowIdx++);
                             ingRow.createCell(0).setCellValue(ingAddId);
@@ -475,24 +530,25 @@ public class OpenFoodFactsToExcelExporter {
                             // Si le code ciqual est vide, on laisse la cellule vide
                             if (!ciqualCode.isEmpty()) {
                                 // Sinon on le convertit en entier pour l'export Excel
-                                ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));   
+                                ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));
                             }
                             // Si le code ciqualProxy est vide, on laisse la cellule vide
                             if (!ciqualProxy.isEmpty()) {
                                 // Sinon on le convertit en entier pour l'export Excel
-                                ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));   
+                                ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));
                             }
                             if (!ingredientId.isEmpty()) {
-                                ingRow.createCell(4).setCellValue((ingredientId));   
-                            } 
+                                ingRow.createCell(4).setCellValue((ingredientId));
+                            }
                         }
                         // On met à jour la composition pour l'additif
                         Row compRowAdditiveProduct = compositionsSheet.createRow(compRowIdx++);
                         compRowAdditiveProduct.createCell(0).setCellValue(productId);
                         compRowAdditiveProduct.createCell(1).setCellValue("AdditiveIngredient");
                         compRowAdditiveProduct.createCell(2).setCellValue(ingAddId);
-                        if (ing.getPercentage() != null)
+                        if (ing.getPercentage() != null) {
                             compRowAdditiveProduct.createCell(5).setCellValue(ing.getPercentage());
+                        }
                         compRowAdditiveProduct.createCell(6).setCellValue(rank++);
 
                         // On traite les ingrédients de l'additif si besoin
@@ -500,13 +556,16 @@ public class OpenFoodFactsToExcelExporter {
                         for (Ingredient sub : subIngredient) {
                             // on traite les sous-ingrédients
                             String labelSubIngredient = sub.getName();
-                            if (labelSubIngredient.isEmpty()) continue;
+                            if (labelSubIngredient.isEmpty())
+                                continue;
                             String typeSubIngredient = sub.getType();
                             // On vérifie si l'ingrédient est dans la map structurée
                             matchResult = matchIngredient(labelSubIngredient, structuredIngredients, structuredMap);
                             if (matchResult.isMatched == false) {
                                 countError++;
-                                System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "+ productId +".");
+                                System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                        + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
+                                        + productId + ".");
                             } else {
                                 ingredientLabel = matchResult.getIngredientLabel();
                                 ingredientId = matchResult.getIngredientId();
@@ -516,21 +575,28 @@ public class OpenFoodFactsToExcelExporter {
                                 matchType = matchResult.getMatchType();
 
                                 if (matchType.equals("exact_match")) {
-                                    System.out.println("Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
+                                    System.out.println(
+                                            "Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
                                 } else if (matchType.equals("approx_match")) {
-                                    System.out.println("Approximation : l'ingrédient '" + labelSubIngredient + "' est aproximé par '" + ingredientLabel + "' dans le produit " + productId + ".");
+                                    System.out.println("Approximation : l'ingrédient '" + labelSubIngredient
+                                            + "' est aproximé par '" + ingredientLabel + "' dans le produit "
+                                            + productId + ".");
                                 }
-                                
+
                                 // Détection d’incohérence
                                 if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
-                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
+                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                            + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
                                 }
                                 if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
-                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
+                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                            + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
                                 }
                             }
-                            // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
-                            String ingId = ingredientIdMap.computeIfAbsent(labelSubIngredient, l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
+                            // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère
+                            // un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
+                            String ingId = ingredientIdMap.computeIfAbsent(labelSubIngredient,
+                                    l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
                             if (ingredientSet.add(ingId)) {
                                 Row ingRow = ingredientsSheet.createRow(ingRowIdx++);
                                 ingRow.createCell(0).setCellValue(ingId);
@@ -538,34 +604,37 @@ public class OpenFoodFactsToExcelExporter {
                                 // Si le code ciqual est vide, on laisse la cellule vide
                                 if (!ciqualCode.isEmpty()) {
                                     // Sinon on le convertit en entier pour l'export Excel
-                                    ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));   
+                                    ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));
                                 }
                                 // Si le code ciqualProxy est vide, on laisse la cellule vide
                                 if (!ciqualProxy.isEmpty()) {
                                     // Sinon on le convertit en entier pour l'export Excel
-                                    ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));   
+                                    ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));
                                 }
                                 if (!ingredientId.isEmpty()) {
-                                    ingRow.createCell(4).setCellValue((ingredientId));   
-                                } 
+                                    ingRow.createCell(4).setCellValue((ingredientId));
+                                }
                             }
-                            
+
                             Row compRow = compositionsSheet.createRow(compRowIdx++);
                             compRow.createCell(0).setCellValue(ingAddId);
                             compRow.createCell(1).setCellValue(typeSubIngredient);
                             compRow.createCell(2).setCellValue(ingId);
                             if (sub.getPercentage() != null) {
                                 compRow.createCell(5).setCellValue(sub.getPercentage());
-                                compRow.createCell(6).setCellValue(subRank++);
-                            }    
-                        }    
+                            }
+                            compRow.createCell(6).setCellValue(subRank++);
+                        }
                     } else if (typeIngredient != null && typeIngredient.equals("Arome")) {
                         // Pour les arômes
                         // On place l'arôme en temps que sous-produit dans les produits
-                        MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients, structuredMap);
+                        MatchResult matchResult = matchIngredient(labelIngredient, structuredIngredients,
+                                structuredMap);
                         if (matchResult.isMatched == false) {
                             countError++;
-                            System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "+ productId +".");
+                            System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                    + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
+                                    + productId + ".");
                         } else {
                             ingredientLabel = matchResult.getIngredientLabel();
                             ingredientId = matchResult.getIngredientId();
@@ -575,21 +644,28 @@ public class OpenFoodFactsToExcelExporter {
                             matchType = matchResult.getMatchType();
 
                             if (matchType.equals("exact_match")) {
-                                System.out.println("Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
+                                System.out.println(
+                                        "Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
                             } else if (matchType.equals("approx_match")) {
-                                System.out.println("Approximation : l'ingrédient '" + labelIngredient + "' est aproximé par '" + ingredientLabel + "' dans le produit " + productId + ".");
+                                System.out.println(
+                                        "Approximation : l'ingrédient '" + labelIngredient + "' est aproximé par '"
+                                                + ingredientLabel + "' dans le produit " + productId + ".");
                             }
-                            
+
                             // Détection d’incohérence
                             if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
-                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
+                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                        + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
                             }
                             if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
-                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
+                                System.out.println("Incohérence : l'ingrédient '" + labelIngredient
+                                        + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
                             }
                         }
-                        // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
-                        String ingAromaId = ingredientIdMap.computeIfAbsent(labelIngredient, l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
+                        // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère
+                        // un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
+                        String ingAromaId = ingredientIdMap.computeIfAbsent(labelIngredient,
+                                l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
 
                         if (ingredientSet.add(ingAromaId)) {
                             Row ingRow = ingredientsSheet.createRow(ingRowIdx++);
@@ -598,78 +674,89 @@ public class OpenFoodFactsToExcelExporter {
                             // Si le code ciqual est vide, on laisse la cellule vide
                             if (!ciqualCode.isEmpty()) {
                                 // Sinon on le convertit en entier pour l'export Excel
-                                ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));   
+                                ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));
                             }
                             // Si le code ciqualProxy est vide, on laisse la cellule vide
                             if (!ciqualProxy.isEmpty()) {
                                 // Sinon on le convertit en entier pour l'export Excel
-                                ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));   
+                                ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));
                             }
                             if (!ingredientId.isEmpty()) {
-                                ingRow.createCell(4).setCellValue((ingredientId));   
-                            } 
+                                ingRow.createCell(4).setCellValue((ingredientId));
+                            }
                         }
                         // On met à jour la composition pour l'arôme
                         Row compRow = compositionsSheet.createRow(compRowIdx++);
                         compRow.createCell(0).setCellValue(productId);
                         compRow.createCell(1).setCellValue("Arôme");
                         compRow.createCell(2).setCellValue(ingAromaId);
-                        if (ing.getPercentage() != null)
+                        if (ing.getPercentage() != null) {
                             compRow.createCell(5).setCellValue(ing.getPercentage());
-                            compRow.createCell(6).setCellValue(rank++);
-                            // On traite les ingrédients de l'arôme si besoin (rare)
-                            int subRank = 1;
-                            for (Ingredient sub : subIngredient) {
-                                // on traite les sous-ingrédients
-                                String labelSubIngredient = sub.getName();
-                                if (labelSubIngredient.isEmpty()) continue;
-                                String typeSubIngredient = sub.getType();
-                                // On vérifie si l'ingrédient est dans la map structurée
-                                matchResult = matchIngredient(labelSubIngredient, structuredIngredients, structuredMap);
-                                if (matchResult.isMatched == false) {
-                                    countError++;
-                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "+ productId +".");
-                                } else {
-                                    ingredientLabel = matchResult.getIngredientLabel();
-                                    ingredientId = matchResult.getIngredientId();
-                                    ciqualCode = matchResult.getCiqualCode();
-                                    ciqualProxy = matchResult.getCiqualProxy();
-                                    hasSubs = matchResult.getHasSubs();
-                                    matchType = matchResult.getMatchType();
+                        }
+                        compRow.createCell(6).setCellValue(rank++);
+                        // On traite les ingrédients de l'arôme si besoin (rare)
+                        int subRank = 1;
+                        for (Ingredient sub : subIngredient) {
+                            // on traite les sous-ingrédients
+                            String labelSubIngredient = sub.getName();
+                            if (labelSubIngredient.isEmpty())
+                                continue;
+                            String typeSubIngredient = sub.getType();
+                            // On vérifie si l'ingrédient est dans la map structurée
+                            matchResult = matchIngredient(labelSubIngredient, structuredIngredients, structuredMap);
+                            if (matchResult.isMatched == false) {
+                                countError++;
+                                System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                        + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
+                                        + productId + ".");
+                            } else {
+                                ingredientLabel = matchResult.getIngredientLabel();
+                                ingredientId = matchResult.getIngredientId();
+                                ciqualCode = matchResult.getCiqualCode();
+                                ciqualProxy = matchResult.getCiqualProxy();
+                                hasSubs = matchResult.getHasSubs();
+                                matchType = matchResult.getMatchType();
 
-                                    if (matchType.equals("exact_match")) {
-                                        System.out.println("Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
-                                    } else if (matchType.equals("approx_match")) {
-                                        System.out.println("Approximation : l'ingrédient '" + labelSubIngredient + "' est aproximé par '" + ingredientLabel + "' dans le produit " + productId + ".");
-                                    }
-                                    
-                                    // Détection d’incohérence
-                                    if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
-                                        System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
-                                    }
-                                    if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
-                                        System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
-                                    }
+                                if (matchType.equals("exact_match")) {
+                                    System.out.println(
+                                            "Correspondance exacte trouvée pour l'ingrédient : " + ingredientLabel);
+                                } else if (matchType.equals("approx_match")) {
+                                    System.out.println("Approximation : l'ingrédient '" + labelSubIngredient
+                                            + "' est aproximé par '" + ingredientLabel + "' dans le produit "
+                                            + productId + ".");
                                 }
-                                // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
-                                String ingId = ingredientIdMap.computeIfAbsent(labelSubIngredient, l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
-                                if (ingredientSet.add(ingId)) {
-                                    Row ingRow = ingredientsSheet.createRow(ingRowIdx++);
-                                    ingRow.createCell(0).setCellValue(ingId);
-                                    ingRow.createCell(1).setCellValue(labelSubIngredient);
-                                    // Si le code ciqual est vide, on laisse la cellule vide
+
+                                // Détection d’incohérence
+                                if ("no".equalsIgnoreCase(hasSubs) && !ing.getSubIngredients().isEmpty()) {
+                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                            + "' est déclaré sans sous-ingrédients mais en contient selon le parsing.");
+                                }
+                                if ("yes".equalsIgnoreCase(hasSubs) && ing.getSubIngredients().isEmpty()) {
+                                    System.out.println("Incohérence : l'ingrédient '" + labelSubIngredient
+                                            + "' est déclaré avec sous-ingrédients mais n'en contient pas selon le parsing.");
+                                }
+                            }
+                            // Si un ingrédient n’a pas encore d’identifiant dans la map, on lui en génère
+                            // un nouveau et on l’y associe, sinon on récupère l’identifiant déjà existant.
+                            String ingId = ingredientIdMap.computeIfAbsent(labelSubIngredient,
+                                    l -> "I-" + String.format("%013d", NatclinnUtil.getNextIngredientCounterValue()));
+                            if (ingredientSet.add(ingId)) {
+                                Row ingRow = ingredientsSheet.createRow(ingRowIdx++);
+                                ingRow.createCell(0).setCellValue(ingId);
+                                ingRow.createCell(1).setCellValue(labelSubIngredient);
+                                // Si le code ciqual est vide, on laisse la cellule vide
                                 if (!ciqualCode.isEmpty()) {
                                     // Sinon on le convertit en entier pour l'export Excel
-                                    ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));   
+                                    ingRow.createCell(2).setCellValue(Integer.parseInt(ciqualCode));
                                 }
                                 // Si le code ciqualProxy est vide, on laisse la cellule vide
                                 if (!ciqualProxy.isEmpty()) {
                                     // Sinon on le convertit en entier pour l'export Excel
-                                    ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));   
+                                    ingRow.createCell(3).setCellValue(Integer.parseInt(ciqualProxy));
                                 }
                                 if (!ingredientId.isEmpty()) {
-                                    ingRow.createCell(4).setCellValue((ingredientId));   
-                                } 
+                                    ingRow.createCell(4).setCellValue((ingredientId));
+                                }
                             }
                             compRow = compositionsSheet.createRow(compRowIdx++);
                             compRow.createCell(0).setCellValue(ingAromaId);
@@ -677,16 +764,17 @@ public class OpenFoodFactsToExcelExporter {
                             compRow.createCell(2).setCellValue(ingId);
                             if (sub.getPercentage() != null) {
                                 compRow.createCell(5).setCellValue(sub.getPercentage());
-                                compRow.createCell(6).setCellValue(subRank++);
-                            }   
-                        }     
+                            }
+                            compRow.createCell(6).setCellValue(subRank++);
+                        }
                     } else if (typeIngredient != null) {
-                        System.out.println("Type d'ingrédient inconnu : " + typeIngredient + " pour l'ingrédient " + labelIngredient);
-                    } 
+                        System.out.println("Type d'ingrédient inconnu : " + typeIngredient + " pour l'ingrédient "
+                                + labelIngredient);
+                    }
                     if (compositeProduct) {
                         cellTypeProduct.setCellValue("CompositeProduct");
                     }
-                    
+
                 }
             }
         }
@@ -720,7 +808,7 @@ public class OpenFoodFactsToExcelExporter {
         label = label.replaceAll("\\b([DdLlJjNnSsTtMm])’", "$1'");
         label = label.trim();
         return label;
-       
+
     }
 
     private static void createHeaders(Sheet sheet, String... headers) {
@@ -753,8 +841,7 @@ public class OpenFoodFactsToExcelExporter {
         }
     }
 
-    
-    private static void hexViewer(String input)  {
+    private static void hexViewer(String input) {
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
             String hex = String.format("%04x", (int) ch); // affichage sur 4 chiffres
@@ -763,7 +850,8 @@ public class OpenFoodFactsToExcelExporter {
     }
 
     /**
-     * Extrait les composants Nutri-Score (negative / positive) et les écrit dans une feuille Excel.
+     * Extrait les composants Nutri-Score (negative / positive) et les écrit dans
+     * une feuille Excel.
      * Format colonnes :
      * 0 = productId
      * 1 = polarity ("negative" ou "positive")
@@ -774,61 +862,73 @@ public class OpenFoodFactsToExcelExporter {
      * 6 = unit
      */
     private static int writeNutriScoreComponents(JsonNode p, Sheet sheet, String productId, int rowIdx) {
-        if (p == null || sheet == null) return rowIdx;
-    
+        if (p == null || sheet == null)
+            return rowIdx;
+
         // nutriscore_data ou nutriscore_v2_data
         JsonNode nutriData = p.has("nutriscore_data") ? p.get("nutriscore_data")
-                          : p.has("nutriscore_v2_data") ? p.get("nutriscore_v2_data")
-                          : null;
-        if (nutriData == null) return rowIdx;
-    
+                : p.has("nutriscore_v2_data") ? p.get("nutriscore_v2_data")
+                        : null;
+        if (nutriData == null)
+            return rowIdx;
+
         JsonNode components = nutriData.path("components");
-        if (components.isMissingNode()) return rowIdx;
-    
+        if (components.isMissingNode())
+            return rowIdx;
+
         // Negative
         JsonNode negArray = components.path("negative");
+        Integer rankNegative = 0;
         if (negArray.isArray()) {
             for (JsonNode item : negArray) {
-                rowIdx = writeComponent(sheet, productId, "negative", item, rowIdx);
+                rankNegative++;
+                rowIdx = writeComponent(sheet, productId, "negative", rankNegative, item, rowIdx);
             }
         }
-    
+
         // Positive
         JsonNode posArray = components.path("positive");
+        Integer rankPositive = 0;
         if (posArray.isArray()) {
             for (JsonNode item : posArray) {
-                rowIdx = writeComponent(sheet, productId, "positive", item, rowIdx);
+                rankPositive++;
+                rowIdx = writeComponent(sheet, productId, "positive",rankPositive, item, rowIdx);
             }
         }
-    
+
         return rowIdx;
     }
-    
-    private static int writeComponent(Sheet sheet, String productId, String polarity, JsonNode node, int rowIdx) {
+
+    private static int writeComponent(Sheet sheet, String productId, String polarity,Integer rank, JsonNode node, int rowIdx) {
         Row row = sheet.createRow(rowIdx++);
         row.createCell(0).setCellValue(productId);
         row.createCell(1).setCellValue(polarity);
-        row.createCell(2).setCellValue(node.path("id").asText(""));
-        row.createCell(3).setCellValue(node.path("points").asDouble(Double.NaN));
-        row.createCell(4).setCellValue(node.path("points_max").asDouble(Double.NaN));
-        row.createCell(5).setCellValue(node.path("value").asText(""));
-        row.createCell(6).setCellValue(node.path("unit").asText(""));
+        row.createCell(2).setCellValue(rank);
+        row.createCell(3).setCellValue(node.path("id").asText(""));
+        row.createCell(4).setCellValue(node.path("points").asDouble(Double.NaN));
+        row.createCell(5).setCellValue(node.path("points_max").asDouble(Double.NaN));
+        row.createCell(6).setCellValue(node.path("value").asDouble(Double.NaN));
+        row.createCell(7).setCellValue(node.path("unit").asText(""));
         return rowIdx;
     }
-    
+
     /**
-     * Rapproche un ingrédient issu du parsing texte avec un ingrédient structuré d'Open Food Facts.
+     * Rapproche un ingrédient issu du parsing texte avec un ingrédient structuré
+     * d'Open Food Facts.
+     * 
      * @param parsedIngredient ingrédient issu de l'analyse textuelle (NatclinnUtil)
-     * @param offIngredients liste des ingrédients structurés du champ "ingredients" d'Open Food Facts
+     * @param offIngredients   liste des ingrédients structurés du champ
+     *                         "ingredients" d'Open Food Facts
      * @return un objet MatchResult indiquant le meilleur rapprochement trouvé
      */
-    public static MatchResult matchIngredient(String labelIngredient,JsonNode structuredIngredients,Map<String,JsonNode> structuredMap) {
-        
+    public static MatchResult matchIngredient(String labelIngredient, JsonNode structuredIngredients,
+            Map<String, JsonNode> structuredMap) {
+
         if (structuredMap == null || structuredMap.isEmpty()) {
             // Aucun ingrédient structuré fourni
             return new MatchResult(labelIngredient, "", "", "", "no", false, "no_match");
         }
-        
+
         JsonNode structured = structuredMap.get(labelIngredient);
         String ingredientLabel;
         String ingredientId;
@@ -838,35 +938,37 @@ public class OpenFoodFactsToExcelExporter {
 
         if (structured != null) {
             ingredientLabel = labelIngredient;
-            ingredientId = structured.path("id").asText("");    
+            ingredientId = structured.path("id").asText("");
             ciqualCode = structured.path("ciqual_food_code").asText("");
             ciqualProxy = structured.path("ciqual_proxy_food_code").asText("");
             hasSubs = structured.path("has_sub_ingredients").asText("");
-            return new MatchResult(ingredientLabel,ingredientId,ciqualCode,ciqualProxy,hasSubs, true,"exact_match");
+            return new MatchResult(ingredientLabel, ingredientId, ciqualCode, ciqualProxy, hasSubs, true,
+                    "exact_match");
         } else {
             // === Tentative de correspondance approximative ===
             Optional<JsonNode> approx = StreamSupport.stream(structuredIngredients.spliterator(), false)
-                .filter(node -> {
-                    String label = node.path("text").asText("");
-                    label=typographicalCorrection(label);
-                    return !label.isEmpty() && labelIngredient.startsWith(label);
-                })
-                .findFirst();
+                    .filter(node -> {
+                        String label = node.path("text").asText("");
+                        label = typographicalCorrection(label);
+                        return !label.isEmpty() && labelIngredient.startsWith(label);
+                    })
+                    .findFirst();
 
             if (approx.isPresent()) {
                 structured = approx.get();
                 ingredientLabel = structured.path("text").asText("");
                 ingredientLabel = typographicalCorrection(ingredientLabel);
                 ingredientLabel = labelIngredient; // On garde le label original
-                ingredientId = structured.path("id").asText("");    
+                ingredientId = structured.path("id").asText("");
                 ciqualCode = structured.path("ciqual_food_code").asText("");
                 ciqualProxy = structured.path("ciqual_proxy_food_code").asText("");
                 hasSubs = structured.path("has_sub_ingredients").asText("");
-                return new MatchResult(ingredientLabel,ingredientId,ciqualCode,ciqualProxy,hasSubs, true,"approx_match");
+                return new MatchResult(ingredientLabel, ingredientId, ciqualCode, ciqualProxy, hasSubs, true,
+                        "approx_match");
             } else {
                 // Aucune correspondance approximative trouvée
                 ingredientLabel = labelIngredient; // On garde le label original
-                return new MatchResult(ingredientLabel,"","","","no", false,"no_match");
+                return new MatchResult(ingredientLabel, "", "", "", "no", false, "no_match");
             }
         }
     }
@@ -880,9 +982,9 @@ public class OpenFoodFactsToExcelExporter {
         private final String hasSubs;
         private final boolean isMatched;
         private final String matchType;
-       
 
-        public MatchResult(String ingredientLabel,String ingredientId,String ciqualCode,String ciqualProxy, String hasSubs, boolean isMatched, String matchType) {
+        public MatchResult(String ingredientLabel, String ingredientId, String ciqualCode, String ciqualProxy,
+                String hasSubs, boolean isMatched, String matchType) {
             this.ingredientLabel = ingredientLabel;
             this.ingredientId = ingredientId;
             this.ciqualCode = ciqualCode;
@@ -895,21 +997,27 @@ public class OpenFoodFactsToExcelExporter {
         public String getIngredientLabel() {
             return ingredientLabel;
         }
+
         public String getIngredientId() {
             return ingredientId;
         }
+
         public String getCiqualCode() {
             return ciqualCode;
         }
+
         public String getCiqualProxy() {
             return ciqualProxy;
         }
+
         public String getHasSubs() {
             return hasSubs;
         }
+
         public boolean isMatched() {
             return isMatched;
         }
+
         public String getMatchType() {
             return matchType;
         }

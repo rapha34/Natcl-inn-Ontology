@@ -8,6 +8,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.jena.datatypes.xsd.XSDDatatype;
 // utiliser le modele ontologique
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
@@ -17,6 +18,7 @@ import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.riot.RDFParser;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.jena.vocabulary.XSD;
 
@@ -74,6 +76,8 @@ public class CreateNatclinnTbox {
 	    om.setNsPrefix("dcat", dcat);
 		String prov = new String("http://www.w3.org/ns/prov#");
 	    om.setNsPrefix("prov", prov);
+		String dc = new String("http://purl.org/dc/elements/1.1/"); 
+	    om.setNsPrefix("dc", dc);
 		String dct = new String("http://purl.org/dc/terms/"); 
 	    om.setNsPrefix("dct", dct);
 		String skos = new String("http://www.w3.org/2004/02/skos/core#");
@@ -82,17 +86,124 @@ public class CreateNatclinnTbox {
 	    om.setNsPrefix("foaf", foaf);
 	    String rdfs = new String("http://www.w3.org/2000/01/rdf-schema#");
 	    om.setNsPrefix("rdfs", rdfs);
+	    String bibo = new String("http://purl.org/ontology/bibo/");
+	    om.setNsPrefix("bibo", bibo);
+	    String vann = new String("http://purl.org/vocab/vann/");
+	    om.setNsPrefix("vann", vann);
+	    String schema = new String("http://schema.org/");
+	    om.setNsPrefix("schema", schema);
+	    String org = new String("http://www.w3.org/ns/org#");
+	    om.setNsPrefix("org", org);
+	    String vocab = new String("https://w3id.org/afy/vocab#");
+	    om.setNsPrefix("vocab", vocab);
 
 		/////////////////////////////////////
 	    //Description de l'ontologie       //
 	    /////////////////////////////////////
 	    
 	    Ontology ont = om.createOntology(ncl + "NatclinnTbox");
-		om.add(ont, RDFS.label,"Model Ontology of Natclinn");
-		om.add(ont, DC.description,"Tbox for the Natclinn ontology");
+		ont.addProperty(RDFS.label, "Natcl'inn ontology", "en");
+		ont.addProperty(RDFS.label, "Ontologie Natcl'inn", "fr");
+		om.add(ont, DC.description,"Tbox for the Natcl'inn ontology", "en");
+		om.add(ont, DC.description,"Tbox pour l'ontologie Natcl'inn", "fr");
 		om.add(ont, DC.creator,"Pierre BISQUERT");	
 		om.add(ont, DC.creator,"Raphaël CONDE SALAZAR");	
 		om.add(ont, DC.creator,"Rallou THOMOPOULOS");	
+        ont.addProperty(OWL.versionIRI, om.createResource(ncl + "/1.0.0"));
+        //ont.addProperty(OWL.imports, om.createResource("http://www.w3.org/2000/01/rdf-schema"));
+
+        // Titre
+        ont.addProperty(om.createProperty(dc + "title"), "NCL", "en");
+
+        // Abstracts
+        ont.addProperty(om.createProperty(dct + "abstract"),
+                "Le projet NATCL’INN vise à aider les entreprises agroalimentaires à mieux répondre aux attentes de naturalité des consommateurs, perçue comme gage de qualité, de santé et de goût. En s’appuyant sur la caractérisation des représentations de la naturalité et l’identification de marqueurs pertinents, il développe un outil d’arbitrage multicritère intégrant contraintes techniques, économiques et réglementaires. Porté par l’ADRIA, l’UBO-LEGO, l’INRAE et plusieurs partenaires industriels, ce projet collaboratif est labellisé par Valorial.", "fr");
+        ont.addProperty(om.createProperty(dct + "abstract"),
+                "The NATCL’INN project aims to help agri-food companies better meet consumers' expectations for naturalness, which is perceived as a guarantee of quality, health and taste. Based on the characterisation of representations of naturalness and the identification of relevant markers, it is developing a multi-criteria arbitration tool that integrates technical, economic and regulatory constraints. Led by ADRIA, UBO-LEGO, INRAE and several industrial partners, this collaborative project has been certified by Valorial.", "en");
+
+        // Dates de création
+        ont.addProperty(om.createProperty(dct + "created"), "Le 5 Octobre 2021", "fr");
+        ont.addProperty(om.createProperty(dct + "created"), "October 5th, 2021", "en");
+
+        // Licence et DOI
+        ont.addProperty(om.createProperty(dct + "license"), om.createResource("http://creativecommons.org/licenses/by/4.0/"));
+        ont.addProperty(om.createProperty(bibo + "doi"), om.createResource("https://doi.org/XXXXXXXXXXXXXXXX"));
+        ont.addProperty(om.createProperty(bibo + "status"), om.createResource("http://purl.org/ontology/bibo/status/draft"));
+
+        // Informations complémentaires
+        ont.addProperty(om.createProperty(vann + "preferredNamespacePrefix"), "ncl", "en");
+        ont.addProperty(om.createProperty(vann + "preferredNamespaceUri"), ncl);
+
+        ont.addProperty(RDFS.comment, "Une ontologie conçue pour définir les différents produits de l'industrie agroalimentaire et les arguments qui leur sont associés en termes de naturalité perçue.", "fr");
+        ont.addProperty(RDFS.comment, "An ontology designed to define the various products of the agri-food industry and the arguments associated with them in terms of their perceived naturalness.", "en");
+        
+        ont.addProperty(OWL.versionInfo, "1.0.0");
+
+        ont.addProperty(om.createProperty(foaf + "fundedBy"), om.createResource("https://www.pole-valorial.fr"));
+
+        ont.addProperty(om.createProperty(schema + "citation"),
+                "Cite this vocabulary as: Raphaël Conde Salazar , Pierre Bisquert, Rallou Thomopoulos; DOI: XXXXXXXXXXXXXXXX", "en");
+
+        // Introduction
+        ont.addProperty(om.createProperty(vocab + "introduction"),
+                "NATCL’INN vise à proposer une solution aux entreprises de l’agroalimentaire qui doivent réaliser des arbitrages entre différents attributs produits relatifs à la naturalité en vue de répondre aux nouvelles attentes et représentations des consommateurs en matière de naturalité alimentaire. Afin de proposer un prototype d’Outil d’Aide à la Décision, les équipes de R&D de l’ADRIA, le laboratoire LEGO de l’Université de Bretagne Occidentale (UBO), les unités de recherche INRAE et leurs partenaires industriels (Bridor, Paticeo, Charles Christ, La PAM, Ecomiam, Fleury Michon, Guyader Gastronomie) se sont associés pour mener un programme ambitieux de R&D collaborative. Le projet NATCL’INN a été labellisé par le pôle de compétitivité VALORIAL et a reçu le soutien de la Région Bretagne, de la Région Pays de la Loire et de Quimper Bretagne Occidentale. Le projet a démarré au 1er janvier 2024 et s'achèvera fin 2027.", "fr");
+        ont.addProperty(om.createProperty(vocab + "introduction"),
+                "NATCL’INN aims to offer a solution to agri-food companies that need to balance different product attributes related to naturalness in order to meet new consumer expectations and perceptions regarding food naturalness. In order to propose a prototype Decision Support Tool, the R&D teams at ADRIA, the LEGO laboratory at the University of Western Brittany (UBO), INRAE research units and their industrial partners (Bridor, Paticeo, Charles Christ, La PAM, Ecomiam, Fleury Michon, Guyader Gastronomie) have joined forces to carry out an ambitious collaborative R&D programme. The NATCL'INN project has been certified by the VALORIAL competitiveness cluster and has received support from the Brittany Region, the Pays de la Loire Region and Quimper Bretagne Occidentale. The project began on 1 January 2024 and will be completed at the end of 2027", "en");
+
+        ont.addProperty(om.createProperty(vocab + "rdfxmlSerialization"),
+                om.createTypedLiteral("https://w3id.org/afy/ontology.xml",
+                        XSDDatatype.XSDanyURI));
+
+        // =====================
+        // Définition des auteurs (noeuds anonymes)
+        // =====================
+
+        // Auteur 1
+        Resource person1 = om.createResource();
+        person1.addProperty(RDF.type, om.createResource(schema + "Person"));
+        Resource org1 = om.createResource();
+        org1.addProperty(RDF.type, om.createResource(foaf + "Organization"));
+        org1.addProperty(om.createProperty(foaf + "name"), "University of Montpellier, INRAE, France");
+        org1.addProperty(om.createProperty(schema + "url"), "https://www.umontpellier.fr/");
+        person1.addProperty(om.createProperty(org + "memberOf"), org1);
+        person1.addProperty(om.createProperty(schema + "familyName"), "Conde Salazar", "fr");
+        person1.addProperty(om.createProperty(schema + "familyName"), "Conde Salazar", "en");
+        person1.addProperty(om.createProperty(schema + "name"), "Raphaël Conde Salazar", "fr");
+        person1.addProperty(om.createProperty(schema + "name"), "Raphael Conde Salazar", "en");
+        person1.addProperty(om.createProperty(schema + "url"), om.createResource("https://orcid.org/0000-0002-6926-5299"));
+        ont.addProperty(om.createProperty(schema + "creator"), person1);
+
+        // Auteur 2
+        Resource person2 = om.createResource();
+        person2.addProperty(RDF.type, om.createResource(schema + "Person"));
+        Resource org2 = om.createResource();
+        org2.addProperty(RDF.type, om.createResource(foaf + "Organization"));
+        org2.addProperty(om.createProperty(foaf + "name"), "University of Montpellier, INRAE, France");
+        org2.addProperty(om.createProperty(schema + "url"), "https://www.umontpellier.fr/");
+        person2.addProperty(om.createProperty(org + "memberOf"), org2);
+        person2.addProperty(om.createProperty(schema + "name"), "Pierre Bisquert", "fr");
+        person2.addProperty(om.createProperty(schema + "name"), "Pierre Bisquert", "en");
+        person2.addProperty(om.createProperty(schema + "url"), om.createResource("https://orcid.org/0000-0001-9418-5330" + //
+						""));
+        ont.addProperty(om.createProperty(schema + "creator"), person2);
+
+        // Auteur 3
+        Resource person3 = om.createResource();
+        person3.addProperty(RDF.type, om.createResource(schema + "Person"));
+        Resource org3 = om.createResource();
+        org3.addProperty(RDF.type, om.createResource(foaf + "Organization"));
+        org3.addProperty(om.createProperty(foaf + "name"), "University of Montpellier, INRAE, France");
+        org3.addProperty(om.createProperty(schema + "url"), "https://www.umontpellier.fr/");
+        person3.addProperty(om.createProperty(org + "memberOf"), org3);
+        person3.addProperty(om.createProperty(schema + "name"), "Rallou Thomopoulos", "fr");
+        person3.addProperty(om.createProperty(schema + "name"), "Rallou Thomopoulos", "en");
+        person3.addProperty(om.createProperty(schema + "url"), om.createResource("https://orcid.org/0000-0002-3218-9472"));
+        ont.addProperty(om.createProperty(schema + "creator"), person3);
+
+        // Financement
+        ont.addProperty(om.createProperty(schema + "funding"),
+                om.createResource("https://www.pole-valorial.fr"));
+
 
 
 	    //////////////////////////////////////////////////////////////////////
@@ -131,13 +242,13 @@ public class CreateNatclinnTbox {
 		SimpleProduct.addComment("Food industry product made up entirely of ingredients.", "en");
 		SimpleProduct.addComment("Produit de l'industrie alimentaire composé uniquement d'ingrédients.", "fr"); 
 
-		OntClass AdditiveProduct = om.createClass(ncl + "AdditiveProduct");
-		SimpleProduct.addComment("Food industry product considered as an additive (stabilizer, raising agent, preservative, etc.). It may be composed of additive ingredients (sorbitol, E330, E520, etc.).", "en");
-		SimpleProduct.addComment("Produit de l'industrie alimentaire considéré comme un additif (stabilisant, poudre à levée, conservateur, etc.). Il peut être composé d’ingrédient additif (sorbitol, E330, E520, etc.).", "fr");
+		// OntClass AdditiveProduct = om.createClass(ncl + "AdditiveProduct");
+		// SimpleProduct.addComment("Food industry product considered as an additive (stabilizer, raising agent, preservative, etc.). It may be composed of additive ingredients (sorbitol, E330, E520, etc.).", "en");
+		// SimpleProduct.addComment("Produit de l'industrie alimentaire considéré comme un additif (stabilisant, poudre à levée, conservateur, etc.). Il peut être composé d’ingrédient additif (sorbitol, E330, E520, etc.).", "fr");
 
-		OntClass AromaProduct = om.createClass(ncl + "AromaProduct");
-		SimpleProduct.addComment("Food industry product considered as a flavoring. It can be composed of ingredients.", "en");
-		SimpleProduct.addComment("Produit de l'industrie alimentaire considéré comme un arôme. Il peut être composé d’ingrédient.", "fr");
+		// OntClass AromaProduct = om.createClass(ncl + "AromaProduct");
+		// SimpleProduct.addComment("Food industry product considered as a flavoring. It can be composed of ingredients.", "en");
+		// SimpleProduct.addComment("Produit de l'industrie alimentaire considéré comme un arôme. Il peut être composé d’ingrédient.", "fr");
 
 		OntClass Ressource = om.createClass(ncl + "Ressource");
 		Ressource.addComment("Abstract class Resource, from which Product and Ingredient inherit.", "en");
@@ -147,6 +258,14 @@ public class CreateNatclinnTbox {
 		OntClass Ingredient = om.createClass(ncl + "Ingredient");
 		Ingredient.addComment("An ingredient used in a product.", "en");
 		Ingredient.addComment("Un ingrédient utilisé dans un produit.", "fr");
+
+		OntClass CompositeIngredient = om.createClass(ncl + "CompositeIngredient");
+		CompositeIngredient.addComment("Ingredient composed of at least one other Ingredient.", "en");
+		CompositeIngredient.addComment("Un ingrédient composé d'au moins un autre ingrédient.", "fr"); 
+
+		OntClass SimpleIngredient = om.createClass(ncl + "SimpleIngredient");
+		SimpleIngredient.addComment("A simple ingredient.", "en");
+		SimpleIngredient.addComment("Un ingrédient simple.", "fr"); 
 
 		OntClass IngredientByOrigin = om.createClass(ncl + "IngredientByOrigin");
 		IngredientByOrigin.addSuperClass(Ingredient);
@@ -244,6 +363,10 @@ public class CreateNatclinnTbox {
 		Packaging.addComment("The packaging of a product.", "en");
 		Packaging.addComment("L'emballage d'un produit.", "fr");
 
+		OntClass Material = om.createClass(ncl + "Material");
+		Material.addComment("The material used for the product packaging.", "en");
+		Material.addComment("La matière de l'emballage du produit.", "fr");
+
 		OntClass Allegation = om.createClass(ncl + "Allegation");
 		Packaging.addComment("Statement of facts about a product whose existence has yet to be proven.", "en");
 		Packaging.addComment("Déclaration relative à des faits sur un produit dont l'existence reste à prouver.", "fr");
@@ -293,6 +416,14 @@ public class CreateNatclinnTbox {
 		Attribute.addComment("The attribute of naturalness in the context of the argument.", "en");
 		Attribute.addComment("L'attribut de naturalité dans le contexte de l'argument.", "fr");
 
+		OntClass Category = om.createClass(ncl + "Category");
+		Category.addComment("Main category of the argument (e.g., 'Mode de culture et d'élevage').", "en");
+		Category.addComment("Catégorie principale de l'argument (ex: 'Mode de culture et d'élevage').", "fr");
+
+		OntClass Subcategory = om.createClass(ncl + "Subcategory");
+		Subcategory.addComment("Subcategory of the argument.", "en");
+		Subcategory.addComment("Sous-catégorie de l'argument.", "fr");
+
 		OntClass ProductMatrix = om.createClass(ncl + "ProductMatrix");
 		ProductMatrix.addComment("The product matrix in the context of the argument.", "en");
 		ProductMatrix.addComment("La matrice produit dans le contexte de l'argument.", "fr");
@@ -320,6 +451,8 @@ public class CreateNatclinnTbox {
 			CleanLabel,
 			Context,
 			Attribute,
+			Category,
+    		Subcategory,
 			ProductMatrix,
 			ControlledOriginLabel,
 			FNI,
@@ -347,7 +480,18 @@ public class CreateNatclinnTbox {
 	    // Définition des object property                       //
 	    //////////////////////////////////////////////////////////
 		
-	    ObjectProperty identifier = om.createObjectProperty(ncl + "identifier");
+		// anonymous class for unionOf
+        RDFList unionListComposedOfDomain = om.createList(new RDFNode[] {CompositeIngredient, CompositeProduct});
+        Resource unionClassComposedOfDomain = om.createResource()
+            .addProperty(OWL.unionOf, unionListComposedOfDomain);
+		RDFList unionListComposedOfRange = om.createList(new RDFNode[] {Ingredient, Product});
+        Resource unionClassComposedOfRange = om.createResource()
+            .addProperty(OWL.unionOf, unionListComposedOfRange);	
+	    ObjectProperty composedOf = om.createObjectProperty(ncl + "composedOf");
+		composedOf.addDomain(unionClassComposedOfDomain);
+		composedOf.addRange(unionClassComposedOfRange);
+
+		ObjectProperty identifier = om.createObjectProperty(ncl + "identifier");
 		identifier.addDomain(Ressource);
 		identifier.addRange(om.createResource(XSD.xstring.getURI()));
 		
@@ -355,18 +499,17 @@ public class CreateNatclinnTbox {
 		hasIngredient.addDomain(Product);
 		hasIngredient.addRange(Ingredient);
 
-		ObjectProperty hasByProduct = om.createObjectProperty(ncl + "hasByProduct");
-		hasByProduct.addDomain(Product);
-		hasByProduct.addRange(Product);
-
 		ObjectProperty hasPackaging = om.createObjectProperty(ncl + "hasPackaging");
 		hasPackaging.addDomain(Product);
 		hasPackaging.addRange(Packaging);
 
+		ObjectProperty hasMaterial = om.createObjectProperty(ncl + "hasMaterial");
+		hasMaterial.addDomain(Packaging);
+		hasPackaging.addRange(Material);
+
 		ObjectProperty hasAllegation = om.createObjectProperty(ncl + "hasAllegation");
 		hasAllegation.addDomain(Product);
 		hasAllegation.addRange(Allegation);
-
 
 		ObjectProperty hasCleanLabel = om.createObjectProperty(ncl + "hasCleanLabel");
 		hasCleanLabel.addDomain(Product);
@@ -452,6 +595,18 @@ public class CreateNatclinnTbox {
 		hasAttribute.addComment("The naturalness attribute of a food industry product.", "en");
 		hasAttribute.addComment("Attribut de la naturalité d'un produit de l'industrie agro-alimentaire.", "fr");
 
+		ObjectProperty hasCategory = om.createObjectProperty(ncl + "hasCategory");
+		hasCategory.addDomain(Argument);
+		hasCategory.addRange(Category);
+		hasCategory.addComment("Links an argument to its main category.", "en");
+		hasCategory.addComment("Relie un argument à sa catégorie principale.", "fr");
+
+		ObjectProperty hasSubcategory = om.createObjectProperty(ncl + "hasSubcategory");
+		hasSubcategory.addDomain(Argument);
+		hasSubcategory.addRange(Subcategory);
+		hasSubcategory.addComment("Links an argument to its subcategory.", "en");
+		hasSubcategory.addComment("Relie un argument à sa sous-catégorie.", "fr");
+
 		ObjectProperty hasProductMatrix = om.createObjectProperty(ncl + "hasProductMatrix");
 		hasProductMatrix.addDomain(Context);
 		hasProductMatrix.addRange(ProductMatrix);
@@ -504,6 +659,66 @@ public class CreateNatclinnTbox {
 		weightingIndex.addComment("Notoriety of the source of an argument.", "en");
 		weightingIndex.addComment("Notoriété de la source d'un argument.", "fr");
 
+		DatatypeProperty assertion = om.createDatatypeProperty(ncl + "assertion");
+		assertion.addDomain(Argument);
+		assertion.addRange(om.createResource(XSD.xstring.getURI()));
+		assertion.addComment("The assertion or claim made by the argument.", "en");
+		assertion.addComment("L'assertion ou la déclaration faite par l'argument.", "fr");
+
+		DatatypeProperty polarity = om.createDatatypeProperty(ncl + "polarity");
+		polarity.addDomain(Argument);
+		polarity.addRange(om.createResource(XSD.xstring.getURI()));
+		polarity.addComment("Polarity of the argument (positive '+' or negative '-').", "en");
+		polarity.addComment("Polarité de l'argument (positif '+' ou négatif '-').", "fr");
+
+		DatatypeProperty nameCriterion = om.createDatatypeProperty(ncl + "nameCriterion");
+		nameCriterion.addDomain(Argument);
+		nameCriterion.addRange(om.createResource(XSD.xstring.getURI()));
+		nameCriterion.addComment("Name of the criterion addressed by the argument.", "en");
+		nameCriterion.addComment("Nom du critère abordé par l'argument.", "fr");
+
+		DatatypeProperty aim = om.createDatatypeProperty(ncl + "aim");
+		aim.addDomain(Argument);
+		aim.addRange(om.createResource(XSD.xstring.getURI()));
+		aim.addComment("Aim or objective related to the argument.", "en");
+		aim.addComment("Objectif ou visée de l'argument.", "fr");
+
+		DatatypeProperty nameProperty = om.createDatatypeProperty(ncl + "nameProperty");
+		nameProperty.addDomain(Argument);
+		nameProperty.addRange(om.createResource(XSD.xstring.getURI()));
+		nameProperty.addComment("Name of the property evaluated in the argument.", "en");
+		nameProperty.addComment("Nom de la propriété évaluée dans l'argument.", "fr");
+
+		DatatypeProperty value = om.createDatatypeProperty(ncl + "value");
+		value.addDomain(Argument);
+		value.addRange(om.createResource(XSD.xstring.getURI()));
+		value.addComment("Value associated with the argument property.", "en");
+		value.addComment("Valeur associée à la propriété de l'argument.", "fr");
+
+		DatatypeProperty condition = om.createDatatypeProperty(ncl + "condition");
+		condition.addDomain(Argument);
+		condition.addRange(om.createResource(XSD.xstring.getURI()));
+		condition.addComment("Condition under which the argument applies.", "en");
+		condition.addComment("Condition dans laquelle l'argument s'applique.", "fr");
+
+		DatatypeProperty infValue = om.createDatatypeProperty(ncl + "infValue");
+		infValue.addDomain(Argument);
+		infValue.addRange(om.createResource(XSD.xdouble.getURI()));
+		infValue.addComment("Lower bound value for the argument condition.", "en");
+		infValue.addComment("Valeur minimale pour la condition de l'argument.", "fr");
+
+		DatatypeProperty supValue = om.createDatatypeProperty(ncl + "supValue");
+		supValue.addDomain(Argument);
+		supValue.addRange(om.createResource(XSD.xdouble.getURI()));
+		supValue.addComment("Upper bound value for the argument condition.", "en");
+		supValue.addComment("Valeur maximale pour la condition de l'argument.", "fr");
+
+		DatatypeProperty unitArg = om.createDatatypeProperty(ncl + "unit");
+		unitArg.addDomain(Argument);
+		unitArg.addRange(om.createResource(XSD.xstring.getURI()));
+		unitArg.addComment("Unit of measurement for the argument values.", "en");
+		unitArg.addComment("Unité de mesure pour les valeurs de l'argument.", "fr");
+
 		DatatypeProperty hasCiqualFoodCode = om.createDatatypeProperty(ncl + "hasCiqualFoodCode");
 		hasCiqualFoodCode.addDomain(Ingredient);
 		hasCiqualFoodCode.addRange(om.createResource(XSD.xstring.getURI()));
@@ -523,6 +738,12 @@ public class CreateNatclinnTbox {
 		//////////////////////////////////////////////////////////
 	    // Définition des annotation property                   //
 	    //////////////////////////////////////////////////////////
+		om.createAnnotationProperty(ncl + "hasEAN13");
+		om.createAnnotationProperty(ncl + "hasTrademark");
+		om.createAnnotationProperty(ncl + "hasCategory");
+		om.createAnnotationProperty(ncl + "hasCiqualFoodCode");
+		om.createAnnotationProperty(ncl + "hasCiqualProxyFoodCode");
+		om.createAnnotationProperty(ncl + "hasIdIngredientOFF");
 		om.createAnnotationProperty(skos + "prefLabel");
 	    om.createAnnotationProperty(skos + "altLabel");
 		om.createAnnotationProperty(skos + "definition");
@@ -558,15 +779,17 @@ public class CreateNatclinnTbox {
 		NCL.addSubClass(Origin);
 		NCL.addSubClass(ProductMatrix);
 		NCL.addSubClass(Attribute);
+		NCL.addSubClass(Category);
+		NCL.addSubClass(Subcategory);
 
 	
 		CompositeProduct.addSuperClass(Product);
 		SimpleProduct.addSuperClass(Product);
-		AdditiveProduct.addSuperClass(Product);
-		AromaProduct.addSuperClass(Product);
 		Product.addSuperClass(Ressource);
 		Argument.addSuperClass(Node);
 		Ingredient.addSuperClass(Ressource);
+		CompositeIngredient.addSuperClass(Ingredient);
+		SimpleIngredient.addSuperClass(Ingredient);
 		// Sous-classes directes de Ingredient
 		IngredientByOrigin.addSuperClass(Ingredient);
 		IngredientByFunction.addSuperClass(Ingredient);

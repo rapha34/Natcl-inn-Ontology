@@ -95,34 +95,62 @@ public static String CreationABox(String excelFile) {
 		/////////////////////////////////////
 	    // Classes RDF                     //
 	    /////////////////////////////////////
+		Resource Product = om.createResource(ncl + "Product");
         Resource CompositeProduct = om.createResource(ncl + "CompositeProduct");
 		Resource SimpleProduct = om.createResource(ncl + "SimpleProduct");
-        Resource Ingredient = om.createResource(ncl + "Ingredient");
+		Resource Ingredient = om.createResource(ncl + "Ingredient");
+		Resource CompositeIngredient = om.createResource(ncl + "CompositeIngredient");
+		Resource SimpleIngredient = om.createResource(ncl + "SimpleIngredient");
 		Resource QuantifiedElement = om.createResource(ncl + "QuantifiedElement");
         Resource CleanLabel = om.createResource(ncl + "CleanLabel");
         Resource Packaging = om.createResource(ncl + "Packaging");
+		Resource Material = om.createResource(ncl + "Material");
+		Resource Shape = om.createResource(ncl + "Shape");
 		Resource ControlledOriginLabel = om.createResource(ncl + "ControlledOriginLabel");
 		Resource ManufacturingProcess = om.createResource(ncl + "ManufacturingProcess");
         Resource NutriScore = om.createResource(ncl + "NutriScore");
+		 Resource NutriScoreAlpha = om.createResource(ncl + "NutriScoreAlpha");
+		Resource AdditiveIngredient = om.createResource(ncl + "AdditiveIngredient");
+		Resource NutriscoreDetail = om.createResource(ncl + "NutriscoreDetail");
 
         /////////////////////////////////////
 	    // Propriétés RDF                  //
 	    /////////////////////////////////////
 		AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
+		AnnotationProperty hasEAN13 = om.createAnnotationProperty(ncl + "hasEAN13");
+		AnnotationProperty hasTrademark = om.createAnnotationProperty(ncl + "hasTrademark");
+		AnnotationProperty hasCategory = om.createAnnotationProperty(ncl + "hasCategory");
+		AnnotationProperty hasCiqualFoodCode = om.createAnnotationProperty(ncl + "hasCiqualFoodCode");
+		AnnotationProperty hasCiqualProxyFoodCode = om.createAnnotationProperty(ncl + "hasCiqualProxyFoodCode");
+		AnnotationProperty hasIdIngredientOFF = om.createAnnotationProperty(ncl + "hasIdIngredientOFF");
+		Property hasComposedOf = om.createProperty(ncl, "hasComposedOf");
         Property hasIngredient = om.createProperty(ncl, "hasIngredient");
-		Property hasByProduct = om.createProperty(ncl, "hasByProduct");
 		Property hasQuantifiedElement = om.createProperty(ncl, "hasQuantifiedElement");
         Property hasCleanLabel = om.createProperty(ncl, "hasCleanLabel");
         Property hasPackaging = om.createProperty(ncl, "hasPackaging");
+		Property hasMaterial = om.createProperty(ncl, "hasMaterial");
+		Property hasShape = om.createProperty(ncl, "hasShape");
 		Property hasControlledOriginLabel = om.createProperty(ncl, "hasControlledOriginLabel");
 		Property hasManufacturingProcess = om.createProperty(ncl, "hasManufacturingProcess");
-        Property hasNutriScore = om.createProperty(ncl, "hasNutriScore");
+		Property hasNutriScore = om.createProperty(ncl, "hasNutriScore");
+		Property hasNutriScoreAlpha = om.createProperty(ncl, "hasNutriScoreAlpha");
+		Property hasNutriScoreNum = om.createProperty(ncl, "hasNutriScoreNum");
+		Property hasFoodContact = om.createProperty(ncl, "hasFoodContact");
+		Property hasNumberOfUnits = om.createProperty(ncl, "hasNumberOfUnits");
+		Property hasWeightSpecified = om.createProperty(ncl, "hasWeightSpecified");
 		Property rdfType = om.createProperty(rdf, "type");
 		Property refersTo = om.createProperty(ncl, "refersTo");
 		Property quantity = om.createProperty(ncl, "quantity");
 		Property unit = om.createProperty(ncl, "unit");
 		Property percentage = om.createProperty(ncl, "percentage");
 		Property rank = om.createProperty(ncl, "rank");
+		Property hasPolarityNSCompoment = om.createProperty(ncl, "hasPolarityNSCompoment");
+		Property hasNSCompoment = om.createProperty(ncl, "hasNSCompoment");
+		Property hasNutriScoreDetail = om.createProperty(ncl, "hasNutriScoreDetail");
+		Property hasPoint = om.createProperty(ncl, "hasPoint");
+		Property hasPointMax = om.createProperty(ncl, "hasPointMax");
+		Property hasValue = om.createProperty(ncl, "hasValue");
+		Property hasUnit = om.createProperty(ncl, "hasUnit");
 
 		//////////////////////////////
 		// Définition des individus //
@@ -134,12 +162,12 @@ public static String CreationABox(String excelFile) {
     		ZipSecureFile.setMinInflateRatio(0.001);
 			try (Workbook workbook = new XSSFWorkbook(fis)) {
 				Map<String, Resource> products = new HashMap<>();
-				Map<String, String> productsURI = new HashMap<>();
 				Map<String, Resource> ingredients = new HashMap<>();
-				Map<String, String> ingredientsURI = new HashMap<>();
 				Map<String, Resource> cleanLabels = new HashMap<>();
+				Map<String, Resource> nutriScoreNodes = new HashMap<>();
 				Map<String, Resource> nutriScores = new HashMap<>();
-				Map<String, Resource> packagings = new HashMap<>();	
+				Map<String, Resource> materials = new HashMap<>();
+				Map<String, Resource> shapes = new HashMap<>();				
 				Map<String, Resource> controlledOriginLabels = new HashMap<>();	
 				Map<String, Resource> manufacturingProcesses = new HashMap<>();	
 				
@@ -149,33 +177,33 @@ public static String CreationABox(String excelFile) {
 					if (row.getRowNum() == 0) continue;
 					String id = getCellValue(row.getCell(0));
 				    String name = getCellValue(row.getCell(1));
-					String code = getCellValue(row.getCell(2));
+					// le code EAN peut être vide dans le cas d'un sous produit d'un produit composite
+					// (ex: surgelé de poisson avec sa sauce holandaise)
+					String code = getCellValue(row.getCell(2)); 
 					String typeProduct = getCellValue(row.getCell(3));
+					String marque = getCellValue(row.getCell(4));
+					String category = getCellValue(row.getCell(5));
 
-					String productURI;
-					if (typeProduct.equalsIgnoreCase("Additif")) {
-						if (code == null || code.isEmpty()) {
-							long counter = NatclinnUtil.getNextProductCounterValue();
-							String paddedCounter = String.format("%013d", counter); // format 13 chiffres
-							productURI = "A-" + paddedCounter;
-						} else {
-							productURI = "A-" + code;
-						}
-					} else {
-						if (code == null || code.isEmpty()) {
-							long counter = NatclinnUtil.getNextProductCounterValue();
-							String paddedCounter = String.format("%013d", counter); // format 13 chiffres
-							productURI = "P-" + paddedCounter;
-						} else {
-							productURI = "P-" + code;
-						}
-					}
-					// System.out.println(productURI);
 
-					Resource product = om.createResource(ncl + productURI)
+					Resource product = om.createResource(ncl + id)
 				            .addProperty(prefLabel, name);
-					products.put(id, product);	
-					productsURI.put(id, productURI);	
+					if (code != null && !code.isEmpty()) {
+						product.addProperty(hasEAN13, code);
+						product.addProperty(rdfType, Product);
+					}
+					if (typeProduct.equals("CompositeProduct") ) {
+						product.addProperty(rdfType, CompositeProduct);
+					}
+					if (typeProduct.equals("SimpleProduct") ) {
+						product.addProperty(rdfType, SimpleProduct);
+					}
+					if (marque != null && !marque.isEmpty()) {
+						product.addProperty(hasTrademark, marque);
+					}
+					if (category != null && !category.isEmpty()) {
+						product.addProperty(hasCategory, category);
+					}
+					products.put(id, product);		
 				}
 
 				Sheet ingredientsSheet = workbook.getSheet("Ingredients");
@@ -183,17 +211,25 @@ public static String CreationABox(String excelFile) {
 					if (row.getRowNum() == 0) continue;
 					String id = getCellValue(row.getCell(0));
 				    String name = getCellValue(row.getCell(1));
-
-					String ingredientURI;
-					long counter = NatclinnUtil.getNextIngredientCounterValue();
-					String paddedCounter = String.format("%013d", counter); // format 13 chiffres
-					ingredientURI = "I-" + paddedCounter;
-
-					Resource ingredient = om.createResource(ncl + ingredientURI)
+					String CiqualFoodCode = getCellValue(row.getCell(2));
+					String CiqualProxiFoodCode = getCellValue(row.getCell(3));
+					String IdIngredientOFF = getCellValue(row.getCell(4));
+					if (id == null || id.isEmpty()) {
+						continue;
+					}
+					Resource ingredient = om.createResource(ncl + id)
 							.addProperty(rdfType, Ingredient)
 							.addProperty(prefLabel, name);
+					if (CiqualFoodCode != null && !CiqualFoodCode.isEmpty()) {
+						ingredient.addProperty(hasCiqualFoodCode, CiqualFoodCode);
+					}
+					if (CiqualProxiFoodCode != null && !CiqualProxiFoodCode.isEmpty()) {
+						ingredient.addProperty(hasCiqualProxyFoodCode, CiqualProxiFoodCode);
+					}
+					if (IdIngredientOFF != null && !IdIngredientOFF.isEmpty()) {
+						ingredient.addProperty(hasIdIngredientOFF, IdIngredientOFF);
+					}
 					ingredients.put(id, ingredient);
-					ingredientsURI.put(id, ingredientURI);	
 				}
 
 
@@ -203,20 +239,53 @@ public static String CreationABox(String excelFile) {
 					if (row.getRowNum() == 0) continue;
 
 					String prodId = getCellValue(row.getCell(0));
-				    String packaging = getCellValue(row.getCell(1));
-
+					Double rankPackaging = getNumericCellValueSafe(row.getCell(1));
+					String material = getCellValue(row.getCell(2));
+					String shape = getCellValue(row.getCell(3));
+					String foodContact = getCellValue(row.getCell(4));    
+					String numberOfUnits = getCellValue(row.getCell(5));
+					String weightSpecified = getCellValue(row.getCell(6));
+					Integer iRank = (rankPackaging != null) ? rankPackaging.intValue() : null;
+					if (prodId == null || prodId.isEmpty()) {
+						continue;
+					}
 					Resource product = products.get(prodId);
 					
-					if (product != null) {
-						if (!packaging.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "Packaging-", packaging);
-							if (uri != null) {
-								Resource pack = packagings.computeIfAbsent(packaging, val ->
-									om.createResource(uri).addProperty(rdfType, Packaging));
-								pack.addProperty(prefLabel, packaging);	
-								product.addProperty(hasPackaging, pack);
+					if (product != null) {	
+						String uri = NatclinnUtil.makeURI(ncl + "Packaging-", prodId + "-" + iRank);
+						if (uri != null) {
+							Resource packaging = om.createResource(uri);
+							packaging.addProperty(rdfType, Packaging);
+							if (material != null && !material.isEmpty()) {
+							String uriMat = NatclinnUtil.makeURI(ncl + "Material_", material);
+								if (uriMat != null) {
+								Resource mat = materials.computeIfAbsent(material, val ->
+									om.createResource(uriMat).addProperty(rdfType, Material));
+								mat.addProperty(prefLabel, material);	
+								packaging.addProperty(hasMaterial, mat);
+								}
 							}
+							if (shape != null && !shape.isEmpty()) {
+							String uriShap = NatclinnUtil.makeURI(ncl + "shape_", shape);
+								if (uriShap != null) {
+								Resource shap = shapes.computeIfAbsent(shape, val ->
+									om.createResource(uriShap).addProperty(rdfType, Shape));
+								shap.addProperty(prefLabel, shape);	
+								packaging.addProperty(hasShape, shap);
+								}
+							}
+							if (foodContact != null && !foodContact.isEmpty()) {
+								packaging.addProperty(hasFoodContact, foodContact);
+							}
+							if (numberOfUnits != null && !numberOfUnits.isEmpty()) {
+								packaging.addProperty(hasNumberOfUnits, numberOfUnits);
+							}
+							if (weightSpecified != null && !weightSpecified.isEmpty()) {
+								packaging.addProperty(hasWeightSpecified, weightSpecified);
+							}
+							product.addProperty(hasPackaging, packaging);
 						}
+						
 					}
 
 				}
@@ -233,7 +302,7 @@ public static String CreationABox(String excelFile) {
 					
 					if (product != null) {
 						if (!controlledOriginLabel.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "ControlledOriginLabel-", controlledOriginLabel);
+							String uri = NatclinnUtil.makeURI(ncl + "ControlledOriginLabel_", controlledOriginLabel);
 							if (uri != null) {
 								Resource pack = controlledOriginLabels.computeIfAbsent(controlledOriginLabel, val ->
 									om.createResource(uri).addProperty(rdfType, ControlledOriginLabel));
@@ -257,12 +326,12 @@ public static String CreationABox(String excelFile) {
 					
 					if (product != null) {
 						if (!cleanLabel.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "CleanLabel-", cleanLabel);
+							String uri = NatclinnUtil.makeURI(ncl + "CleanLabel_", cleanLabel);
 							if (uri != null) {
-								Resource pack = cleanLabels.computeIfAbsent(cleanLabel, val ->
+								Resource cLabel = cleanLabels.computeIfAbsent(cleanLabel, val ->
 									om.createResource(uri).addProperty(rdfType, CleanLabel));
-								pack.addProperty(prefLabel, cleanLabel);
-								product.addProperty(hasCleanLabel, pack);
+								cLabel.addProperty(prefLabel, cleanLabel);
+								product.addProperty(hasCleanLabel, cLabel);
 							}
 						}
 					}
@@ -281,7 +350,7 @@ public static String CreationABox(String excelFile) {
 					
 					if (product != null) {
 						if (!manufacturingProcess.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "ManufacturingProcess-", manufacturingProcess);
+							String uri = NatclinnUtil.makeURI(ncl + "ManufacturingProcess_", manufacturingProcess);
 							if (uri != null) {
 								Resource pack = manufacturingProcesses.computeIfAbsent(manufacturingProcess, val ->
 									om.createResource(uri).addProperty(rdfType, ManufacturingProcess));
@@ -300,19 +369,79 @@ public static String CreationABox(String excelFile) {
 
 					String prodId = getCellValue(row.getCell(0));
 				    String nutriScore = getCellValue(row.getCell(1));
+					String Score = getCellValue(row.getCell(2));
 
 					Resource product = products.get(prodId);
 					
 					if (product != null) {
 						if (!nutriScore.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "NutriScore-", nutriScore);
+							String uri = NatclinnUtil.makeURI(ncl + "NutriScore_", prodId);
 							if (uri != null) {
-								Resource pack = nutriScores.computeIfAbsent(nutriScore, val ->
+								Resource nutriscoreNode = nutriScoreNodes.computeIfAbsent(prodId, val ->
 									om.createResource(uri).addProperty(rdfType, NutriScore));
-								pack.addProperty(prefLabel, "Nutri-Score " + nutriScore.toUpperCase());
-								product.addProperty(hasNutriScore, pack);
+								product.addProperty(hasNutriScore, nutriscoreNode);	
+								String uriScoreAlpha = NatclinnUtil.makeURI(ncl + "NutriScore_", nutriScore);
+								if (uriScoreAlpha != null) {
+									Resource nutriscore = nutriScores.computeIfAbsent(nutriScore, val ->
+										om.createResource(uriScoreAlpha).addProperty(rdfType, NutriScoreAlpha));
+									nutriscore.addProperty(prefLabel, "Nutri-Score " + nutriScore.toUpperCase());
+									nutriscoreNode.addProperty(hasNutriScoreAlpha, nutriscore);
+									if (!Score.isEmpty()) {
+										nutriscoreNode.addProperty(hasNutriScoreNum, Score);
+									}	
+								}
 							}
 						}
+					}
+
+				}
+
+				Sheet nutriScoreDetailsSheet = workbook.getSheet("NutriScoreDetails");
+
+				for (Row row : nutriScoreDetailsSheet) {
+					if (row.getRowNum() == 0) continue;
+
+					String prodId = getCellValue(row.getCell(0));
+					String PolarityComponent = getCellValue(row.getCell(1));
+					Double rankVal = getNumericCellValueSafe(row.getCell(2));
+					Integer iRank = (rankVal != null) ? rankVal.intValue() : null;
+					String IDNScomponent = getCellValue(row.getCell(3));
+					Double points = getNumericCellValueSafe(row.getCell(4));
+					Double points_max = getNumericCellValueSafe(row.getCell(5));
+					Double value = getNumericCellValueSafe(row.getCell(6));
+					String unitval = getCellValue(row.getCell(7));	
+
+					Resource product = products.get(prodId);
+					Resource nutriscoreNode = nutriScoreNodes.get(prodId);
+					
+					
+					if (product != null && nutriscoreNode != null && iRank != null) {
+						// Création d'une ressource nommée de type NutriscoreDetail
+						String nutriscoreDetailURI = ncl + "NutriscoreDetail_" + prodId + "_" + PolarityComponent + "_"+ iRank;
+						Resource nutriscoreDetail = om.createResource(nutriscoreDetailURI)
+							.addProperty(rdfType,NutriscoreDetail);
+						if (PolarityComponent != null && !PolarityComponent.isEmpty()) {
+							nutriscoreDetail.addProperty(hasPolarityNSCompoment,
+									om.createResource(ncl + PolarityComponent));
+						}
+						if (IDNScomponent != null && !IDNScomponent.isEmpty()) {
+							nutriscoreDetail.addProperty(hasNSCompoment, om.createResource(ncl + IDNScomponent));
+						}
+						if (points != null) {
+							nutriscoreDetail.addLiteral(hasPoint, points);
+						}
+						if (points_max != null) {
+							nutriscoreDetail.addLiteral(hasPointMax, points_max);
+						}
+						if (value != null) {
+							nutriscoreDetail.addLiteral(hasValue, value);
+						}
+						if (unitval != null && !unitval.isEmpty()) {
+							nutriscoreDetail.addProperty(hasUnit, unitval);
+						}
+
+						nutriscoreNode.addProperty(hasNutriScoreDetail, nutriscoreDetail);
+						
 					}
 
 				}
@@ -326,54 +455,63 @@ public static String CreationABox(String excelFile) {
 				for (Row row : compositionsSheet) {
 					if (row.getRowNum() == 0) continue;
 
-					String prodId = getCellValue(row.getCell(0));
+					String compoundId = getCellValue(row.getCell(0));
 				    String type = getCellValue(row.getCell(1));
-				    String compId = getCellValue(row.getCell(2));
+				    String componentId = getCellValue(row.getCell(2));
 				    Double dQuantity = getNumericCellValueSafe(row.getCell(3));
 					String sUnit = getCellValue(row.getCell(4));
 					Double dPercentage = getNumericCellValueSafe(row.getCell(5));
 					Double rankVal = getNumericCellValueSafe(row.getCell(6));
 					Integer iRank = (rankVal != null) ? rankVal.intValue() : null;
+					if (compoundId == null || compoundId.isEmpty()) {
+						continue;
+					}
 
-					Resource product = products.get(prodId);
-					String productURI = productsURI.get(prodId);
-					Resource composant = "Ingredient".equalsIgnoreCase(type) ? ingredients.get(compId) : products.get(compId);
-					// String composantURI = "Ingredient".equalsIgnoreCase(type) ? ingredientsURI.get(compId) : productsURI.get(compId);
+					Resource compound = products.get(compoundId) != null ? products.get(compoundId) : ingredients.get(compoundId);
+					Resource component = ingredients.get(componentId) != null ? ingredients.get(componentId) : products.get(componentId);
+					Boolean compoundIsProduct = products.get(compoundId) != null ? true : false;
+					Boolean componentIsProduct = products.get(componentId) != null ? true : false;
 
-					if (product != null && composant != null) {
-
-						// Ajout du composant la bonne propriété selon le type de composant
-						if ("Ingredient".equalsIgnoreCase(type)) {
-							product.addProperty(hasIngredient, composant);
-							isComposite.putIfAbsent(prodId, false); // Pas un produit composite
-						} else {
-							product.addProperty(hasByProduct, composant);
-							isComposite.put(prodId, true); // Produit composite
-						}
+					if (compound != null && component != null) {
 
 						// Création d'une ressource nommée de type QuantifiedElement
-						String qElemURI = ncl + "QuantifiedElement_" + productURI + "_" + iRank;
+						String qElemURI = ncl + "QuantifiedElement_" + compound + "_" + iRank;
 						Resource quantifiedElement = om.createResource(qElemURI)
 							.addProperty(rdfType,QuantifiedElement)
-							.addProperty(refersTo, composant);
+							.addProperty(refersTo, component);
 							if (dQuantity != null) quantifiedElement.addLiteral(quantity, dQuantity);
 							if (!sUnit.isEmpty()) quantifiedElement.addProperty(unit, sUnit);
 							if (dPercentage != null) quantifiedElement.addLiteral(percentage, dPercentage);
 							if (iRank != null) quantifiedElement.addLiteral(rank, iRank);
 
 						// Ajout de la propriété générique
-						product.addProperty(hasQuantifiedElement, quantifiedElement);
+						compound.addProperty(hasQuantifiedElement, quantifiedElement);
+						// Ajout de la propriété spécifique selon le type
+						if ("AdditiveIngredient".equalsIgnoreCase(type)) {
+							component.addProperty(rdfType, AdditiveIngredient);
+						}
+						// Détermination de la nature de la relation entre le composé et le composant
+						// selon qu'ils sont des produits ou des ingrédients
+						if (compoundIsProduct && componentIsProduct) {
+							compound.addProperty(hasComposedOf, component);
+						} else if (compoundIsProduct && !componentIsProduct) {
+							compound.addProperty(hasIngredient, component);
+						} else if (!compoundIsProduct && !componentIsProduct) {
+							compound.addProperty(hasComposedOf, component);
+							isComposite.put(compoundId, true);
+						}
+
 					}
 				}
 
-				// Affectation des types aux produits après l'analyse complète
-				for (Map.Entry<String, Resource> entry : products.entrySet()) {
-					String prodId = entry.getKey();
-					Resource product = entry.getValue();
+				// Affectation des types aux ingrédients après l'analyse complète
+				for (Map.Entry<String, Resource> entry : ingredients.entrySet()) {
+					String ingredientId = entry.getKey();
+					Resource ingredient = entry.getValue();
 
-					boolean composite = isComposite.getOrDefault(prodId, false);
-					Resource typeURI = composite ? CompositeProduct : SimpleProduct;
-					product.addProperty(rdfType, typeURI);
+					boolean composite = isComposite.getOrDefault(ingredientId, false);
+					Resource typeURI = composite ? CompositeIngredient : SimpleIngredient;
+					ingredient.addProperty(rdfType, typeURI);
 				}
 			}
 
