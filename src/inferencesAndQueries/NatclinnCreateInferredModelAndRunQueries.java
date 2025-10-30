@@ -36,7 +36,13 @@ public class NatclinnCreateInferredModelAndRunQueries {
 		Path pathOfTheListRules = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListRules);
 		// Récupération du nom des fichiers des régles dans listRulesFileName
 		ArrayList<String> listRulesFileName = new ArrayList<String>();	
-		listRulesFileName = NatclinnUtil.makeListFileName(pathOfTheListRules.toString()); 
+		listRulesFileName = NatclinnUtil.makeListFileName(pathOfTheListRules.toString());
+		
+		// Récupération du nom du fichier contenant la liste des primitives à traiter.
+		Path pathOfTheListPrimitives = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListPrimitives);					
+		// Récupération du nom des fichiers d'ontologies dans listOntologiesFileName
+		ArrayList<String> listPrimitivesFileName = new ArrayList<String>();	
+		listPrimitivesFileName = NatclinnUtil.makeListFileName(pathOfTheListPrimitives .toString());
 		
 		// Récupération du nom du fichier contenant la liste des requêtes à traiter.
 		Path pathOfTheListQueries = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListQueries);
@@ -56,7 +62,7 @@ public class NatclinnCreateInferredModelAndRunQueries {
 		//System.out.println("topSpatial : " + topSpatial);
 		
 		// Création du model inféré
-		InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologiesFileName, listRulesFileName, topSpatial);
+		InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologiesFileName, listRulesFileName, listPrimitivesFileName, topSpatial);
 		// Execution des requêtes sur le modèle inféré
 		listQueriesOutputs = NatclinnQueryInferedModel.queryInferedModel(listQueriesFileName, infModel);
 	    
@@ -67,8 +73,8 @@ public class NatclinnCreateInferredModelAndRunQueries {
 		
 	}
 	
-	public static void InferencesAndQuery(ArrayList<String> listOntologies, ArrayList<String> listRules, String topSpatial, ArrayList<NatclinnQueryObject> listQueries) throws Exception {
-	    InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologies, listRules, topSpatial);
+	public static void InferencesAndQuery(ArrayList<String> listOntologies, ArrayList<String> listRules, ArrayList<String> listPrimitives, String topSpatial, ArrayList<NatclinnQueryObject> listQueries) throws Exception {
+	    InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologies, listRules, listPrimitives, topSpatial);
 	    NatclinnQueryInferedModel.queryInferedModel(infModel, listQueries);
 	}
 

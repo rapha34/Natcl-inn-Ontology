@@ -7,129 +7,134 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QueryFactory;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.query.ResultSetFormatter;
+import org.apache.jena.query.*;
 import org.apache.jena.rdf.model.InfModel;
-import org.apache.jena.update.UpdateAction;
-import org.apache.jena.update.UpdateFactory;
-import org.apache.jena.update.UpdateRequest;
+import org.apache.jena.update.*;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import natclinn.util.NatclinnConf;
 import natclinn.util.NatclinnQueryObject;
 import natclinn.util.NatclinnQueryOutputObject;
 
+/**
+ * Classe utilitaire permettant d'exécuter une liste de requêtes SPARQL
+ * sur un modèle inféré Jena (InfModel).
+ */
 public class NatclinnQueryInferedModel {
-	
-	// On passe par les fichiers du serveur en fournissant une liste de noms de fichier
-	public static ArrayList<NatclinnQueryOutputObject> queryInferedModel(ArrayList<String> listQueriesFileName, InfModel infModel) throws JsonParseException, JsonMappingException, IOException {
 
-		System.out.println("Model size before inference:" + infModel.size());
+    /**
+     * Exécute des fichiers de requêtes JSON sur le modèle inféré.
+     * Chaque fichier contient une liste de NatclinnQueryObject.
+     */
+    public static ArrayList<NatclinnQueryOutputObject> queryInferedModel(
+            ArrayList<String> listQueriesFileName, InfModel infModel)
+            throws IOException {
 
-		ArrayList<NatclinnQueryObject> listQueries = new ArrayList<NatclinnQueryObject>();
-		ArrayList<NatclinnQueryObject> listQueriesTemp;	
-		ArrayList<NatclinnQueryOutputObject> listQueriesOutputs = new ArrayList<NatclinnQueryOutputObject>();
-		
-		// On recupére les fichiers de requêtes sur le serveur
-		// et on charge listQueries
-		ObjectMapper objectMapper = new ObjectMapper();
-		
-		for(String QueriesFilename: listQueriesFileName){
-			// Récupération du nom du fichier contenant les requêtes.
-			Path pathOfTheListQueries = Paths.get(NatclinnConf.folderForQueries, QueriesFilename);
-			//JSON from file to Object
-			listQueriesTemp = objectMapper.readValue(new File(pathOfTheListQueries.toString()), new TypeReference<ArrayList<NatclinnQueryObject>>(){});
-			listQueries.addAll(listQueriesTemp); 
-		}
-		
-		for(NatclinnQueryObject objectQuery: listQueries){
-			
-			// Sauvegarde résultat
-			NatclinnQueryOutputObject QueryOutput = new NatclinnQueryOutputObject(null, "{}");
-			QueryOutput.setQuery(objectQuery);
-			
-			if (!(objectQuery.getStringQuery().equals(""))) {
-				if (objectQuery.getTypeQuery().equalsIgnoreCase("INSERT")) {
-					UpdateRequest update = UpdateFactory.create(objectQuery.getStringQuery());
-					UpdateAction.execute(update, infModel);
-				}
-				if (objectQuery.getTypeQuery().equalsIgnoreCase("SELECT")) {	
-					Query query = QueryFactory.create(objectQuery.getStringQuery());
-					QueryExecution qe = QueryExecutionFactory.create(query, infModel);		
-					ResultSet results = qe.execSelect();
-					ByteArrayOutputStream os = new ByteArrayOutputStream();
-		   			ResultSetFormatter.outputAsJSON(os, results);
-					QueryOutput.setQueryResponse(os.toString("UTF-8"));		
-				}
-			}
-			listQueriesOutputs.add(QueryOutput);
-		}
+        System.out.println("Model size before inference: " + infModel.size());
 
-		System.out.println("Model size after inference:" + infModel.size());
+        ArrayList<NatclinnQueryObject> listQueries = new ArrayList<>();
+        ObjectMapper objectMapper = new ObjectMapper();
 
-		return listQueriesOutputs;	
+        // Chargement de toutes les requêtes
+        for (String queriesFilename : listQueriesFileName) {
+            Path pathOfTheListQueries = Paths.get(NatclinnConf.folderForQueries, queriesFilename);
+            ArrayList<NatclinnQueryObject> listQueriesTemp = objectMapper.readValue(
+                    new File(pathOfTheListQueries.toString()),
+                    new TypeReference<ArrayList<NatclinnQueryObject>>() {});
+            listQueries.addAll(listQueriesTemp);
+        }
 
-	}
+        // Exécution des requêtes
+        ArrayList<NatclinnQueryOutputObject> listQueriesOutputs = new ArrayList<>();
 
-	
-	// Ici on injecte un liste de requêtes en entrée
-    public static ArrayList<NatclinnQueryOutputObject> queryInferedModel(InfModel infModel, ArrayList<NatclinnQueryObject> listQueries) {
-    	
-    	System.out.println("Model size before inference:" + infModel.size());
-    	
-    	for(NatclinnQueryObject objectQuery: listQueries){
-    		
-    		if (objectQuery.getTitleQuery().length()>0) {
-    			System.out.println();
-    			for (int c = 0; c < objectQuery.getTitleQuery().length()+6; c++)
-    				System.out.print("=");
-    			System.out.println();
-    			System.out.println("|  " + objectQuery.getTitleQuery() + "  |");
-    			for (int c = 0; c < objectQuery.getTitleQuery().length()+6; c++)
-    				System.out.print("=");
-    			System.out.println();
-    		}	else {
-    			System.out.println();
-    		}
-    			
-    		//System.out.println(stringQuery);
-    		if (!(objectQuery.getStringQuery() == "")) {
-    			if (objectQuery.getTypeQuery() == "INSERT") {
-    				Query query = QueryFactory.create(objectQuery.getStringQuery());
-    				QueryExecution qe = QueryExecutionFactory.create(query, infModel);		
-    				ResultSet results = qe.execSelect();
-    				ResultSetFormatter.out(System.out, results);
-    			}
-    			if (objectQuery.getTypeQuery() == "SELECT") {
-    				Query query = QueryFactory.create(objectQuery.getStringQuery());
-    				QueryExecution qe = QueryExecutionFactory.create(query, infModel);		
-    				ResultSet results = qe.execSelect();
-    				ResultSetFormatter.out(System.out, results);
-    			}
-    			if (objectQuery.getTypeQuery() == "UPDATE") {
+        for (NatclinnQueryObject objectQuery : listQueries) {
 
-    				UpdateRequest update = UpdateFactory.create(objectQuery.getStringQuery());
-    				UpdateAction.execute(update, infModel);
-    			}
-    		}
-    	}
-        
-    	System.out.println("Model size after inference:" + infModel.size());
-		
-    	return null;	
-    
+            NatclinnQueryOutputObject queryOutput = new NatclinnQueryOutputObject(null, "{}");
+            queryOutput.setQuery(objectQuery);
+
+            String queryString = objectQuery.getStringQuery();
+
+            if (queryString != null && !queryString.trim().isEmpty()) {
+
+                String type = objectQuery.getTypeQuery();
+
+                try {
+                    if ("INSERT".equalsIgnoreCase(type) || "UPDATE".equalsIgnoreCase(type)) {
+                        UpdateRequest update = UpdateFactory.create(queryString);
+                        UpdateAction.execute(update, infModel);
+
+                    } else if ("SELECT".equalsIgnoreCase(type)) {
+                        Query query = QueryFactory.create(queryString);
+                        try (QueryExecution qe = QueryExecutionFactory.create(query, infModel)) {
+                            ResultSet results = qe.execSelect();
+                            ByteArrayOutputStream os = new ByteArrayOutputStream();
+                            ResultSetFormatter.outputAsJSON(os, results);
+                            queryOutput.setQueryResponse(os.toString("UTF-8"));
+                        }
+                    } else {
+                        System.out.println("Type de requête inconnu : " + type);
+                    }
+
+                } catch (Exception e) {
+                    System.err.println("Erreur lors de l'exécution de la requête : " + objectQuery.getTitleQuery());
+                    e.printStackTrace();
+                }
+            }
+
+            listQueriesOutputs.add(queryOutput);
+        }
+
+        System.out.println("Model size after inference: " + infModel.size());
+        return listQueriesOutputs;
     }
 
-	
-	
+    /**
+     * Variante : on injecte directement la liste de requêtes.
+     */
+    public static ArrayList<NatclinnQueryOutputObject> queryInferedModel(
+            InfModel infModel, ArrayList<NatclinnQueryObject> listQueries) {
 
+        System.out.println("Model size before inference: " + infModel.size());
+        ArrayList<NatclinnQueryOutputObject> outputs = new ArrayList<>();
 
+        for (NatclinnQueryObject objectQuery : listQueries) {
+            NatclinnQueryOutputObject output = new NatclinnQueryOutputObject(objectQuery, "{}");
+            String queryString = objectQuery.getStringQuery();
+            // System.err.println("Executing query: " + queryString);
+            if (queryString != null && !queryString.trim().isEmpty()) {
+
+                String type = objectQuery.getTypeQuery();
+
+				if (objectQuery.getTitleQuery() != null && !objectQuery.getTitleQuery().isEmpty()) {
+                	System.out.println("\n=== " + objectQuery.getTitleQuery() + " ===");
+				}
+
+                try {
+                    if ("INSERT".equalsIgnoreCase(type) || "UPDATE".equalsIgnoreCase(type)) {
+                        UpdateRequest update = UpdateFactory.create(queryString);
+                        UpdateAction.execute(update, infModel);
+                    } else if ("SELECT".equalsIgnoreCase(type)) {
+                        Query query = QueryFactory.create(queryString);
+                        try (QueryExecution qe = QueryExecutionFactory.create(query, infModel)) {
+                            ResultSet results = qe.execSelect();
+                            ResultSetFormatter.out(System.out, results);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erreur dans la requête : " + objectQuery.getTitleQuery());
+                    e.printStackTrace();
+                }
+            } else {
+
+				System.out.println("\n=== " + objectQuery.getTitleQuery() + " ===");
+			}
+
+            outputs.add(output);
+        }
+
+        System.out.println("Model size after inference: " + infModel.size());
+        return outputs;
+    }
 }

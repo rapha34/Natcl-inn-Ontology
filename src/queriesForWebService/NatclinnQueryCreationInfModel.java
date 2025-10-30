@@ -25,13 +25,19 @@ public class NatclinnQueryCreationInfModel {
     			// Récupération du nom des fichiers des régles dans listRulesFileName
     			ArrayList<String> listRulesFileName = new ArrayList<String>();	
     			listRulesFileName = NatclinnUtil.makeListFileName(pathOfTheListRules.toString()); 
-    			
+
+				// Récupération du nom du fichier contenant la liste des primitives à traiter.
+				Path pathOfTheListPrimitives = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListPrimitives);					
+				// Récupération du nom des fichiers d'ontologies dans listOntologiesFileName
+				ArrayList<String> listPrimitivesFileName = new ArrayList<String>();	
+				listPrimitivesFileName = NatclinnUtil.makeListFileName(pathOfTheListPrimitives .toString());
+						
     			// Récupération du nom du fichier contenant les paramètres.
     			Path pathOfTheParameters = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameParameters);
     			// Récupération du top spatial
     			String topSpatial = NatclinnUtil.extractParameter(pathOfTheParameters.toString(), "topSpatial"); 	
     			//System.out.println("topSpatial : " + topSpatial);
     		
-    	NatclinnSingletonInfModel.setModel(NatclinnCreateInferedModel.createInferedModel(listOntologiesFileName, listRulesFileName, topSpatial));
+    	NatclinnSingletonInfModel.setModel(NatclinnCreateInferedModel.createInferedModel(listOntologiesFileName, listRulesFileName, listPrimitivesFileName, topSpatial));
 	}
 }

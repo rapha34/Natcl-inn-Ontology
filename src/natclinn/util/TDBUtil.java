@@ -25,7 +25,7 @@ import org.apache.jena.tdb2.TDB2Factory;
 public class TDBUtil {
 	
 	public static Dataset CreateTDBDataset() throws Exception {
-    System.out.println("=== Début de createTDBDataset ===");
+    // System.out.println("=== Début de createTDBDataset ===");
 
     // Étape 1 : Initialisation de la configuration
     new NatclinnConf();
@@ -60,7 +60,7 @@ public class TDBUtil {
         dataset.end();
     }
 
-    System.out.println("=== Fin de createTDBDataset ===");
+    // System.out.println("=== Fin de createTDBDataset ===");
     return dataset;
 }
 

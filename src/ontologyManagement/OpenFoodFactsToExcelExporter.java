@@ -35,7 +35,7 @@ public class OpenFoodFactsToExcelExporter {
 
         String fieldParams = "&fields=code,product_name,brands,categories,nutriscore_grade,nutriscore_data,nutriscore_v2_data,nova_groups,nova_groups_markers,ingredients_text_fr,ingredients,packagings,origins,labels";
         int pageSize = 100;
-        String baseUrl = "https://world.openfoodfacts.org/api/v2/search?" + searchProperty + "=" + searchPropertyString
+        String baseUrl = NatclinnConf.OFF_API_BASE_URL + searchProperty + "=" + searchPropertyString
                 + "&json=1&page_size=" + pageSize;
         // Attention avec .net on obtient des résultats différents
         // String baseUrl = "https://world.openfoodfacts.net/api/v2/search?" +

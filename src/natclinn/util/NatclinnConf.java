@@ -27,6 +27,7 @@ public final class NatclinnConf {
 	
 	public static String fileNameListOntologiesForInitTDB = null;
 	public static String fileNameListOntologies = null;
+	public static String fileNameListPrimitives = null;
 	public static String fileNameListRules = null;
 	public static String fileNameListQueries = null;
 	public static String fileNameParameters = null;
@@ -74,6 +75,28 @@ public final class NatclinnConf {
 	public static String wgs = null;
 	public static String sio = null;
 	public static String uom = null;
+
+	public static String OFF_API_BASE_URL = null;
+	public static String OFF_API_TIMEOUT = null;
+	public static String OFF_API_CONNECT_TIMEOUT = null;
+	public static String OFF_API_READ_TIMEOUT = null;
+	public static String OFF_API_USER_AGENT = null;
+	public static String OFF_API_MAX_RETRIES = null;
+	public static String OFF_API_RETRY_DELAY_MS = null;
+	public static String OFF_API_RATE_LIMIT_MS = null;
+	public static String OFF_API_CACHE_EXPIRY_HOURS = null;
+
+	public static String CIQUAL_API_BASE_URL = null;
+	public static String CIQUAL_API_TIMEOUT = null;
+	public static String CIQUAL_API_CONNECT_TIMEOUT = null;
+	public static String CIQUAL_API_READ_TIMEOUT = null;
+	public static String CIQUAL_API_USER_AGENT = null;
+	public static String CIQUAL_API_MAX_RETRIES = null;
+	public static String CIQUAL_API_RETRY_DELAY_MS = null;
+	public static String CIQUAL_API_RATE_LIMIT_MS = null;
+	public static String CIQUAL_API_CACHE_EXPIRY_HOURS = null;
+
+
 	
 	public static String queryPrefix = null;
 	
@@ -127,6 +150,7 @@ public final class NatclinnConf {
 			
 			fileNameListOntologiesForInitTDB = prop.getProperty("fileNameListOntologiesForInitTDB");	
 			fileNameListOntologies = prop.getProperty("fileNameListOntologies");
+			fileNameListPrimitives = prop.getProperty("fileNameListPrimitives");
 			fileNameListRules = prop.getProperty("fileNameListRules");
 			fileNameListQueries = prop.getProperty("fileNameListQueries");
 			fileNameParameters = prop.getProperty("fileNameParameters");
@@ -193,11 +217,31 @@ public final class NatclinnConf {
 			wgs = prop.getProperty("wgs");
 			sio = prop.getProperty("sio");
 			uom = prop.getProperty("uom");
+
+			OFF_API_BASE_URL = prop.getProperty("OFF_API_BASE_URL");
+			OFF_API_TIMEOUT = prop.getProperty("OFF_API_TIMEOUT");
+			OFF_API_CONNECT_TIMEOUT = prop.getProperty("OFF_API_CONNECT_TIMEOUT");
+			OFF_API_READ_TIMEOUT = prop.getProperty("OFF_API_READ_TIMEOUT");
+			OFF_API_USER_AGENT = prop.getProperty("OFF_API_USER_AGENT");
+			OFF_API_MAX_RETRIES = prop.getProperty("OFF_API_MAX_RETRIES");
+			OFF_API_RETRY_DELAY_MS = prop.getProperty("OFF_API_RETRY_DELAY_MS");
+			OFF_API_RATE_LIMIT_MS = prop.getProperty("OFF_API_RATE_LIMIT_MS");
+			OFF_API_CACHE_EXPIRY_HOURS = prop.getProperty("OFF_API_CACHE_EXPIRY_HOURS");
+
+			CIQUAL_API_BASE_URL = prop.getProperty("CIQUAL_API_BASE_URL");
+			CIQUAL_API_TIMEOUT = prop.getProperty("CIQUAL_API_TIMEOUT");
+			CIQUAL_API_CONNECT_TIMEOUT = prop.getProperty("CIQUAL_API_CONNECT_TIMEOUT");
+			CIQUAL_API_READ_TIMEOUT = prop.getProperty("CIQUAL_API_READ_TIMEOUT");
+			CIQUAL_API_USER_AGENT = prop.getProperty("CIQUAL_API_USER_AGENT");
+			CIQUAL_API_MAX_RETRIES = prop.getProperty("CIQUAL_API_MAX_RETRIES");
+			CIQUAL_API_RETRY_DELAY_MS = prop.getProperty("CIQUAL_API_RETRY_DELAY_MS");
+			CIQUAL_API_RATE_LIMIT_MS = prop.getProperty("CIQUAL_API_RATE_LIMIT_MS");
+			CIQUAL_API_CACHE_EXPIRY_HOURS = prop.getProperty("CIQUAL_API_CACHE_EXPIRY_HOURS");
 			
 			// Prefix pour les query
 			
 			queryPrefix =  
-					"prefix afy: <" + ncl + ">\n" +
+					"prefix ncl: <" + ncl + ">\n" +
 					"prefix afo: <" + afo + ">\n" +	
 					"prefix afv: <" + afv + ">\n" +			
 					"prefix res: <" + res + ">\n" +

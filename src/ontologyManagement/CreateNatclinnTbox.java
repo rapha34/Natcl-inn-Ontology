@@ -151,7 +151,7 @@ public class CreateNatclinnTbox {
                 "NATCL’INN aims to offer a solution to agri-food companies that need to balance different product attributes related to naturalness in order to meet new consumer expectations and perceptions regarding food naturalness. In order to propose a prototype Decision Support Tool, the R&D teams at ADRIA, the LEGO laboratory at the University of Western Brittany (UBO), INRAE research units and their industrial partners (Bridor, Paticeo, Charles Christ, La PAM, Ecomiam, Fleury Michon, Guyader Gastronomie) have joined forces to carry out an ambitious collaborative R&D programme. The NATCL'INN project has been certified by the VALORIAL competitiveness cluster and has received support from the Brittany Region, the Pays de la Loire Region and Quimper Bretagne Occidentale. The project began on 1 January 2024 and will be completed at the end of 2027", "en");
 
         ont.addProperty(om.createProperty(vocab + "rdfxmlSerialization"),
-                om.createTypedLiteral("https://w3id.org/afy/ontology.xml",
+                om.createTypedLiteral("https://w3id.org/NCL/ontology.xml",
                         XSDDatatype.XSDanyURI));
 
         // =====================
@@ -250,9 +250,9 @@ public class CreateNatclinnTbox {
 		// SimpleProduct.addComment("Food industry product considered as a flavoring. It can be composed of ingredients.", "en");
 		// SimpleProduct.addComment("Produit de l'industrie alimentaire considéré comme un arôme. Il peut être composé d’ingrédient.", "fr");
 
-		OntClass Ressource = om.createClass(ncl + "Ressource");
-		Ressource.addComment("Abstract class Resource, from which Product and Ingredient inherit.", "en");
-		Ressource.addComment("Classe abstraite Ressource, dont héritent Produit et Ingrédient.", "fr"); 
+		OntClass Resource = om.createClass(ncl + "Resource");
+		Resource.addComment("Abstract class Resource, from which Product and Ingredient inherit.", "en");
+		Resource.addComment("Classe abstraite Resource, dont héritent Produit et Ingrédient.", "fr"); 
 
 		// Pour les ingrédients 
 		OntClass Ingredient = om.createClass(ncl + "Ingredient");
@@ -363,6 +363,10 @@ public class CreateNatclinnTbox {
 		Packaging.addComment("The packaging of a product.", "en");
 		Packaging.addComment("L'emballage d'un produit.", "fr");
 
+		OntClass Shape = om.createClass(ncl + "Shape");
+		Shape.addComment("The forme used for the product packaging.", "en");
+		Shape.addComment("La forme de l'emballage du produit.", "fr");
+
 		OntClass Material = om.createClass(ncl + "Material");
 		Material.addComment("The material used for the product packaging.", "en");
 		Material.addComment("La matière de l'emballage du produit.", "fr");
@@ -391,6 +395,14 @@ public class CreateNatclinnTbox {
 		NutriScore.addComment("Nutri-Score.", "en");
 		NutriScore.addComment("Nutri-Score.", "fr");
 
+		OntClass NutriScoreAlpha = om.createClass(ncl + "NutriScoreAlpha");
+		NutriScoreAlpha.addComment("Nutri-Score alpha	.", "en");
+		NutriScoreAlpha.addComment("Nutri-Score alpha.", "fr");
+
+		OntClass NutriScoreDetail = om.createClass(ncl + "NutriScoreDetail");
+		NutriScoreDetail.addComment("Nutri-Score detail	.", "en");
+		NutriScoreDetail.addComment("Nutri-Score detail.", "fr");
+
 		OntClass NaturalnessScore = om.createClass(ncl + "NaturalnessScore");
 		NaturalnessScore.addComment("Naturalness-Score.", "en");
 		NaturalnessScore.addComment("Score de naturalité.", "fr");
@@ -412,6 +424,16 @@ public class CreateNatclinnTbox {
 		Context.addComment("The context in which the argument is relevant.", "en");
 		Context.addComment("Le contexte dans lequel l'argument est pertinent.", "fr");
 
+		OntClass ContextProduct = om.createClass(ncl + "ContextProduct");
+		ContextProduct.addSuperClass(Context);
+		ContextProduct.addComment("The product context in which an argument is relevant.", "en");
+		ContextProduct.addComment("Le contexte produit dans lequel un argument est pertinent.", "fr");
+
+		OntClass ContextIngredient = om.createClass(ncl + "ContextIngredient");
+		ContextIngredient.addSuperClass(Context);
+		ContextIngredient.addComment("The ingredient context in which an argument is relevant.", "en");
+		ContextIngredient.addComment("Le contexte ingrédient dans lequel un argument est pertinent.", "fr");
+
 		OntClass Attribute = om.createClass(ncl + "Attribute");
 		Attribute.addComment("The attribute of naturalness in the context of the argument.", "en");
 		Attribute.addComment("L'attribut de naturalité dans le contexte de l'argument.", "fr");
@@ -423,10 +445,6 @@ public class CreateNatclinnTbox {
 		OntClass Subcategory = om.createClass(ncl + "Subcategory");
 		Subcategory.addComment("Subcategory of the argument.", "en");
 		Subcategory.addComment("Sous-catégorie de l'argument.", "fr");
-
-		OntClass ProductMatrix = om.createClass(ncl + "ProductMatrix");
-		ProductMatrix.addComment("The product matrix in the context of the argument.", "en");
-		ProductMatrix.addComment("La matrice produit dans le contexte de l'argument.", "fr");
 
 		OntClass Verbatim = om.createClass(ncl + "Verbatim");
 		Verbatim.addComment("Extract of a sentence supporting the argument.", "en");
@@ -453,16 +471,19 @@ public class CreateNatclinnTbox {
 			Attribute,
 			Category,
     		Subcategory,
-			ProductMatrix,
 			ControlledOriginLabel,
 			FNI,
 			Ingredient,
 			QuantifiedElement,
 			ManufacturingProcess,
 			NutriScore,
+			NutriScoreDetail,
+			NutriScoreAlpha,
 			NaturalnessScore,
 			Allegation,
 			Packaging,
+			Shape,
+			Material,
 			Origin,
 			Product,
 			Source,
@@ -492,7 +513,7 @@ public class CreateNatclinnTbox {
 		composedOf.addRange(unionClassComposedOfRange);
 
 		ObjectProperty identifier = om.createObjectProperty(ncl + "identifier");
-		identifier.addDomain(Ressource);
+		identifier.addDomain(Resource);
 		identifier.addRange(om.createResource(XSD.xstring.getURI()));
 		
 		ObjectProperty hasIngredient = om.createObjectProperty(ncl + "hasIngredient");
@@ -505,7 +526,11 @@ public class CreateNatclinnTbox {
 
 		ObjectProperty hasMaterial = om.createObjectProperty(ncl + "hasMaterial");
 		hasMaterial.addDomain(Packaging);
-		hasPackaging.addRange(Material);
+		hasMaterial.addRange(Material);
+
+		ObjectProperty hasShape = om.createObjectProperty(ncl + "hasShape");
+		hasShape.addDomain(Packaging);
+		hasShape.addRange(Shape);
 
 		ObjectProperty hasAllegation = om.createObjectProperty(ncl + "hasAllegation");
 		hasAllegation.addDomain(Product);
@@ -533,7 +558,7 @@ public class CreateNatclinnTbox {
 
 
 		ObjectProperty hasQuantifiedElement = om.createObjectProperty(ncl + "hasQuantifiedElement");
-		hasQuantifiedElement.addDomain(Product);
+		hasQuantifiedElement.addDomain(Resource);
 		hasQuantifiedElement.addRange(QuantifiedElement);
 
 		ObjectProperty hasOrigin = om.createObjectProperty(ncl + "hasOrigin");
@@ -542,7 +567,7 @@ public class CreateNatclinnTbox {
 
 
 		ObjectProperty hasControlledOrigin = om.createObjectProperty(ncl + "hasControlledOriginLabel");
-		hasControlledOrigin.addDomain(Ingredient);
+		hasControlledOrigin.addDomain(Product);
 		hasControlledOrigin.addRange(ControlledOriginLabel);
 
 
@@ -576,6 +601,18 @@ public class CreateNatclinnTbox {
 		hasContext.addRange(Context);
 		hasContext.addComment("Links an argument to its context", "en");
 		hasContext.addComment("Relie un argument à son contexte", "fr");
+
+		ObjectProperty hasContextProduct = om.createObjectProperty(ncl + "hasContextProduct");
+		hasContextProduct.addDomain(Context);
+		hasContextProduct.addRange(ContextProduct);
+		hasContextProduct.addComment("The product context of an argument.", "en");
+		hasContextProduct.addComment("Le contexte produit d'un argument.", "fr");
+
+		ObjectProperty hasContextIngredient = om.createObjectProperty(ncl + "hasContextIngredient");
+		hasContextIngredient.addDomain(Context);
+		hasContextIngredient.addRange(ContextIngredient);
+		hasContextIngredient.addComment("The ingredient context of an argument.", "en");
+		hasContextIngredient.addComment("Le contexte ingrédient d'un argument.", "fr");
 		
 		ObjectProperty hasVerbatim = om.createObjectProperty(ncl + "hasVerbatim");
 		hasVerbatim.addDomain(Argument);
@@ -590,7 +627,7 @@ public class CreateNatclinnTbox {
 		hasSource.addComment("Relie un argument à sa source (enquête consommateur, revue scientifique, etc.).", "fr");
 
 		ObjectProperty hasAttribute = om.createObjectProperty(ncl + "hasAttribute");
-		hasAttribute.addDomain(Context);
+		hasAttribute.addDomain(Argument);
 		hasAttribute.addRange(Attribute);
 		hasAttribute.addComment("The naturalness attribute of a food industry product.", "en");
 		hasAttribute.addComment("Attribut de la naturalité d'un produit de l'industrie agro-alimentaire.", "fr");
@@ -607,13 +644,13 @@ public class CreateNatclinnTbox {
 		hasSubcategory.addComment("Links an argument to its subcategory.", "en");
 		hasSubcategory.addComment("Relie un argument à sa sous-catégorie.", "fr");
 
-		ObjectProperty hasProductMatrix = om.createObjectProperty(ncl + "hasProductMatrix");
-		hasProductMatrix.addDomain(Context);
-		hasProductMatrix.addRange(ProductMatrix);
-		hasProductMatrix.addComment("Matrix for a food industry product.", "en");
-		hasProductMatrix.addComment("Matrice d'un produit de l'industrie agroalimentaire.", "fr");
+		ObjectProperty containsIngredientWithFunction = om.createObjectProperty(ncl + "containsIngredientWithFunction");
+		containsIngredientWithFunction.addDomain(Product);
+		containsIngredientWithFunction.addRange(om.createResource(XSD.xstring.getURI()));
+		containsIngredientWithFunction.addComment("Links a product to the function of its ingredients.", "en");
+		containsIngredientWithFunction.addComment("Relie un produit à la fonction de ses ingrédients.", "fr");
 
-	    
+
 	    //////////////////////////////////////////////////////////
 	    // Définition des data property                         //
 	    //////////////////////////////////////////////////////////
@@ -655,7 +692,7 @@ public class CreateNatclinnTbox {
 
 		DatatypeProperty weightingIndex = om.createDatatypeProperty(ncl + "weightingIndex");
 		weightingIndex.addDomain(Source);
-		weightingIndex.addRange(om.createResource(XSD.nonNegativeInteger.getURI()));
+		weightingIndex.addRange(om.createResource(XSD.xdouble.getURI()));
 		weightingIndex.addComment("Notoriety of the source of an argument.", "en");
 		weightingIndex.addComment("Notoriété de la source d'un argument.", "fr");
 
@@ -689,11 +726,11 @@ public class CreateNatclinnTbox {
 		nameProperty.addComment("Name of the property evaluated in the argument.", "en");
 		nameProperty.addComment("Nom de la propriété évaluée dans l'argument.", "fr");
 
-		DatatypeProperty value = om.createDatatypeProperty(ncl + "value");
-		value.addDomain(Argument);
-		value.addRange(om.createResource(XSD.xstring.getURI()));
-		value.addComment("Value associated with the argument property.", "en");
-		value.addComment("Valeur associée à la propriété de l'argument.", "fr");
+		DatatypeProperty valueProperty = om.createDatatypeProperty(ncl + "valueProperty");
+		valueProperty.addDomain(Argument);
+		valueProperty.addRange(om.createResource(XSD.xstring.getURI()));
+		valueProperty.addComment("Value associated with the argument property.", "en");
+		valueProperty.addComment("Valeur associée à la propriété de l'argument.", "fr");
 
 		DatatypeProperty condition = om.createDatatypeProperty(ncl + "condition");
 		condition.addDomain(Argument);
@@ -731,18 +768,23 @@ public class CreateNatclinnTbox {
 		hasCiqualProxyFoodCode.addComment("Ciqual code for a similar food industry product.", "en");
 		hasCiqualProxyFoodCode.addComment("Code Ciqual d'un produit similaire de l'industrie agroalimentaire.", "fr");
 		
+		DatatypeProperty hasFunction = om.createDatatypeProperty(ncl + "hasFunction");
+		hasFunction.addDomain(Ingredient);
+		hasFunction.addRange(om.createResource(XSD.xstring.getURI()));
+		hasFunction.addComment("The technological or sensory function of an ingredient (preservative, flavor enhancer, etc.).", "en");
+		hasFunction.addComment("La fonction technologique ou sensorielle d'un ingrédient (conservateur, exhausteur de goût, etc.).", "fr");
 
-
-
+		DatatypeProperty containsAdditives = om.createDatatypeProperty(ncl + "containsAdditives");
+		containsAdditives.addDomain(Product);
+		containsAdditives.addRange(om.createResource(XSD.xboolean.getURI()));
+		containsAdditives.addComment("Indicates whether the product contains additives.", "en");
+		containsAdditives.addComment("Indique si le produit contient des additifs.", "fr");			
 	
 		//////////////////////////////////////////////////////////
 	    // Définition des annotation property                   //
 	    //////////////////////////////////////////////////////////
 		om.createAnnotationProperty(ncl + "hasEAN13");
 		om.createAnnotationProperty(ncl + "hasTrademark");
-		om.createAnnotationProperty(ncl + "hasCategory");
-		om.createAnnotationProperty(ncl + "hasCiqualFoodCode");
-		om.createAnnotationProperty(ncl + "hasCiqualProxyFoodCode");
 		om.createAnnotationProperty(ncl + "hasIdIngredientOFF");
 		om.createAnnotationProperty(skos + "prefLabel");
 	    om.createAnnotationProperty(skos + "altLabel");
@@ -750,6 +792,8 @@ public class CreateNatclinnTbox {
 		om.createAnnotationProperty(rdfs + "label");
 		om.createAnnotationProperty(rdfs + "comment");
 		om.createAnnotationProperty(dct + "created");
+
+
 
 
 		
@@ -762,14 +806,20 @@ public class CreateNatclinnTbox {
 	// Inclusion de concepts   //
 	/////////////////////////////
 	
-		NCL.addSubClass(Ressource);
+		NCL.addSubClass(Resource);
 		NCL.addSubClass(Argument);
 		NCL.addSubClass(CleanLabel);
 		NCL.addSubClass(Context);
+		NCL.addSubClass(ContextIngredient);
+		NCL.addSubClass(ContextProduct);
 		NCL.addSubClass(ControlledOriginLabel);
 		NCL.addSubClass(FNI);
 		NCL.addSubClass(NutriScore);
-		NCL.addSubClass(Packaging);	
+		NCL.addSubClass(NutriScoreDetail);
+		NCL.addSubClass(NutriScoreAlpha);
+		NCL.addSubClass(Packaging);
+		NCL.addSubClass(Shape);
+		NCL.addSubClass(Material);
 		NCL.addSubClass(QuantifiedElement);	
 		NCL.addSubClass(Source);
 		NCL.addSubClass(Verbatim);
@@ -777,7 +827,6 @@ public class CreateNatclinnTbox {
 		NCL.addSubClass(NaturalnessScore);
 		NCL.addSubClass(Allegation);
 		NCL.addSubClass(Origin);
-		NCL.addSubClass(ProductMatrix);
 		NCL.addSubClass(Attribute);
 		NCL.addSubClass(Category);
 		NCL.addSubClass(Subcategory);
@@ -785,9 +834,9 @@ public class CreateNatclinnTbox {
 	
 		CompositeProduct.addSuperClass(Product);
 		SimpleProduct.addSuperClass(Product);
-		Product.addSuperClass(Ressource);
+		Product.addSuperClass(Resource);
 		Argument.addSuperClass(Node);
-		Ingredient.addSuperClass(Ressource);
+		Ingredient.addSuperClass(Resource);
 		CompositeIngredient.addSuperClass(Ingredient);
 		SimpleIngredient.addSuperClass(Ingredient);
 		// Sous-classes directes de Ingredient

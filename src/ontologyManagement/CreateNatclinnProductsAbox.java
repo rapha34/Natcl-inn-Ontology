@@ -30,14 +30,14 @@ import org.apache.poi.openxml4j.util.ZipSecureFile;
 //  construit une représentation OWL (ABox) de ces données en instanciant des individus et en établissant
 //  leurs relations, puis exporte le modèle obtenu dans différents formats RDF.
 
-public class CreateNatclinnProductAbox {
+public class CreateNatclinnProductsAbox {
 	
 	public static <ValuesFromRestriction> void main( String[] args ) {
 
 	new NatclinnConf();  
 	// Passage du chemin complet du fichier Excel à traiter
     String excelFile = NatclinnConf.folderForData + "/NatclinnProductAbox.xlsx";
-    String jsonString = CreationABox(excelFile);
+    String jsonString = CreationProductABox(excelFile);
     
     OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
     
@@ -47,7 +47,7 @@ public class CreateNatclinnProductAbox {
         .parse(om);
     
     try {   
-        FileOutputStream outStream = new FileOutputStream(NatclinnConf.folderForOntologies + "/NatclinnAbox.xml");
+        FileOutputStream outStream = new FileOutputStream(NatclinnConf.folderForOntologies + "/NatclinnProductsAbox.xml");
         om.write(outStream, "RDF/XML");
         outStream.close();
     }
@@ -57,7 +57,7 @@ public class CreateNatclinnProductAbox {
 	
 // Méthode principale de création de l'ABox à partir du chemin d'un fichier Excel en paramètre d'entrée et 
 // retourne une chaîne JSON-LD
-public static String CreationABox(String excelFile) {
+public static String CreationProductABox(String excelFile) {
 
     String jsonString = null;
     OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
@@ -87,9 +87,9 @@ public static String CreationABox(String excelFile) {
 	    //Description de l'ontologie       //
 	    /////////////////////////////////////
 
-		Ontology ont = om.createOntology(ncl + "NatclinnAbox");
+		Ontology ont = om.createOntology(ncl + "NatclinnProductAbox");
 		om.add(ont, RDFS.label,"Ontology of Natclinn");
-		om.add(ont, DC.description,"Abox for the Natclinn ontology");
+		om.add(ont, DC.description,"Abox for the Products of Natcl'inn ontology");
 		om.add(ont, DC.creator,"Raphaël CONDE SALAZAR");	
 
 		/////////////////////////////////////
@@ -109,9 +109,9 @@ public static String CreationABox(String excelFile) {
 		Resource ControlledOriginLabel = om.createResource(ncl + "ControlledOriginLabel");
 		Resource ManufacturingProcess = om.createResource(ncl + "ManufacturingProcess");
         Resource NutriScore = om.createResource(ncl + "NutriScore");
-		 Resource NutriScoreAlpha = om.createResource(ncl + "NutriScoreAlpha");
+		Resource NutriScoreAlpha = om.createResource(ncl + "NutriScoreAlpha");
 		Resource AdditiveIngredient = om.createResource(ncl + "AdditiveIngredient");
-		Resource NutriscoreDetail = om.createResource(ncl + "NutriscoreDetail");
+		Resource NutriScoreDetail = om.createResource(ncl + "NutriScoreDetail");
 
         /////////////////////////////////////
 	    // Propriétés RDF                  //
@@ -119,10 +119,10 @@ public static String CreationABox(String excelFile) {
 		AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
 		AnnotationProperty hasEAN13 = om.createAnnotationProperty(ncl + "hasEAN13");
 		AnnotationProperty hasTrademark = om.createAnnotationProperty(ncl + "hasTrademark");
-		AnnotationProperty hasCategory = om.createAnnotationProperty(ncl + "hasCategory");
-		AnnotationProperty hasCiqualFoodCode = om.createAnnotationProperty(ncl + "hasCiqualFoodCode");
-		AnnotationProperty hasCiqualProxyFoodCode = om.createAnnotationProperty(ncl + "hasCiqualProxyFoodCode");
 		AnnotationProperty hasIdIngredientOFF = om.createAnnotationProperty(ncl + "hasIdIngredientOFF");
+		Property hasCategory = om.createProperty(ncl + "hasCategory");
+		Property hasCiqualFoodCode = om.createProperty(ncl + "hasCiqualFoodCode");
+		Property hasCiqualProxyFoodCode = om.createProperty(ncl + "hasCiqualProxyFoodCode");
 		Property hasComposedOf = om.createProperty(ncl, "hasComposedOf");
         Property hasIngredient = om.createProperty(ncl, "hasIngredient");
 		Property hasQuantifiedElement = om.createProperty(ncl, "hasQuantifiedElement");
@@ -419,7 +419,7 @@ public static String CreationABox(String excelFile) {
 						// Création d'une ressource nommée de type NutriscoreDetail
 						String nutriscoreDetailURI = ncl + "NutriscoreDetail_" + prodId + "_" + PolarityComponent + "_"+ iRank;
 						Resource nutriscoreDetail = om.createResource(nutriscoreDetailURI)
-							.addProperty(rdfType,NutriscoreDetail);
+							.addProperty(rdfType,NutriScoreDetail);
 						if (PolarityComponent != null && !PolarityComponent.isEmpty()) {
 							nutriscoreDetail.addProperty(hasPolarityNSCompoment,
 									om.createResource(ncl + PolarityComponent));

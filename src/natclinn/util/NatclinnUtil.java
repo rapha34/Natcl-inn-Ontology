@@ -661,26 +661,54 @@ public static String removeOrphanClosingParentheses(String text) {
 		return listFile;
 	}
 
-	// Retourne un nom de fichier à traiter	
-		public static String makeFileName(String nameJsonFile) throws Exception {
-			String nameOfFile = null;
-			File file  = new File(nameJsonFile);
-			if (file.exists()) {
-			   //on récupère le noms des fichier à traiter dans le fichier JSON
-				String jsonArray = NatclinnUtil.readFileAsString(nameJsonFile);
+	// // Retourne un nom de fichier à traiter	
+	// 	public static String makeFileName(String nameJsonFile) throws Exception {
+	// 		String nameOfFile = null;
+	// 		File file  = new File(nameJsonFile);
+	// 		if (file.exists()) {
+	// 		   //on récupère le noms des fichier à traiter dans le fichier JSON
+	// 			String jsonArray = NatclinnUtil.readFileAsString(nameJsonFile);
 
-				ObjectMapper objectMapper = new ObjectMapper();
+	// 			ObjectMapper objectMapper = new ObjectMapper();
 
-				FileName fileName = objectMapper.readValue(jsonArray, new TypeReference<FileName>(){});
+	// 			FileName fileName = objectMapper.readValue(jsonArray, new TypeReference<FileName>(){});
 				
-				nameOfFile = fileName.getName();
-			} else {
-				System.out.println("Le fichier " + nameJsonFile +  " est inexistant !"); 
-			}
+	// 			nameOfFile = fileName.getName();
+	// 		} else {
+	// 			System.out.println("Le fichier " + nameJsonFile +  " est inexistant !"); 
+	// 		}
 			
 			
-			return nameOfFile ;
-		}
+	// 		return nameOfFile ;
+	// 	}
+
+    // Retourne un nom de fichier à traiter
+    public static String makeFileName(String nameJsonFile) throws Exception {
+        String nameOfFile = null;
+        File file = new File(nameJsonFile);
+
+        if (file.exists()) {
+            if (file.length() == 0) {
+                System.err.println("⚠️ Le fichier " + nameJsonFile + " est vide !");
+                return "resultsQueries_default.json";
+            }
+
+            String jsonArray = NatclinnUtil.readFileAsString(nameJsonFile);
+            if (jsonArray == null || jsonArray.trim().isEmpty()) {
+                System.err.println("⚠️ Le contenu du fichier " + nameJsonFile + " est vide ou invalide !");
+                return "resultsQueries_default.json";
+            }
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            FileName fileName = objectMapper.readValue(jsonArray, new TypeReference<FileName>(){});
+            nameOfFile = fileName.getName();
+        } else {
+            System.err.println("⚠️ Le fichier " + nameJsonFile + " est inexistant !");
+            nameOfFile = "resultsQueries_default.json";
+        }
+
+        return nameOfFile;
+    }
 	
 	// Retourne un top	
 	public static String extractParameter(String nameJsonFile, String keyParameter) throws Exception {
