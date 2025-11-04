@@ -25,7 +25,7 @@ public class NatclinnQueryInfModel {
 		// Initialisation de la configuration
 		// Chemin d'accès, noms fichiers...
 		new NatclinnConf();
-		String afv = NatclinnConf.afv;
+		String ncl = NatclinnConf.ncl;
 		
 		////////////////////////////////
 		// Recupèration du model      //
@@ -33,18 +33,18 @@ public class NatclinnQueryInfModel {
 		InfModel infModel = NatclinnSingletonInfModel.getModel();
 		showModelSize( infModel );
 		
-		List<Resource> listTerms = new ArrayList<Resource>() ;
-		listTerms = listTermsWithLabel(infModel, "forest trees");
-		System.out.println(listTerms);
+		List<Resource> listProductIAA = new ArrayList<Resource>() ;
+		listProductIAA = listProductIAA(infModel);
+		System.out.println(listProductIAA);
 		
-		Resource caf_13 = infModel.getResource( afv + "caf_13" );
-		listTerms.clear();
-		listTerms.add(caf_13);
+		// Resource caf_13 = infModel.getResource( afv + "caf_13" );
+		// listTerms.clear();
+		// listTerms.add(caf_13);
 		
-		List<Resource> listElements = new ArrayList<Resource>() ;
-		listElements = listElementClarifyByTerms(infModel, listTerms);
-		System.out.println(listElements);
-		System.out.println(listElements.size());
+		// List<Resource> listElements = new ArrayList<Resource>() ;
+		// listElements = listElementClarifyByTerms(infModel, listTerms);
+		// System.out.println(listElements);
+		// System.out.println(listElements.size());
 		
 		Instant end2 = Instant.now();
 		System.out.println("Running time : " + Duration.between(start, end2).getSeconds() + " seconds");
@@ -82,20 +82,18 @@ public class NatclinnQueryInfModel {
 		return listElements;
 	}	
 	
-	public static List<Resource> listTermsWithLabel(InfModel m, String label) {
-		List<Resource> listTerms = new ArrayList<Resource>() ;
+	public static List<Resource> listProductIAA(InfModel m) {
+		List<Resource> listProduct = new ArrayList<Resource>() ;
 		new NatclinnConf();
 		String ncl = NatclinnConf.ncl;
-		String skos = NatclinnConf.skos;
-		Resource TermClass = m.getResource( ncl + "Term" );
-		StmtIterator i = m.listStatements( null, RDF.type, TermClass );
-		Property prefLabel = m.getProperty( skos + "prefLabel" );
+		Property isProductIAA = m.getProperty( ncl + "isProductIAA" );
+		RDFNode trueBoolean = m.createTypedLiteral(true);
+		StmtIterator i = m.listStatements( null, isProductIAA, trueBoolean);
 		while (i.hasNext()) {
-			Resource Term = i.next().getSubject();
-			String labelDuTerme = getValueAsString(Term, prefLabel);
-			if (labelDuTerme.contentEquals(label)){listTerms.add(Term);};
+			Resource product = i.next().getSubject();
+			listProduct.add(product);
 		}
-		return listTerms;
+		return listProduct;
 	}
 	
 	

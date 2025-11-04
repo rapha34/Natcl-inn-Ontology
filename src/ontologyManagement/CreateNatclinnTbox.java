@@ -508,9 +508,9 @@ public class CreateNatclinnTbox {
 		RDFList unionListComposedOfRange = om.createList(new RDFNode[] {Ingredient, Product});
         Resource unionClassComposedOfRange = om.createResource()
             .addProperty(OWL.unionOf, unionListComposedOfRange);	
-	    ObjectProperty composedOf = om.createObjectProperty(ncl + "composedOf");
-		composedOf.addDomain(unionClassComposedOfDomain);
-		composedOf.addRange(unionClassComposedOfRange);
+	    ObjectProperty hasComposedOf = om.createObjectProperty(ncl + "hasComposedOf");
+		hasComposedOf.addDomain(unionClassComposedOfDomain);
+		hasComposedOf.addRange(unionClassComposedOfRange);
 
 		ObjectProperty identifier = om.createObjectProperty(ncl + "identifier");
 		identifier.addDomain(Resource);

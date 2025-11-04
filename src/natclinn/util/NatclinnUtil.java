@@ -355,6 +355,10 @@ public class NatclinnUtil {
                 ing.setType("Additif"); // Antioxydant
             } else if (name.contains("antiagglomérant")) {
                 ing.setType("Additif"); // Anti-agglomérant
+            } else if (name.contains("epaissaissant")) {
+                ing.setType("Additif"); // épaissisant    
+            } else if (name.contains("epaississant")) {
+                ing.setType("Additif"); // épaissisant    
             }
 
         if (pct != null) ing.setPercentage(pct);

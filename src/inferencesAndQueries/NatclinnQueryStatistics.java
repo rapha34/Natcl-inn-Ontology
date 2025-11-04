@@ -82,7 +82,7 @@ public class NatclinnQueryStatistics {
 		typeQuery = "SELECT";
 		stringQuery = prefix + "SELECT DISTINCT (?s AS ?Instance_ProduitIAA) WHERE { " +
 			"?s rdf:type ncl:Product. " +	
-			"?s ncl:isProductIAA 'true'^^xsd:Boolean." +
+			"?s ncl:isProductIAA 'true'^^xsd:boolean." +
 			"}";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
@@ -101,39 +101,64 @@ public class NatclinnQueryStatistics {
 			"}";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
-
-		titleQuery = "Test Résumé des fonctions dans un produit";
-		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT ?product (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
-			"WHERE { " +
-				"?product rdf:type ncl:Product . " +
-				"?product ncl:hasIngredient ?ingredient . " +
-			"} " +
-			"GROUP BY ?product ";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-
-		titleQuery = "Test 2 Résumé des fonctions dans un produit";
-		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT ?ingredient ?label " +
-			"WHERE { " +
-				"?ingredient rdf:type ncl:Ingredient . " +
-				"?ingredient skos:prefLabel ?label . " +
-			"} " ;
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-
-
 		titleQuery = "Résumé des fonctions dans un produit";
 		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT ?product (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
+		stringQuery = prefix + "SELECT ?targetProduct (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
 				"(GROUP_CONCAT(DISTINCT ?function; separator=\", \") AS ?functions) " +
 			"WHERE { " +
-				"?product rdf:type ncl:Product . " +
-				"?product ncl:hasIngredient ?ingredient . " +
-				"?ingredient ncl:hasFunction ?function . " +
+				"?targetProduct rdf:type ncl:Product . " +
+				"?targetProduct ncl:isProductIAA 'true'^^xsd:boolean." +
+				// Naviguer récursivement : Product -> hasIngredient|hasComposedOf -> Ingredient
+				"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
+				"    " +
+				// S'assurer que c'est bien un ingrédient et récupérer son label et sa fonction
+				"    ?ingredient a ncl:Ingredient ; " +
+				"                skos:prefLabel ?ingredientLabel ; " +
+				"                ncl:hasFunction ?function . " +
+				"    " +
+				// EXCLURE les CompositeIngredient
+        		"FILTER NOT EXISTS { ?ingredient a ncl:CompositeIngredient } " +
 			"} " +
-			"GROUP BY ?product ";
+			"GROUP BY ?targetProduct ";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
+		// titleQuery = "test";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix + "SELECT DISTINCT ?s  WHERE { " +
+		// 	"?s rdf:type ncl:ComposedIngredient . " +
+		// 	"}";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		
+		
+		titleQuery = "Tous les ingrédients avec leurs fonctions associées";
+		commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT DISTINCT ?ingredient ?ingredientLabel " +
+			"(GROUP_CONCAT(DISTINCT ?function; separator=\", \") AS ?functions) " +
+			"WHERE { " +
+			"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3564700423196> } " +
+			"    " +
+			// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
+			// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
+				"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
+			"    " +
+			// S'assurer que c'est bien un ingrédient et récupérer son label
+			"    ?ingredient a ncl:Ingredient ; " +
+			"                skos:prefLabel ?ingredientLabel . " +
+			"    " +
+			// Optionnel : récupérer les fonctions des ingrédients
+			"    OPTIONAL { ?ingredient ncl:hasFunction ?function } " +
+			"} " +
+			"GROUP BY ?ingredient ?ingredientLabel " +
+			"ORDER BY ?ingredient";
+			// System.out.println(stringQuery);
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+
+		
+
+		
+		
 		// titleQuery = "Périodes étudiées";
 		// typeQuery = "SELECT";
 		// stringQuery = prefix + "SELECT (?period AS ?Periode) (str(?year) AS ?AnneeDebut) (str(?nextYear) AS ?AnneeFin) WHERE { " + 
@@ -654,7 +679,7 @@ public class NatclinnQueryStatistics {
 		listPrimitives.add("GetOFFProperty");
 		listPrimitives.add("GetCiqualProperty");
 		listPrimitives.add("GetIngredientFunction");
-		topSpatial = "true";
+		topSpatial = "false";
 		
 		// Récupération du nom du fichier contenant la liste des ontologies à traiter.
 		Path pathOfTheListOntologies = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListOntologies);					
