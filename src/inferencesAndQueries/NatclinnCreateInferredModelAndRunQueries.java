@@ -73,9 +73,72 @@ public class NatclinnCreateInferredModelAndRunQueries {
 		
 	}
 	
+	/**
+	 * Version qui retourne le modèle inféré pour permettre des traitements ultérieurs.
+	 */
+	public static InfModel InferencesAndQueryWithModel() throws Exception {
+	    
+		ArrayList<NatclinnQueryOutputObject> listQueriesOutputs = new ArrayList<NatclinnQueryOutputObject>();
+		
+		// Initialisation de la configuration
+		new NatclinnConf(); 
+		
+		// Récupération du nom du fichier contenant la liste des ontologies à traiter.
+		Path pathOfTheListOntologies = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListOntologies);					
+		ArrayList<String> listOntologiesFileName = new ArrayList<String>();	
+		listOntologiesFileName = NatclinnUtil.makeListFileName(pathOfTheListOntologies.toString()); 
+
+		// Récupération du nom du fichier contenant la liste des règles à traiter.
+		Path pathOfTheListRules = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListRules);
+		ArrayList<String> listRulesFileName = new ArrayList<String>();	
+		listRulesFileName = NatclinnUtil.makeListFileName(pathOfTheListRules.toString());
+		
+		// Récupération du nom du fichier contenant la liste des primitives à traiter.
+		Path pathOfTheListPrimitives = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListPrimitives);					
+		ArrayList<String> listPrimitivesFileName = new ArrayList<String>();	
+		listPrimitivesFileName = NatclinnUtil.makeListFileName(pathOfTheListPrimitives .toString());
+		
+		// Récupération du nom du fichier contenant la liste des requêtes à traiter.
+		Path pathOfTheListQueries = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameListQueries);
+		ArrayList<String> listQueriesFileName = new ArrayList<String>();	
+		listQueriesFileName = NatclinnUtil.makeListFileName(pathOfTheListQueries.toString());
+		
+		// Récupération du nom du fichier pour les résultat.
+		Path pathOfTheFileResults = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameResultsQueries);
+		String fileNameResults = NatclinnUtil.makeFileName(pathOfTheFileResults.toString()); 
+		
+		// Récupération du nom du fichier contenant les paramètres.
+		Path pathOfTheParameters = Paths.get(NatclinnConf.mainFolderNatclinn, NatclinnConf.fileNameParameters);
+		String topSpatial = NatclinnUtil.extractParameter(pathOfTheParameters.toString(), "topSpatial"); 	
+		
+		// Création du model inféré
+		InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologiesFileName, listRulesFileName, listPrimitivesFileName, topSpatial);
+		// Execution des requêtes sur le modèle inféré
+		listQueriesOutputs = NatclinnQueryInferedModel.queryInferedModel(listQueriesFileName, infModel);
+	    
+		// Sauvegarde des résultats dans fichier JSON	
+		Path pathOfTheResultsFile = Paths.get(NatclinnConf.folderForResults, fileNameResults);
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.writeValue(new File(pathOfTheResultsFile.toString()), listQueriesOutputs);
+		
+		return infModel;
+	}
+	
 	public static void InferencesAndQuery(ArrayList<String> listOntologies, ArrayList<String> listRules, ArrayList<String> listPrimitives, String topSpatial, ArrayList<NatclinnQueryObject> listQueries) throws Exception {
 	    InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologies, listRules, listPrimitives, topSpatial);
 	    NatclinnQueryInferedModel.queryInferedModel(infModel, listQueries);
+	}
+	
+	/**
+	 * Exécute les inférences et requêtes, puis retourne le modèle inféré.
+	 * Cette surcharge permet de récupérer le modèle pour des traitements ultérieurs.
+	 * 
+	 * @return Le modèle inféré après exécution des requêtes
+	 */
+	public static InfModel InferencesAndQueryWithModel(ArrayList<String> listOntologies, ArrayList<String> listRules, ArrayList<String> listPrimitives, String topSpatial, ArrayList<NatclinnQueryObject> listQueries) throws Exception {
+	    InfModel infModel = NatclinnCreateInferedModel.createInferedModel(listOntologies, listRules, listPrimitives, topSpatial);
+	    NatclinnQueryInferedModel.queryInferedModel(infModel, listQueries);
+	    return infModel;
 	}
 
 }

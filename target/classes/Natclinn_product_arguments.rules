@@ -1,0 +1,235 @@
+@prefix ncl: <https://w3id.org/NCL/ontology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+-> tableAll().
+
+# =============================================
+# Natclinn Product-Argument Linking Rules
+# =============================================
+# This file contains Jena inference rules to automatically link products
+# to arguments based on ingredient functions, packaging properties, and labels.
+
+# ---------------------------------------------
+# Helper: Recursive gathering of all ingredients
+# ---------------------------------------------
+# hasIngredientR collects all ingredients reachable from a product
+# by following hasIngredient and/or hasComposedOf across nested products.
+
+[hasIngredientR_direct:
+    (?p ncl:hasIngredient ?i)
+    ->
+    (?p ncl:hasIngredientR ?i)
+]
+
+[hasIngredientR_viaComposed_1:
+    (?p ncl:hasComposedOf ?c)
+    (?c ncl:hasIngredient ?i)
+    ->
+    (?p ncl:hasIngredientR ?i)
+]
+
+[hasIngredientR_viaComposed_2:
+    (?p ncl:hasComposedOf ?c)
+    (?c ncl:hasIngredientR ?i)
+    ->
+    (?p ncl:hasIngredientR ?i)
+]
+
+[hasIngredientR_chainIngredient:
+    (?p ncl:hasIngredientR ?x)
+    (?x ncl:hasComposedOf ?y)
+    (?y ncl:hasIngredient ?i)
+    ->
+    (?p ncl:hasIngredientR ?i)
+]
+
+# ---------------------------------------------
+# Link arguments based on ingredient FUNCTIONS
+# ---------------------------------------------
+# Match by argument nameProperty == function label (with skos:prefLabel)
+[linkArgByFunction_nameProperty_skos:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasIngredientR ?ing)
+    (?ing ncl:hasFunction ?func)
+    (?func skos:prefLabel ?funcLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:nameProperty ?funcLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Match by argument nameProperty == function label (with rdfs:label)
+[linkArgByFunction_nameProperty_rdfs:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasIngredientR ?ing)
+    (?ing ncl:hasFunction ?func)
+    (?func rdfs:label ?funcLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:nameProperty ?funcLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Match by ContextIngredient keywords (skos:prefLabel)
+[linkArgByFunction_contextKeyword_skos:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasIngredientR ?ing)
+    (?ing ncl:hasFunction ?func)
+    (?func skos:prefLabel ?funcLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextIngredient ?ctxIng)
+    (?ctxIng ncl:hasVerbatimKeyWord ?funcLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Match by ContextIngredient keywords (rdfs:label)
+[linkArgByFunction_contextKeyword_rdfs:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasIngredientR ?ing)
+    (?ing ncl:hasFunction ?func)
+    (?func rdfs:label ?funcLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextIngredient ?ctxIng)
+    (?ctxIng ncl:hasVerbatimKeyWord ?funcLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Match ingredient label in context
+[linkArgByIngredientLabel_contextKeyword:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasIngredientR ?ing)
+    (?ing skos:prefLabel ?ingLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextIngredient ?ctxIng)
+    (?ctxIng ncl:hasVerbatimKeyWord ?ingLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# ---------------------------------------------
+# Link arguments based on PACKAGING properties
+# ---------------------------------------------
+# Material keyword in ContextProduct
+[linkArgByPackaging_material_contextKeyword:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasPackaging ?pkg)
+    (?pkg ncl:hasMaterial ?mat)
+    (?mat skos:prefLabel ?matLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextProduct ?ctxProd)
+    (?ctxProd ncl:hasVerbatimKeyWord ?matLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Shape keyword in ContextProduct
+[linkArgByPackaging_shape_contextKeyword:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasPackaging ?pkg)
+    (?pkg ncl:hasShape ?sh)
+    (?sh skos:prefLabel ?shapeLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextProduct ?ctxProd)
+    (?ctxProd ncl:hasVerbatimKeyWord ?shapeLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Direct mapping via nameProperty == material label
+[linkArgByPackaging_material_nameProperty:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasPackaging ?pkg)
+    (?pkg ncl:hasMaterial ?mat)
+    (?mat skos:prefLabel ?matLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:nameProperty ?matLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Direct mapping via nameProperty == shape label
+[linkArgByPackaging_shape_nameProperty:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasPackaging ?pkg)
+    (?pkg ncl:hasShape ?sh)
+    (?sh skos:prefLabel ?shapeLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:nameProperty ?shapeLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# ---------------------------------------------
+# Link arguments based on LABELS & CERTIFICATIONS
+# ---------------------------------------------
+# Controlled origin labels: match against ContextProduct labelsAndCertifications
+[linkArgByControlledOriginLabel:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasControlledOriginLabel ?lbl)
+    (?lbl skos:prefLabel ?l)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextProduct ?ctxProd)
+    (?ctxProd ncl:hasLabelsAndCertifications ?l)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# CleanLabel: match against ContextProduct keyword
+[linkArgByCleanLabel_keyword:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasCleanLabel ?cl)
+    (?cl skos:prefLabel ?clLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextProduct ?ctxProd)
+    (?ctxProd ncl:hasVerbatimKeyWord ?clLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# CleanLabel: match against labels list
+[linkArgByCleanLabel_labels:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasCleanLabel ?cl)
+    (?cl skos:prefLabel ?clLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextProduct ?ctxProd)
+    (?ctxProd ncl:hasLabelsAndCertifications ?clLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Manufacturing process: match against ContextProduct keyword
+[linkArgByManufacturingProcess_keyword:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasManufacturingProcess ?mp)
+    (?mp skos:prefLabel ?mpLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextProduct ?ctxProd)
+    (?ctxProd ncl:hasVerbatimKeyWord ?mpLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]
+
+# Manufacturing process: match via nameProperty
+[linkArgByManufacturingProcess_nameProperty:
+    (?p rdf:type ncl:Product)
+    (?p ncl:hasManufacturingProcess ?mp)
+    (?mp skos:prefLabel ?mpLabel)
+    (?arg rdf:type ncl:Argument)
+    (?arg ncl:nameProperty ?mpLabel)
+    ->
+    (?p ncl:hasArgument ?arg)
+]

@@ -7,11 +7,14 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.jena.rdf.model.InfModel;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import natclinn.util.NatclinnConf;
 import natclinn.util.NatclinnQueryObject;
 import natclinn.util.NatclinnUtil;
+import ontologyManagement.CreateMychoiceProjectFromProducts;
 
 public class NatclinnQueryStatistics {
 
@@ -130,7 +133,7 @@ public class NatclinnQueryStatistics {
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		
 		
-		titleQuery = "Tous les ingrédients avec leurs fonctions associées";
+		titleQuery = "Tous les ingrédients avec leurs fonctions associées pour un produit donné P-3564700423196";
 		commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
 		typeQuery = "SELECT";
 		stringQuery = prefix + 
@@ -155,7 +158,19 @@ public class NatclinnQueryStatistics {
 			// System.out.println(stringQuery);
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
-		
+		titleQuery = "Produits liés à des arguments par inférence";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product (COUNT(?arg) AS ?nbArguments) " +
+			"(GROUP_CONCAT(DISTINCT ?argLabel; separator=\", \") AS ?arguments) " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasArgument ?arg . " +
+			"  ?arg skos:prefLabel ?argLabel . " +
+			"} " +
+			"GROUP BY ?product " +
+			"ORDER BY DESC(?nbArguments)";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
 		
 		
@@ -675,6 +690,8 @@ public class NatclinnQueryStatistics {
 		listRulesFileName.add("Natclinn.rules");
 		listRulesFileName.add("Natclinn_1.rules");
 		listRulesFileName.add("Natclinn_additives.rules");
+		// Nouveau fichier de règles pour relier automatiquement produits et arguments
+		listRulesFileName.add("natclinn_product_arguments.rules");
 		listPrimitives.add("CalcNumberOfTriples");
 		listPrimitives.add("GetOFFProperty");
 		listPrimitives.add("GetCiqualProperty");
@@ -687,9 +704,12 @@ public class NatclinnQueryStatistics {
 		listOntologiesFileName = new ArrayList<String>();	
 		listOntologiesFileName = NatclinnUtil.makeListFileName(pathOfTheListOntologies.toString()); 
 
-		NatclinnCreateInferredModelAndRunQueries.InferencesAndQuery(listOntologiesFileName, listRulesFileName, listPrimitives, topSpatial, listQuery);
+		InfModel infModel = NatclinnCreateInferredModelAndRunQueries.InferencesAndQueryWithModel(listOntologiesFileName, listRulesFileName, listPrimitives, topSpatial, listQuery);
 		
 		Instant end0 = Instant.now();
 		System.out.println("Total running time : " + Duration.between(start0, end0).getSeconds() + " secondes");
+		
+		// Création des projets MyChoice à partir du modèle inféré
+		CreateMychoiceProjectFromProducts.createFromInferredModel(infModel);
 	}  
 }

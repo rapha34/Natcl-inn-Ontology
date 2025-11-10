@@ -3,6 +3,10 @@ package inferencesAndQueries;
 import java.time.Duration;
 import java.time.Instant;
 
+import org.apache.jena.rdf.model.InfModel;
+
+import ontologyManagement.CreateMychoiceProjectFromProducts;
+
 public class NatclinnStartQueries {
 
 	// Lancement initial pour création modèle inferé et traitement des requêtes
@@ -13,9 +17,16 @@ public class NatclinnStartQueries {
 
 		Instant start0 = Instant.now();
 		
-		NatclinnCreateInferredModelAndRunQueries.InferencesAndQuery();
+		// Création du modèle inféré et exécution des requêtes
+		// Retourne le modèle pour permettre la création des projets MyChoice
+		InfModel infModel = NatclinnCreateInferredModelAndRunQueries.InferencesAndQueryWithModel();
 		
 		Instant end0 = Instant.now();
 		System.out.println("Total running time : " + Duration.between(start0, end0).getSeconds() + " secondes");
-	}  
+		
+		// Création des projets MyChoice à partir du modèle inféré
+		if (infModel != null) {
+			CreateMychoiceProjectFromProducts.createFromInferredModel(infModel);
+		}
+	}
 }
