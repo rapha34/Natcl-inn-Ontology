@@ -251,6 +251,13 @@ public class CreateMychoiceTbox {
         hasAlternative.addDomain(Argument);
         hasAlternative.addRange(Alternative);
         
+        // hasProject
+        ObjectProperty hasProject = om.createObjectProperty(mch + "hasProject");
+        hasProject.addLabel("a pour projet", "fr");
+        hasProject.addLabel("has project", "en");
+        hasProject.addDomain(Alternative);
+        hasProject.addRange(Project);
+
         // hasProperty
         ObjectProperty hasProperty = om.createObjectProperty(mch + "hasProperty");
         hasProperty.addLabel("a pour propriété", "fr");
@@ -283,7 +290,7 @@ public class CreateMychoiceTbox {
         ObjectProperty belongsToProject = om.createObjectProperty(mch + "belongsToProject");
         belongsToProject.addLabel("appartient au projet", "fr");
         belongsToProject.addLabel("belongs to project", "en");
-        belongsToProject.addDomain(Alternative);
+        belongsToProject.addDomain(Argument);
         belongsToProject.addRange(Project);
         
         // hasCriterion
@@ -359,11 +366,11 @@ public class CreateMychoiceTbox {
         aimDescription.addRange(XSD.xstring);
         
         // Propriétés pour Alternative
-        DatatypeProperty alternativeName = om.createDatatypeProperty(mch + "alternativeName");
-        alternativeName.addLabel("nom de l'alternative", "fr");
-        alternativeName.addLabel("alternative name", "en");
-        alternativeName.addDomain(Alternative);
-        alternativeName.addRange(XSD.xstring);
+        DatatypeProperty nameAlternative = om.createDatatypeProperty(mch + "nameAlternative");
+        nameAlternative.addLabel("nom de l'alternative", "fr");
+        nameAlternative.addLabel("alternative name", "en");     
+        nameAlternative.addDomain(Alternative);
+        nameAlternative.addRange(XSD.xstring);
         
         DatatypeProperty alternativeDescription = om.createDatatypeProperty(mch + "alternativeDescription");
         alternativeDescription.addLabel("description de l'alternative", "fr");

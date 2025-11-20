@@ -6,19 +6,28 @@ import java.util.ArrayList;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.jena.rdf.model.InfModel;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import natclinn.util.NatclinnConf;
 import natclinn.util.NatclinnQueryObject;
 import natclinn.util.NatclinnUtil;
-import ontologyManagement.CreateMychoiceProjectFromProducts;
+import ontologyManagement.CreateMychoiceProjectFromPreliminaryProject;
 
 public class NatclinnQueryStatistics {
 
 	public static void main(String[] args) throws Exception {
+		// Forcer l'encodage UTF-8 pour la console afin d'éviter les problèmes d'accents
+		try {
+			System.setProperty("file.encoding", "UTF-8");
+			System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+			System.setErr(new PrintStream(System.err, true, StandardCharsets.UTF_8));
+		} catch (Exception e) {
+			// Ignorer silencieusement si non supporté
+		}
 
 		// ============================================================
         // Vérification / définition de la propriété SIS_DATA
@@ -29,7 +38,6 @@ public class NatclinnQueryStatistics {
 		new NatclinnConf();
 
 
-		String UserLanguage = NatclinnConf.preferredLanguage;
 		String prefix = NatclinnConf.queryPrefix;
 		String titleQuery = "";
 		String commentQuery = "";
@@ -53,63 +61,286 @@ public class NatclinnQueryStatistics {
 		listQuery.clear();
 		titleQuery = "Insertion du namespace de l'ontologie dans le modèle";
 		typeQuery = "INSERT";
+	// Insertion dans le modèle du nameSpace de l'ontologie (pour les rules)
+	stringQuery = prefix + "INSERT DATA {ncl:thisOntology ncl:hasNameSpace ncl:.}";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;		// /////////////////////////////////////////////////////
+		// // TEST : Liens produits-arguments au hasard      //
+		// /////////////////////////////////////////////////////
+		// titleQuery = "TEST - Liens produits-arguments aléatoires";
+		// commentQuery = "Crée des liens ncl:hasProductArgument arbitraires pour tester l'export";
+		// typeQuery = "INSERT";
+		// stringQuery = prefix + 
+		// 	"INSERT DATA { " +
+		// 	// Produit P-3564700423196 -> Arguments naturalité/additifs
+		// 	"  ncl:P-3564700423196 ncl:hasProductArgument ncl:A-0000008 . " +  // Conservateurs naturels
+		// 	"  ncl:P-3564700423196 ncl:hasProductArgument ncl:A-0000007 . " +  // Colorants naturels
+		// 	"  ncl:P-3564700423196 ncl:hasProductArgument ncl:A-0000023 . " +  // Transformation minimale
+		// 	// Produit P-3250392814908 -> Arguments bio/clean label
+		// 	"  ncl:P-3250392814908 ncl:hasProductArgument ncl:A-0000045 . " +  // Certification biologique
+		// 	"  ncl:P-3250392814908 ncl:hasProductArgument ncl:A-0000011 . " +  // Absence d'additifs
+		// 	"  ncl:P-3250392814908 ncl:hasProductArgument ncl:A-0000043 . " +  // Allégations naturel
+		// 	// Produit P-3302740044786 -> Arguments texture/fraîcheur
+		// 	"  ncl:P-3302740044786 ncl:hasProductArgument ncl:A-0000041 . " +  // Texture de qualité
+		// 	"  ncl:P-3302740044786 ncl:hasProductArgument ncl:A-0000039 . " +  // Fraîcheur perçue
+		// 	"  ncl:P-3302740044786 ncl:hasProductArgument ncl:A-0000040 . " +  // Goût authentique
+		// 	// Produit P-3564709163871 -> Arguments production
+		// 	"  ncl:P-3564709163871 ncl:hasProductArgument ncl:A-0000032 . " +  // Production artisanale
+		// 	"  ncl:P-3564709163871 ncl:hasProductArgument ncl:A-0000033 . " +  // Production locale
+		// 	// Produit P-3178530410105 -> Arguments ingrédients
+		// 	"  ncl:P-3178530410105 ncl:hasProductArgument ncl:A-0000009 . " +  // Ingrédients bruts
+		// 	"  ncl:P-3178530410105 ncl:hasProductArgument ncl:A-0000021 . " +  // Longueur liste ingrédients
+		// 	"  ncl:P-3178530410105 ncl:hasProductArgument ncl:A-0000014 . " +  // Absence de conservateurs
+		// 	// Produit P-3245412343810 -> Arguments qualité/origine
+		// 	"  ncl:P-3245412343810 ncl:hasProductArgument ncl:A-0000047 . " +  // Qualité nutritionnelle
+		// 	"  ncl:P-3245412343810 ncl:hasProductArgument ncl:A-0000048 . " +  // Origine géographique
+		// 	"  ncl:P-3245412343810 ncl:hasProductArgument ncl:A-0000002 . " +  // Naturalité perçue
+		// 	"}";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
-		// Insertion dans le modèle du nameSpace de l'ontologie (pour les rules)
-		stringQuery = prefix + "INSERT DATA {ncl:thisOntology ncl:hasNameSpace ncl:.}";
+		/////////////////////////////////////////////////////
+		// Pré-création du projet MyChoice                //
+		/////////////////////////////////////////////////////
+		titleQuery = "Création du projet MyChoice Moussakas";
+		commentQuery = "Toutes les propriétés du projet peuvent être personnalisées ici";
+		typeQuery = "INSERT";
+		stringQuery = prefix + 
+			"INSERT DATA { " +
+			"  mch:Project-Moussakas rdf:type mch:Project . " +
+			// Propriétés obligatoires
+			"  mch:Project-Moussakas mch:projectName \"Projet moussakas\"@fr . " +
+			"  mch:Project-Moussakas mch:projectDescription \"Projet généré automatiquement à partir des produits et arguments inférés\"@fr . " +
+			// Propriété optionnelle : image du projet (par défaut si non spécifiée)
+			"  mch:Project-Moussakas mch:projectImage \"https://cdn.pixabay.com/photo/2022/01/18/16/30/vegetables-6947444_960_720.jpg\" . " +
+			// Vous pouvez ajouter d'autres propriétés ici selon vos besoins
+			"}";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
 
+		titleQuery = "Création des alternatives du projet Moussakas";
+		commentQuery = "Chaque produit de la liste devient une alternative du projet MyChoice";
+		typeQuery = "INSERT";
+		stringQuery = prefix + 
+			"INSERT { " +
+			"  ?alternative rdf:type mch:Alternative . " +
+			"  ?alternative mch:nameAlternative ?productName . " +
+			"  ?alternative mch:alternativeDescription ?productDescription . " +
+			"  ?alternative mch:imageAlternative ?imageAlternative . " +
+			"  ?alternative mch:iconAlternative ?iconAlternative . " +
+			"  ?alternative mch:relatedToProduct ?product . " +
+			"  ?alternative mch:hasProject mch:Project-Moussakas . " + // Alternative -> Project
+			"} WHERE { " +
+			"  VALUES (?ean13 ?imageAlt ?iconAlt) { " +
+			"    (\"3564700423196\" \"https://images.openfoodfacts.org/images/products/356/470/042/3196/front_fr.30.400.jpg\" \"numeric-1\") " +       
+			"    (\"3250392814908\" \"https://images.openfoodfacts.org/images/products/325/039/281/4908/front_fr.3.400.jpg\" \"numeric-2\") " +        
+			"    (\"3302740044786\" \"https://images.openfoodfacts.org/images/products/330/274/004/4786/front_fr.1123.400.jpg\" \"numeric-3\") " +       
+			// Ajoutez ici d'autres codes EAN13 avec leurs images et icônes
+			// Format: (\"EAN13\" \"URL_IMAGE\" \"ICON\")
+			"  } " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasEAN13 ?ean13 . " +
+			"  ?product skos:prefLabel ?productName . " +
+			"  OPTIONAL { ?product ncl:description ?productDescription } " +
+			"  BIND(?imageAlt AS ?imageAlternative) " +
+			"  BIND(?iconAlt AS ?iconAlternative) " +
+		"  BIND(IRI(CONCAT(STR(mch:), \"Alternative-P-\", STR(?ean13))) AS ?alternative) " + // STR() assure compatibilité si ?ean13 est typé
+		"}";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+
+	/////////////////////////////////////////////////////
+	// Pré-création d'un 2ème projet MyChoice         //
+		/////////////////////////////////////////////////////
+		titleQuery = "Création du projet Mychoice Madeleines";
+		commentQuery = "Comparaison de Madeleines";
+		typeQuery = "INSERT";
+		stringQuery = prefix + 
+			"INSERT DATA { " +
+			"  mch:Project-Madeleines rdf:type mch:Project . " +
+			"  mch:Project-Madeleines mch:projectName \"Project madeleines\"@fr . " +
+			"  mch:Project-Madeleines mch:projectDescription \"Comparaison nutritionnelle de madeleines\"@fr . " +
+		"  mch:Project-Madeleines mch:projectImage \"https://cdn.pixabay.com/photo/2022/01/18/16/30/vegetables-6947444_960_720.jpg\" . " +
+		"}";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+
+	titleQuery = "Création des alternatives du projet Madeleines";
+		typeQuery = "INSERT";
+		stringQuery = prefix + 
+			"INSERT { " +
+			"  ?alternative rdf:type mch:Alternative . " +
+			"  ?alternative mch:nameAlternative ?productName . " +
+			"  ?alternative mch:alternativeDescription ?productDescription . " +
+			"  ?alternative mch:imageAlternative ?imageAlternative . " +
+			"  ?alternative mch:iconAlternative ?iconAlternative . " +
+			"  ?alternative mch:relatedToProduct ?product . " +
+			"  ?alternative mch:hasProject mch:Project-Madeleines . " + // Alternative -> Project
+			"} WHERE { " +
+			"  VALUES (?ean13 ?imageAlt ?iconAlt) { " +
+			"    (\"3564709163871\" \"\" \"\") " +
+			"    (\"3178530410105\" \"\" \"\") " +
+			"    (\"3245412343810\" \"\" \"\") " +
+			"  } " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasEAN13 ?ean13 . " +
+			"  ?product skos:prefLabel ?productName . " +
+			"  OPTIONAL { ?product ncl:description ?productDescription } " +
+			"  BIND(?imageAlt AS ?imageAlternative) " +
+			"  BIND(?iconAlt AS ?iconAlternative) " +
+		"  BIND(IRI(CONCAT(STR(mch:), \"Alternative-P-\", STR(?ean13))) AS ?alternative) " + // Harmonisation avec Moussakas : STR() pour types littéraux
+		"}";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+
+
+	// // Vérifications pour le projet Moussakas
+		// 		titleQuery = "Vérif: produits Moussakas par codes EAN13";
+		// 		commentQuery = "Confirme l'existence des produits ciblés (ncl:hasEAN13)";
+		// 		typeQuery = "SELECT";
+		// 		stringQuery = prefix +
+		// 			"SELECT ?product ?productName WHERE { " +
+		// 			"  VALUES ?ean13 { \"3564700423196\" \"3250392814908\" \"3302740044786\" } " +
+		// 			"  ?product rdf:type ncl:Product . " +
+		// 			"  ?product ncl:hasEAN13 ?ean13 . " +
+		// 			"  ?product skos:prefLabel ?productName . " +
+		// 			"}";
+		// 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+
+		// 		titleQuery = "Vérif: alternatives du projet Moussakas";
+		// 		commentQuery = "Liste des alternatives créées et leur produit lié";
+		// 		typeQuery = "SELECT";
+		// 		stringQuery = prefix +
+		// 			"SELECT ?alt ?prod WHERE { " +
+		// 			"  ?alt mch:hasProject mch:Project-Moussakas . " +
+		// 			"  ?alt mch:relatedToProduct ?prod . " +
+		// 			"}";
+		// 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+
+
+
+		// // Vérifications pour le projet Madeleines
+		// titleQuery = "Vérif: produits Madeleines par codes EAN13";
+		// commentQuery = "Confirme l'existence des produits ciblés (ncl:hasEAN13)";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix +
+		// 	"SELECT ?product ?productName WHERE { " +
+		// 	"  VALUES ?ean13 { \"3564709163871\" \"3178530410105\" \"3245412343810\" } " +
+		// 	"  ?product rdf:type ncl:Product . " +
+		// 	"  ?product ncl:hasEAN13 ?ean13 . " +
+		// 	"  ?product skos:prefLabel ?productName . " +
+		// 	"}";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+
+		titleQuery = "Vérif: alternatives du projet Madeleines";
+		commentQuery = "Liste des alternatives créées et leur produit lié";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT (?alt AS ?Alternative) (?prodName AS ?Produit) (?prodEAN AS ?EAN_Produit) WHERE { " +
+			"  ?alt mch:hasProject mch:Project-Madeleines . " +
+			"  ?alt mch:relatedToProduct ?prod . " +
+			"  ?prod skos:prefLabel ?prodName . " +
+		"  ?prod ncl:hasEAN13 ?prodEAN . " +	
+		"}";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+
+	titleQuery = "Vérif: alternatives du projet Moussakas";
+		commentQuery = "Liste des alternatives créées et leur produit lié";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT (?alt AS ?Alternative) (?prodName AS ?Produit) (?prodEAN AS ?EAN_Produit) WHERE { " +
+			"  ?alt mch:hasProject mch:Project-Moussakas . " +
+			"  ?alt mch:relatedToProduct ?prod . " +
+			"  ?prod skos:prefLabel ?prodName . " +
+			"  ?prod ncl:hasEAN13 ?prodEAN . " +	
+			"}";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		
-		/////////////////////////////
+		 /////////////////////////////
 		// Affichage des résultats //
 		/////////////////////////////
 
-		titleQuery = "NATCLINN - STATISTIQUES GLOBALES";
-		typeQuery = "";
-		stringQuery = "";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	titleQuery = "NATCLINN - STATISTIQUES GLOBALES";
+	typeQuery = "";
+	stringQuery = "";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
 
-		titleQuery = "Taille du_modèle après inférences (en triplets)";
-		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT (COUNT(*) AS ?Nombre_De_Triplets) WHERE { ?s ?p ?o. }";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	titleQuery = "Taille du_modèle après inférences (en triplets)";
+	typeQuery = "SELECT";
+	stringQuery = prefix + "SELECT (COUNT(*) AS ?Nombre_De_Triplets) WHERE { ?s ?p ?o. }";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
 
-		titleQuery = "Instances de la classe Product ";
+	titleQuery = "Instances de la classe Product ";
 		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT DISTINCT (?s AS ?Instance_Produit) WHERE { " +
+		stringQuery = prefix + "SELECT DISTINCT (?s AS ?Instance_Produit) (?prodName AS ?Nom_Produit) WHERE { " +
 			"?s ?p ?o." +
 			"?s rdf:type ncl:Product." +
-			"}";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		"?s skos:prefLabel ?prodName . " +
+		"}";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
 
-		titleQuery = "Instances avec le flag isProductIAA à true ";
+	titleQuery = "Instances avec le flag isProductIAA à true ";
 		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT DISTINCT (?s AS ?Instance_ProduitIAA) WHERE { " +
+		stringQuery = prefix + "SELECT DISTINCT (?s AS ?Instance_ProduitIAA) (?prodName AS ?Nom_Produit) WHERE { " +
 			"?s rdf:type ncl:Product. " +	
 			"?s ncl:isProductIAA 'true'^^xsd:boolean." +
-			"}";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-
-		titleQuery = "Instances de la classe ProductIAA ";
-		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT DISTINCT (?product AS ?Instance_ProduitIAA) WHERE { " +
-		"?product rdf:type ncl:Product. " +
-		"FILTER NOT EXISTS { ?otherProduct ncl:hasComposedOf ?product } " +
+		"?s skos:prefLabel ?prodName . " +
 		"}";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+
+	titleQuery = "Tous les ingrédients avec leurs fonctions associées pour un produit donné P-3564700423196";
+	commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
+	typeQuery = "SELECT";
+	stringQuery = prefix + 
+		"SELECT DISTINCT ?ingredientLabel " +
+		"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
+		"WHERE { " +
+		"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3564700423196> } " +
+		"    " +
+		// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
+		// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
+			"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
+		"    " +
+		// S'assurer que c'est bien un ingrédient et récupérer son label
+		"    ?ingredient a ncl:Ingredient ; " +
+		"                skos:prefLabel ?ingredientLabel . " +
+		"    " +
+		// Optionnel : récupérer les fonctions des ingrédients
+		"    OPTIONAL { ?ingredient ncl:hasFunction ?function . ?function skos:prefLabel ?functionLabel . } " +
+		"} " +
+		"GROUP BY ?ingredient ?ingredientLabel " +
+		"ORDER BY ?ingredient";
+		// System.out.println(stringQuery);
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+	
+	
+	// titleQuery = "Instances de la classe ProductIAA ";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix + "SELECT DISTINCT (?product AS ?Instance_ProduitIAA) WHERE { " +
+		// "?product rdf:type ncl:Product. " +
+		// "FILTER NOT EXISTS { ?otherProduct ncl:hasComposedOf ?product } " +
+		// "}";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		
-		titleQuery = "Nombre de triplets (calcNumberOfTriples) ";
-		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT (?o AS ?numberOfTriples) WHERE { " +
-			"?s ncl:numberOfTriples ?o." +
-			"}";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		// titleQuery = "Nombre de triplets (calcNumberOfTriples) ";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix + "SELECT (?o AS ?numberOfTriples) WHERE { " +
+		// 	"?s ncl:numberOfTriples ?o." +
+		// 	"}";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
 		titleQuery = "Résumé des fonctions dans un produit";
 		typeQuery = "SELECT";
-		stringQuery = prefix + "SELECT ?targetProduct (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
-				"(GROUP_CONCAT(DISTINCT ?function; separator=\", \") AS ?functions) " +
+		stringQuery = prefix + "SELECT (?targetName AS ?Nom_Produit) (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
+				"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
 			"WHERE { " +
 				"?targetProduct rdf:type ncl:Product . " +
+				"?targetProduct skos:prefLabel ?targetName . " +
 				"?targetProduct ncl:isProductIAA 'true'^^xsd:boolean." +
 				// Naviguer récursivement : Product -> hasIngredient|hasComposedOf -> Ingredient
 				"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
@@ -118,12 +349,44 @@ public class NatclinnQueryStatistics {
 				"    ?ingredient a ncl:Ingredient ; " +
 				"                skos:prefLabel ?ingredientLabel ; " +
 				"                ncl:hasFunction ?function . " +
+				"    ?function   skos:prefLabel ?functionLabel . " +
 				"    " +
 				// EXCLURE les CompositeIngredient
         		"FILTER NOT EXISTS { ?ingredient a ncl:CompositeIngredient } " +
 			"} " +
-			"GROUP BY ?targetProduct ";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		"GROUP BY ?targetName " ;
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+
+	titleQuery = "Arguments disponibles (ncl:ProductArgument avec nameProperty)";
+	commentQuery = "Liste tous les arguments qui peuvent être liés aux fonctions";
+	typeQuery = "SELECT";
+	stringQuery = prefix + "SELECT ?argument ?nameProperty WHERE { " +
+		"?argument rdf:type ncl:ProductArgument . " +
+		"?argument ncl:nameProperty ?nameProperty . " +
+		"} ORDER BY ?nameProperty";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;		
+	
+	
+		// titleQuery = "Fonctions des additifs avec leurs labels";
+		// commentQuery = "Vérifie comment les fonctions sont étiquetées (skos:prefLabel, rdfs:label)";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix + "SELECT DISTINCT ?function ?labelSkos ?labelRdfs WHERE { " +
+		// 	"?ingredient ncl:hasFunction ?function . " +
+		// 	"OPTIONAL { ?function skos:prefLabel ?labelSkos } " +
+		// 	"OPTIONAL { ?function rdfs:label ?labelRdfs } " +
+		// 	"} ORDER BY ?function";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+
+		// titleQuery = "Propriétés des fonctions (toutes)";
+		// commentQuery = "Montre toutes les propriétés des fonctions pour comprendre leur structure";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix + "SELECT DISTINCT ?function ?property ?value WHERE { " +
+		// 	"?ingredient ncl:hasFunction ?function . " +
+		// 	"?function ?property ?value . " +
+		// 	"} ORDER BY ?function ?property";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
 		// titleQuery = "test";
 		// typeQuery = "SELECT";
@@ -132,45 +395,33 @@ public class NatclinnQueryStatistics {
 		// 	"}";
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		
-		
-		titleQuery = "Tous les ingrédients avec leurs fonctions associées pour un produit donné P-3564700423196";
-		commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
-		typeQuery = "SELECT";
-		stringQuery = prefix + 
-			"SELECT DISTINCT ?ingredient ?ingredientLabel " +
-			"(GROUP_CONCAT(DISTINCT ?function; separator=\", \") AS ?functions) " +
-			"WHERE { " +
-			"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3564700423196> } " +
-			"    " +
-			// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
-			// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
-				"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
-			"    " +
-			// S'assurer que c'est bien un ingrédient et récupérer son label
-			"    ?ingredient a ncl:Ingredient ; " +
-			"                skos:prefLabel ?ingredientLabel . " +
-			"    " +
-			// Optionnel : récupérer les fonctions des ingrédients
-			"    OPTIONAL { ?ingredient ncl:hasFunction ?function } " +
-			"} " +
-			"GROUP BY ?ingredient ?ingredientLabel " +
-			"ORDER BY ?ingredient";
-			// System.out.println(stringQuery);
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
+		
+		// titleQuery = "Test arguments";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix + 
+		// 	"SELECT ?arg " +
+		// 	"WHERE { " +
+		// 	"  ?product ncl:hasProductArgument ?arg . " +
+		// 	"} " ;
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		
 		titleQuery = "Produits liés à des arguments par inférence";
 		typeQuery = "SELECT";
 		stringQuery = prefix + 
-			"SELECT ?product (COUNT(?arg) AS ?nbArguments) " +
-			"(GROUP_CONCAT(DISTINCT ?argLabel; separator=\", \") AS ?arguments) " +
+			"SELECT (?nameProduct AS ?Nom_Produit) (COUNT(?arg) AS ?nbArguments) " +
+			"(GROUP_CONCAT(DISTINCT ?argNameProperty; separator=\", \") AS ?arguments) " +
 			"WHERE { " +
 			"  ?product rdf:type ncl:Product . " +
-			"  ?product ncl:hasArgument ?arg . " +
+			"  ?product skos:prefLabel ?nameProduct . " +
+			"  ?product ncl:hasProductArgument ?arg . " +
 			"  ?arg skos:prefLabel ?argLabel . " +
+			"  ?arg ncl:nameProperty ?argNameProperty . " +
 			"} " +
-			"GROUP BY ?product " +
+			"GROUP BY ?product ?nameProduct " +
 			"ORDER BY DESC(?nbArguments)";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
 
 		
 		
@@ -691,11 +942,12 @@ public class NatclinnQueryStatistics {
 		listRulesFileName.add("Natclinn_1.rules");
 		listRulesFileName.add("Natclinn_additives.rules");
 		// Nouveau fichier de règles pour relier automatiquement produits et arguments
-		listRulesFileName.add("natclinn_product_arguments.rules");
+		listRulesFileName.add("Natclinn_product_arguments.rules");
 		listPrimitives.add("CalcNumberOfTriples");
 		listPrimitives.add("GetOFFProperty");
 		listPrimitives.add("GetCiqualProperty");
 		listPrimitives.add("GetIngredientFunction");
+		listPrimitives.add("CompareFunctionProperty");
 		topSpatial = "false";
 		
 		// Récupération du nom du fichier contenant la liste des ontologies à traiter.
@@ -710,6 +962,6 @@ public class NatclinnQueryStatistics {
 		System.out.println("Total running time : " + Duration.between(start0, end0).getSeconds() + " secondes");
 		
 		// Création des projets MyChoice à partir du modèle inféré
-		CreateMychoiceProjectFromProducts.createFromInferredModel(infModel);
+		CreateMychoiceProjectFromPreliminaryProject.createFromInferredModel(infModel);
 	}  
 }

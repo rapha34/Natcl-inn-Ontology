@@ -1816,7 +1816,7 @@
     <rdfs:comment xml:lang="en">Ciqual code for a similar food industry product.</rdfs:comment>
     <rdfs:comment xml:lang="fr">Code Ciqual d'un produit similaire de l'industrie agroalimentaire.</rdfs:comment>
   </owl:DatatypeProperty>
-  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/alternativeName">
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/nameAlternative">
     <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
     <rdfs:label xml:lang="fr">nom de l'alternative</rdfs:label>
     <rdfs:label xml:lang="en">alternative name</rdfs:label>

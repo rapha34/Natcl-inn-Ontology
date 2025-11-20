@@ -28,7 +28,10 @@ public class OpenFoodFactsToExcelExporter {
         // 3302740044786 La Moussaka Boeuf & Aubergines avec une touche de menthe douce
         // – Fleury Michon – 300 g
         // extractOFFToExcel("code", "3270160865826");
-        extractOFFToExcel("code", "3250392814908");
+        // 3564709163871 Madeleine coquilles au sel de Guérande – Nos régions ont du talent – 330 g (10 x 33 g)
+        // 3178530410105 Petites Madeleines – St Michel – 500 g
+        // 3245412343810 Madeleines Moelleuses – Carrefour – 500 g
+        extractOFFToExcel("code", "3245412343810");
     }
 
     public static void extractOFFToExcel(String searchProperty, String searchPropertyString) throws Exception {

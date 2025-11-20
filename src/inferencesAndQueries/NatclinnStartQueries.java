@@ -5,7 +5,7 @@ import java.time.Instant;
 
 import org.apache.jena.rdf.model.InfModel;
 
-import ontologyManagement.CreateMychoiceProjectFromProducts;
+import ontologyManagement.CreateMychoiceProjectFromPreliminaryProject;
 
 public class NatclinnStartQueries {
 
@@ -26,7 +26,7 @@ public class NatclinnStartQueries {
 		
 		// Création des projets MyChoice à partir du modèle inféré
 		if (infModel != null) {
-			CreateMychoiceProjectFromProducts.createFromInferredModel(infModel);
+			CreateMychoiceProjectFromPreliminaryProject.createFromInferredModel(infModel);
 		}
 	}
 }

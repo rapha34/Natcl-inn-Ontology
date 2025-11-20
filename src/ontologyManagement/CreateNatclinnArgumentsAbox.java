@@ -69,22 +69,21 @@ public class CreateNatclinnArgumentsAbox {
 		///////////////////////////////
 		// Définition des namespaces //
 		///////////////////////////////
-
-		String ncl = new String("https://w3id.org/NCL/ontology/");
+		String ncl = NatclinnConf.ncl;
 		om.setNsPrefix("ncl", ncl);
-		String dcat = new String("http://www.w3.org/ns/dcat#/");
+		String dcat = NatclinnConf.dcat;
 		om.setNsPrefix("dcat", dcat);
-		String prov = new String("http://www.w3.org/ns/prov#");
+		String prov = NatclinnConf.prov;
 		om.setNsPrefix("prov", prov);
-		String dct = new String("http://purl.org/dc/terms/"); 
-		om.setNsPrefix("dct", dct);
-		String skos = new String("http://www.w3.org/2004/02/skos/core#");
+		String dcterms = NatclinnConf.dcterms; 
+		om.setNsPrefix("dcterms", dcterms);
+		String skos = NatclinnConf.skos;
 		om.setNsPrefix("skos", skos); 
-		String foaf = new String("http://xmlns.com/foaf/0.1/");
+		String foaf = NatclinnConf.foaf;
 		om.setNsPrefix("foaf", foaf);
-		String rdfs = new String("http://www.w3.org/2000/01/rdf-schema#");
+		String rdfs = NatclinnConf.rdfs;
 		om.setNsPrefix("rdfs", rdfs);
-		String rdf = new String("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		String rdf = NatclinnConf.rdf;
 		om.setNsPrefix("rdf", rdf);
 
 		/////////////////////////////////////
@@ -99,10 +98,12 @@ public class CreateNatclinnArgumentsAbox {
 		/////////////////////////////////////
 		// Classes RDF                     //
 		/////////////////////////////////////
-		Resource Argument = om.createResource(ncl + "Argument");
+		Resource ProductArgument = om.createResource(ncl + "ProductArgument");
 		Resource Attribute = om.createResource(ncl + "Attribute");
 		Resource Verbatim = om.createResource(ncl + "Verbatim");
 		Resource Source = om.createResource(ncl + "Source");
+		Resource TypeSource = om.createResource(ncl + "TypeSource");
+		Resource Stakeholder = om.createResource(ncl + "Stakeholder");
 		Resource Context = om.createResource(ncl + "Context");
 		Resource ContextIngredient = om.createResource(ncl + "ContextIngredient");
 		Resource ContextProduct = om.createResource(ncl + "ContextProduct");
@@ -117,7 +118,8 @@ public class CreateNatclinnArgumentsAbox {
 		Property hasVerbatim = om.createProperty(ncl, "hasVerbatim");
 		Property hasVerbatimKeyWord = om.createProperty(ncl, "hasVerbatimKeyWord");
 		Property hasSource = om.createProperty(ncl, "hasSource");
-		Property hasStakeholderName = om.createProperty(ncl, "hasStakeholderName");
+		Property hasTypeSource = om.createProperty(ncl, "hasTypeSource");
+		Property hasStakeholder = om.createProperty(ncl, "hasStakeholder");
 		
 		// Propriétés de données pour les contextes
 		Property hasContext = om.createProperty(ncl, "hasContext");
@@ -142,8 +144,8 @@ public class CreateNatclinnArgumentsAbox {
 		// Propriété pour Verbatim
 		DatatypeProperty hasText = om.createDatatypeProperty(ncl + "hasText");
 		
-		// Propriété pour Source
-		DatatypeProperty weightingIndex = om.createDatatypeProperty(ncl + "weightingIndex");
+	// Propriété pour TypeSource (nouvelle TBox)
+	DatatypeProperty fiability = om.createDatatypeProperty(ncl + "fiability");
 		AnnotationProperty comment = om.createAnnotationProperty(rdfs + "comment");
 
 		//////////////////////////////
@@ -157,6 +159,50 @@ public class CreateNatclinnArgumentsAbox {
 				Map<String, Resource> arguments = new HashMap<>();
 				Map<String, Resource> attributes = new HashMap<>();
 				Map<String, Resource> sources = new HashMap<>();
+				Map<String, Resource> typeSources = new HashMap<>();
+				Map<String, Resource> stakeholders = new HashMap<>();
+
+				// Traitement de l'onglet Stakeholder
+				Sheet stakeholderSheet = workbook.getSheet("Stakeholder");
+				if (stakeholderSheet != null) {
+					for (Row row : stakeholderSheet) {
+						if (row.getRowNum() == 0) continue;
+						String idStakeholder = getCellValue(row.getCell(0)); // IDStakeHolder
+						String nomStakeholder = getCellValue(row.getCell(1)); // NomStakeHolder
+
+						if (idStakeholder != null && !idStakeholder.isEmpty()) {
+							Resource sh = om.createResource(ncl + idStakeholder)
+								.addProperty(rdfType, Stakeholder)
+								.addProperty(prefLabel, nomStakeholder != null ? nomStakeholder : idStakeholder);
+							stakeholders.put(idStakeholder, sh);
+						}
+					}
+				}
+
+				// Traitement de l'onglet TypeSource (nouvelle TBox)
+				Sheet typeSourceSheet = workbook.getSheet("TypeSource");
+				if (typeSourceSheet != null) {
+					for (Row row : typeSourceSheet) {
+						if (row.getRowNum() == 0) continue;
+						String idTypeSource = getCellValue(row.getCell(0)); // IDTypeSource
+						String nomTypeSource = getCellValue(row.getCell(1)); // NomTypeSource
+						String importanceSource = getCellValue(row.getCell(2)); // ImportanceSource
+
+						if (idTypeSource != null && !idTypeSource.isEmpty()) {
+							Resource ts = om.createResource(ncl + idTypeSource)
+								.addProperty(rdfType, TypeSource)
+								.addProperty(prefLabel, nomTypeSource != null ? nomTypeSource : idTypeSource);
+							if (importanceSource != null && !importanceSource.isEmpty()) {
+								try {
+									ts.addLiteral(fiability, Double.parseDouble(importanceSource));
+								} catch (NumberFormatException e) {
+									ts.addLiteral(fiability, importanceSource);
+								}
+							}
+							typeSources.put(idTypeSource, ts);
+						}
+					}
+				}
 				Map<String, Resource> contexts = new HashMap<>();
 				Map<String, Resource> contextIngredients = new HashMap<>();
 				Map<String, Resource> contextProducts = new HashMap<>();
@@ -168,22 +214,15 @@ public class CreateNatclinnArgumentsAbox {
 						if (row.getRowNum() == 0) continue;
 						String idSource = getCellValue(row.getCell(0));
 						String nomSource = getCellValue(row.getCell(1));
-						String importanceSource = getCellValue(row.getCell(2));
-						String partiePrenante = getCellValue(row.getCell(3));
+						String idTypeSource = getCellValue(row.getCell(2));
 						
 						if (idSource != null && !idSource.isEmpty()) {
 							Resource source = om.createResource(ncl + idSource)
 								.addProperty(rdfType, Source)
 								.addProperty(prefLabel, nomSource != null ? nomSource : idSource);
-							if (importanceSource != null && !importanceSource.isEmpty()) {
-								try {
-									source.addLiteral(weightingIndex, Double.parseDouble(importanceSource));
-								} catch (NumberFormatException e) {
-									source.addLiteral(weightingIndex, importanceSource);
-								}
-							}
-							if (partiePrenante != null && !partiePrenante.isEmpty()) {
-								source.addProperty(hasStakeholderName, partiePrenante);
+							// Lien vers le TypeSource si présent
+							if (idTypeSource != null && !idTypeSource.isEmpty() && typeSources.containsKey(idTypeSource)) {
+								source.addProperty(hasTypeSource, typeSources.get(idTypeSource));
 							}
 							sources.put(idSource, source);
 						}
@@ -308,11 +347,12 @@ public class CreateNatclinnArgumentsAbox {
 						String valeurSuperieure = getCellValue(row.getCell(12));
 						String unitePropriete = getCellValue(row.getCell(13));
 						String idSource = getCellValue(row.getCell(14));
+						String idStakeholder = getCellValue(row.getCell(15));
 						
 						if (idArgument != null && !idArgument.isEmpty()) {
 							// Créer l'argument
 							Resource argument = om.createResource(ncl + idArgument)
-								.addProperty(rdfType, Argument);
+									.addProperty(rdfType, ProductArgument);
 							
 							if (description != null && !description.isEmpty()) {
 								argument.addProperty(prefLabel, description);
@@ -321,7 +361,7 @@ public class CreateNatclinnArgumentsAbox {
 							// Attribut
 							if (attribut != null && !attribut.isEmpty()) {
 								if (!attributes.containsKey(attribut)) {
-									String uriAtt = NatclinnUtil.makeURI(ncl + "Attribute_", attribut.replaceAll("\\s+", "_"));
+									String uriAtt = NatclinnUtil.makeURI(ncl + "Attribute-", attribut.replaceAll("\\s+", "-"));
 									Resource att = om.createResource(uriAtt)
 										.addProperty(rdfType, Attribute)
 										.addProperty(prefLabel, attribut);
@@ -334,7 +374,7 @@ public class CreateNatclinnArgumentsAbox {
 							
 							// Verbatim
 							if (verbatimText != null && !verbatimText.isEmpty()) {
-								String verbatimId = "Verbatim_" + idArgument;
+								String verbatimId = "Verbatim-" + idArgument;
 								Resource verbatim = om.createResource(ncl + verbatimId)
 									.addProperty(rdfType, Verbatim)
 									.addProperty(hasText, verbatimText);
@@ -384,6 +424,11 @@ public class CreateNatclinnArgumentsAbox {
 							// Source
 							if (idSource != null && !idSource.isEmpty() && sources.containsKey(idSource)) {
 								argument.addProperty(hasSource, sources.get(idSource));
+							}
+							
+							// Stakeholder
+							if (idStakeholder != null && !idStakeholder.isEmpty() && stakeholders.containsKey(idStakeholder)) {
+								argument.addProperty(hasStakeholder, stakeholders.get(idStakeholder));
 							}
 							
 							arguments.put(idArgument, argument);

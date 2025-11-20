@@ -1,9 +1,9 @@
 package natclinn.util;
 
 import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
-import org.apache.jena.sparql.expr.NodeValue;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -17,9 +17,11 @@ import java.util.Map;
 /**
  * Primitive pour identifier la fonction d'un ingrédient via Open Food Facts
  * Usage: getIngredientFunction(?ingredientLabel, ?function)
- * Retourne: 'conservateur', 'exhausteur_gout', 'colorant', 'edulcorant', etc.
+ * Retourne: une ressource URI ncl:<fonction> (ex: ncl:conservateur, ncl:emulsifiant_stabilisant)
  */
 public class GetIngredientFunction extends BaseBuiltin {
+    
+    private static final String ncl;
     
     // Cache pour éviter les appels API répétés
     private static Map<String, String> cache = new HashMap<>();
@@ -28,6 +30,10 @@ public class GetIngredientFunction extends BaseBuiltin {
     private static final Map<String, String> E_NUMBER_FUNCTIONS = new HashMap<>();
     
     static {
+        // Initialisation de la configuration
+        new NatclinnConf();
+        ncl = NatclinnConf.ncl;
+        
         // Conservateurs (E200-E299)
         for (int i = 200; i <= 299; i++) {
             E_NUMBER_FUNCTIONS.put("E" + i, "conservateur");
@@ -209,7 +215,8 @@ public class GetIngredientFunction extends BaseBuiltin {
             
             // Vérifier le cache
             if (cache.containsKey(label)) {
-                Node functionNode = NodeValue.makeString(cache.get(label)).asNode();
+                // Créer une ressource URI au lieu d'un literal
+                Node functionNode = NodeFactory.createURI(ncl + cache.get(label));
                 return context.getEnv().bind(args[1], functionNode);
             }
             
@@ -217,7 +224,8 @@ public class GetIngredientFunction extends BaseBuiltin {
             
             if (function != null) {
                 cache.put(label, function);
-                Node functionNode = NodeValue.makeString(function).asNode();
+                // Créer une ressource URI au lieu d'un literal
+                Node functionNode = NodeFactory.createURI(ncl + function);
                 return context.getEnv().bind(args[1], functionNode);
             }
         }

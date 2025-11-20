@@ -66,21 +66,21 @@ public static String CreationProductABox(String excelFile) {
 	    //Définition des namespaces  //
 	    ///////////////////////////////
 
-		String ncl = new String("https://w3id.org/NCL/ontology/");
+		String ncl = NatclinnConf.ncl;
 	    om.setNsPrefix("ncl", ncl);
-	    String dcat = new String("http://www.w3.org/ns/dcat#/");
+	    String dcat = NatclinnConf.dcat;
 	    om.setNsPrefix("dcat", dcat);
-		String prov = new String("http://www.w3.org/ns/prov#");
+		String prov = NatclinnConf.prov;
 	    om.setNsPrefix("prov", prov);
-		String dct = new String("http://purl.org/dc/terms/"); 
-	    om.setNsPrefix("dct", dct);
-		String skos = new String("http://www.w3.org/2004/02/skos/core#");
+		String dcterms = NatclinnConf.dcterms; 
+	    om.setNsPrefix("dcterms", dcterms);
+		String skos = NatclinnConf.skos;
 	    om.setNsPrefix("skos", skos); 
-	    String foaf = new String("http://xmlns.com/foaf/0.1/");
+	    String foaf = NatclinnConf.foaf;
 	    om.setNsPrefix("foaf", foaf);
-	    String rdfs = new String("http://www.w3.org/2000/01/rdf-schema#");
+	    String rdfs = NatclinnConf.rdfs;
 	    om.setNsPrefix("rdfs", rdfs);
-		String rdf = new String("http://www.w3.org/1999/02/22-rdf-syntax-ns#");
+		String rdf = NatclinnConf.rdf;
 	    om.setNsPrefix("rdf", rdf);
 
 		/////////////////////////////////////
@@ -257,7 +257,7 @@ public static String CreationProductABox(String excelFile) {
 							Resource packaging = om.createResource(uri);
 							packaging.addProperty(rdfType, Packaging);
 							if (material != null && !material.isEmpty()) {
-							String uriMat = NatclinnUtil.makeURI(ncl + "Material_", material);
+							String uriMat = NatclinnUtil.makeURI(ncl + "Material-", material);
 								if (uriMat != null) {
 								Resource mat = materials.computeIfAbsent(material, val ->
 									om.createResource(uriMat).addProperty(rdfType, Material));
@@ -266,7 +266,7 @@ public static String CreationProductABox(String excelFile) {
 								}
 							}
 							if (shape != null && !shape.isEmpty()) {
-							String uriShap = NatclinnUtil.makeURI(ncl + "shape_", shape);
+							String uriShap = NatclinnUtil.makeURI(ncl + "shape-", shape);
 								if (uriShap != null) {
 								Resource shap = shapes.computeIfAbsent(shape, val ->
 									om.createResource(uriShap).addProperty(rdfType, Shape));
@@ -302,7 +302,7 @@ public static String CreationProductABox(String excelFile) {
 					
 					if (product != null) {
 						if (!controlledOriginLabel.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "ControlledOriginLabel_", controlledOriginLabel);
+							String uri = NatclinnUtil.makeURI(ncl + "ControlledOriginLabel-", controlledOriginLabel);
 							if (uri != null) {
 								Resource pack = controlledOriginLabels.computeIfAbsent(controlledOriginLabel, val ->
 									om.createResource(uri).addProperty(rdfType, ControlledOriginLabel));
@@ -326,7 +326,7 @@ public static String CreationProductABox(String excelFile) {
 					
 					if (product != null) {
 						if (!cleanLabel.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "CleanLabel_", cleanLabel);
+							String uri = NatclinnUtil.makeURI(ncl + "CleanLabel-", cleanLabel);
 							if (uri != null) {
 								Resource cLabel = cleanLabels.computeIfAbsent(cleanLabel, val ->
 									om.createResource(uri).addProperty(rdfType, CleanLabel));
@@ -350,7 +350,7 @@ public static String CreationProductABox(String excelFile) {
 					
 					if (product != null) {
 						if (!manufacturingProcess.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "ManufacturingProcess_", manufacturingProcess);
+							String uri = NatclinnUtil.makeURI(ncl + "ManufacturingProcess-", manufacturingProcess);
 							if (uri != null) {
 								Resource pack = manufacturingProcesses.computeIfAbsent(manufacturingProcess, val ->
 									om.createResource(uri).addProperty(rdfType, ManufacturingProcess));
@@ -375,12 +375,12 @@ public static String CreationProductABox(String excelFile) {
 					
 					if (product != null) {
 						if (!nutriScore.isEmpty()) {
-							String uri = NatclinnUtil.makeURI(ncl + "NutriScore_", prodId);
+							String uri = NatclinnUtil.makeURI(ncl + "NutriScore-", prodId);
 							if (uri != null) {
 								Resource nutriscoreNode = nutriScoreNodes.computeIfAbsent(prodId, val ->
 									om.createResource(uri).addProperty(rdfType, NutriScore));
 								product.addProperty(hasNutriScore, nutriscoreNode);	
-								String uriScoreAlpha = NatclinnUtil.makeURI(ncl + "NutriScore_", nutriScore);
+								String uriScoreAlpha = NatclinnUtil.makeURI(ncl + "NutriScore-", nutriScore);
 								if (uriScoreAlpha != null) {
 									Resource nutriscore = nutriScores.computeIfAbsent(nutriScore, val ->
 										om.createResource(uriScoreAlpha).addProperty(rdfType, NutriScoreAlpha));
@@ -417,7 +417,7 @@ public static String CreationProductABox(String excelFile) {
 					
 					if (product != null && nutriscoreNode != null && iRank != null) {
 						// Création d'une ressource nommée de type NutriscoreDetail
-						String nutriscoreDetailURI = ncl + "NutriscoreDetail_" + prodId + "_" + PolarityComponent + "_"+ iRank;
+						String nutriscoreDetailURI = ncl + "NutriscoreDetail-" + prodId + "-" + PolarityComponent + "-"+ iRank;
 						Resource nutriscoreDetail = om.createResource(nutriscoreDetailURI)
 							.addProperty(rdfType,NutriScoreDetail);
 						if (PolarityComponent != null && !PolarityComponent.isEmpty()) {
@@ -475,7 +475,7 @@ public static String CreationProductABox(String excelFile) {
 					if (compound != null && component != null) {
 
 						// Création d'une ressource nommée de type QuantifiedElement
-						String qElemURI = ncl + "QuantifiedElement_" + compound + "_" + iRank;
+						String qElemURI = ncl + "QuantifiedElement-" + compound + "-" + iRank;
 						Resource quantifiedElement = om.createResource(qElemURI)
 							.addProperty(rdfType,QuantifiedElement)
 							.addProperty(refersTo, component);

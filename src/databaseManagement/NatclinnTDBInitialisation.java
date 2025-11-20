@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -36,6 +37,14 @@ public class NatclinnTDBInitialisation {
 	}
 	public static void initialisation() throws Exception {
 
+		// Forcer l'encodage UTF-8 pour la console afin d'éviter les problèmes d'accents
+		try {
+			System.setProperty("file.encoding", "UTF-8");
+			System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+			System.setErr(new PrintStream(System.err, true, StandardCharsets.UTF_8));
+		} catch (Exception e) {
+			// Ignorer silencieusement si non supporté
+		}
 		// Initialisation de la configuration
 		// Chemin d'accès, noms fichiers...
 		new NatclinnConf(); 

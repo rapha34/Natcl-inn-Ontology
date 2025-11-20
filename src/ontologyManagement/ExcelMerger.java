@@ -131,6 +131,10 @@ public class ExcelMerger {
         }
     }
 
+    /**
+     * Ajuste automatiquement la largeur de toutes les colonnes d'une feuille
+     * en fonction du contenu, avec une largeur maximale pour éviter les colonnes trop larges.
+     */
     private static void autoSizeAllColumns(Sheet sheet) {
         if (sheet.getPhysicalNumberOfRows() > 0) {
             Row firstRow = sheet.getRow(0);
@@ -138,6 +142,15 @@ public class ExcelMerger {
                 int lastCellNum = firstRow.getLastCellNum();
                 for (int i = 0; i < lastCellNum; i++) {
                     sheet.autoSizeColumn(i);
+                    // Limiter la largeur maximale à 100 caractères (environ 25600 unités)
+                    int currentWidth = sheet.getColumnWidth(i);
+                    int maxWidth = 25600; // ~100 caractères
+                    if (currentWidth > maxWidth) {
+                        sheet.setColumnWidth(i, maxWidth);
+                    }
+                    // Ajouter un peu de padding (5% de plus)
+                    int newWidth = Math.min(sheet.getColumnWidth(i) + 512, maxWidth);
+                    sheet.setColumnWidth(i, newWidth);
                 }
             }
         }

@@ -10,7 +10,6 @@ import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.RDFS;
 import natclinn.util.NatclinnConf;
 
 /**
@@ -37,6 +36,7 @@ public class CreateNatclinnOntology {
         String inputFileProductsAbox = folderForOntologies + "/NatclinnProductsAbox.xml";
         String inputFileArgumentsAbox = folderForOntologies + "/NatclinnArgumentsAbox.xml";
         String inputFileClassificationAttribute = folderForOntologies + "/NatclinnClassificationAttribute.xml";
+        String inputFileFunctionAbox = folderForOntologies + "/NatclinnFunctionAbox.xml";
 
         // Modèle ontologique principal
         OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
@@ -136,6 +136,7 @@ public class CreateNatclinnOntology {
             mergeOntology(om, modelTemp, inputFileProductsAbox, ncl + "NatclinnProductAbox");
             mergeOntology(om, modelTemp, inputFileArgumentsAbox, ncl + "NatclinnArgumentAbox");
             mergeOntology(om, modelTemp, inputFileClassificationAttribute, ncl + "ClassificationAttribute");
+            mergeOntology(om, modelTemp, inputFileFunctionAbox, ncl + "NatclinnFunctionAbox");
         } catch (IOException e) {
             System.err.println("Erreur lors de la fusion des fichiers : " + e.getMessage());
         }

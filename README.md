@@ -57,7 +57,15 @@ Notes et bonnes pratiques
 
 - Formats d'entrée : les produits et arguments sont instanciés à partir de feuilles Excel. Le mapping onglet/colonne attendu est défini dans le code (voir classes de `ontologyManagement/` et la documentation interne).
 - Inférence : Jena est utilisé pour étendre la connaissance (InfModel). Les règles et axiomes définis dans la TBox permettent d'attacher automatiquement certains arguments à certains produits.
+	- **Architecture d'inférence** : Les produits (`ncl:Product`) sont liés aux arguments consommateurs (`ncl:ProductArgument`) via la propriété inférée `ncl:hasProductArgument`. Cette inférence se base sur :
+		- Les fonctions additives des ingrédients (`ncl:AdditiveFunction`)
+		- Les métadonnées de liaison (`ncl:AdditiveFunctionArgumentBinding` avec propriétés `bindingAgent*`)
+		- La correspondance sémantique entre `bindingAgentNameProperty` (métadonnées) et `nameProperty` (arguments consommateurs)
+	- Les règles d'inférence se trouvent dans `natclinn_additives.rules` et utilisent le primitif personnalisé `CompareFunctionProperty`
 - Export MyChoice : l'objectif final est la production d'un fichier d'échange compatible avec MyChoice. Le format exact et les colonnes d'export sont gérés par les utilitaires d'`ontologyManagement`/`inferencesAndQueries` et peuvent nécessiter une configuration locale pour correspondre à la version de MyChoice utilisée.
+	- **Workflow multi-projets** : Le système supporte la création de plusieurs projets MyChoice en parallèle (voir `MULTI_PROJECT_WORKFLOW.md`)
+	- **Conversion** : Les `ncl:Product` deviennent `mch:Alternative`, les `ncl:ProductArgument` deviennent `mch:Argument`
+	- **Traçabilité** : La propriété `mch:relatedToNatclinnProductArgument` (DatatypeProperty) conserve l'URI source du `ncl:ProductArgument`
 - Encodage des identifiants :
 	- Lors de l'appel par chemin (`/{id}`), les identifiants contenant des caractères spéciaux doivent être encadrés (par ex. `<...>`) ou correctement encodés par le client.
 	- Lors de l'appel par query param (`/search?id=...`), utiliser le percent-encoding (ex. `https%3A%2F%2Fw3id.org%2FNCL%2Fontology%2FP-...`). Le service effectue un décodage côté serveur.

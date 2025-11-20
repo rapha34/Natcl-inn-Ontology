@@ -160,6 +160,10 @@ public class NatclinnUtil {
         for (String part : partsList) {
             // Spécial "tomate" pour enrichir les ingrédients dérivés
             part = factorizeTomato(part);
+            // Spécial "mono- et diglycérides" pour factoriser
+            part = factorizeMonoDiGlycerides(part);
+            // Spécial "carbonates et citrates de sodium" pour factoriser
+            part = factorizeChemicalSalts(part);
             Ingredient ing = parseIngredientRecursive(part.trim());
             if (ing != null) ingredients.add(ing);
         }
@@ -205,6 +209,80 @@ public class NatclinnUtil {
 
         return sb.toString();
     }
+
+    private static String factorizeMonoDiGlycerides(String input) {
+        // Regex pour repérer les combinaisons de mono/di/tri avant "glycérides d'acides gras"
+        Pattern pattern = Pattern.compile(
+            "\\b((?:mono|di|tri)(?:\\s*-\\s*)?(?:\\s*,\\s*(?:mono|di|tri)(?:\\s*-\\s*)?)*(?:\\s*et\\s*(?:mono|di|tri)(?:\\s*-\\s*)?)?)\\s*glycérides d'acides gras",
+            Pattern.CASE_INSENSITIVE
+        );
+
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            String prefixesRaw = matcher.group(1);
+            // Nettoyage du texte entre "mono" et "glycérides"
+            String cleaned = prefixesRaw
+                    .replaceAll("-", " ")   // retire les tirets
+                    .replaceAll("\\bet\\b", ",") // remplace "et" par virgule
+                    .replaceAll("\\s+", " ") // normalise les espaces
+                    .trim();
+
+            // Extraction des préfixes (mono, di, tri)
+            String[] prefixes = cleaned.split("\\s*,\\s*");
+
+            // Construit la chaîne complète
+            StringBuilder expansion = new StringBuilder();
+            for (int i = 0; i < prefixes.length; i++) {
+                if (i > 0) expansion.append(", ");
+                expansion.append(prefixes[i].trim()).append("glycérides d'acides gras");
+            }
+
+            matcher.appendReplacement(sb, expansion.toString());
+        }
+
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+    private static String factorizeChemicalSalts(String input) {
+        // Regex : capture des groupes du type "carbonates et citrates de sodium"
+        Pattern pattern = Pattern.compile(
+            "\\b((?:[a-zàâçéèêëîïôûùüÿñæœ]+(?:ates|ures))(?:\\s*,\\s*[a-zàâçéèêëîïôûùüÿñæœ]+(?:ates|ures))*(?:\\s*et\\s*[a-zàâçéèêëîïôûùüÿñæœ]+(?:ates|ures))?)\\s+de\\s+([a-zàâçéèêëîïôûùüÿñæœ]+)",
+            Pattern.CASE_INSENSITIVE
+        );
+
+        Matcher matcher = pattern.matcher(input);
+        StringBuffer sb = new StringBuffer();
+
+        while (matcher.find()) {
+            String groupList = matcher.group(1); // ex. "carbonates et citrates"
+            String element = matcher.group(2);   // ex. "sodium"
+
+            // Transformer "et" en virgule, puis séparer
+            groupList = groupList.replaceAll("\\bet\\b", ",");
+            String[] bases = groupList.split("\\s*,\\s*");
+
+            StringBuilder expansion = new StringBuilder();
+            for (int i = 0; i < bases.length; i++) {
+                if (i > 0) expansion.append(", ");
+                // Mise au singulier : "carbonates" -> "carbonate"
+                String baseSingulier = bases[i]
+                        .trim()
+                        .replaceAll("(ates|ures)\\b", "ate")  // simplifié
+                        .replaceAll("\\s+", " ");
+                expansion.append(baseSingulier).append(" de ").append(element);
+            }
+
+            matcher.appendReplacement(sb, expansion.toString());
+        }
+
+        matcher.appendTail(sb);
+        return sb.toString();
+    }
+
+
 
     /**
  * Analyse récursive d'un ingrédient (ou sous-ingrédient) à partir d'une chaîne.

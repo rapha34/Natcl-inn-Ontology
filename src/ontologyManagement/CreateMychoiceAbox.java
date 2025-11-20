@@ -89,7 +89,7 @@ public class CreateMychoiceAbox {
         DatatypeProperty projectImage = om.createDatatypeProperty(mch + "projectImage");
         DatatypeProperty criterionName = om.createDatatypeProperty(mch + "criterionName");
         DatatypeProperty aimDescription = om.createDatatypeProperty(mch + "aimDescription");
-        DatatypeProperty alternativeName = om.createDatatypeProperty(mch + "alternativeName");
+        DatatypeProperty nameAlternative = om.createDatatypeProperty(mch + "nameAlternative");
         DatatypeProperty alternativeDescription = om.createDatatypeProperty(mch + "alternativeDescription");
         DatatypeProperty assertion = om.createDatatypeProperty(mch + "assertion");
         DatatypeProperty explanation = om.createDatatypeProperty(mch + "explanation");
@@ -138,7 +138,7 @@ public class CreateMychoiceAbox {
                         String desc = getCellValue(row.getCell(1));
                         String image = getCellValue(row.getCell(2));
                         if (nameProject == null || nameProject.isEmpty()) continue;
-                        String uri = NatclinnUtil.makeURI(mch + "Project_", nameProject); // nameProject est la clé du projet
+                        String uri = NatclinnUtil.makeURI(mch + "Project-", nameProject); // nameProject est la clé du projet
                         Resource proj = om.createResource(uri).addProperty(projectName, nameProject);
                         if (desc != null && !desc.isEmpty()) proj.addProperty(projectDescription, desc);
                         if (image != null && !image.isEmpty()) proj.addProperty(projectImage, image);
@@ -157,8 +157,8 @@ public class CreateMychoiceAbox {
                         String imageAlt = getCellValue(row.getCell(2));
                         String iconAlt = getCellValue(row.getCell(3));
                         if (nameAlt == null || nameAlt.isEmpty()) continue;
-                        String uri = NatclinnUtil.makeURI(mch + "Alternative_", nameAlt); // nameAlt est le nom de l'alternative
-                        Resource alt = om.createResource(uri).addProperty(alternativeName, nameAlt);
+                        String uri = NatclinnUtil.makeURI(mch + "Alternative-", nameAlt); // nameAlt est le nom de l'alternative
+                        Resource alt = om.createResource(uri).addProperty(nameAlternative, nameAlt);
                         if (desc != null && !desc.isEmpty()) alt.addProperty(alternativeDescription, desc);
                         if (imageAlt != null && !imageAlt.isEmpty()) alt.addProperty(projectImage, imageAlt);
                         if (iconAlt != null && !iconAlt.isEmpty()) alt.addProperty(projectImage, iconAlt);
@@ -183,7 +183,7 @@ public class CreateMychoiceAbox {
                         String nameType = getCellValue(row.getCell(0));
                         String fiability = getCellValue(row.getCell(1));
                         if (nameType == null || nameType.isEmpty()) continue;
-                        String uri = NatclinnUtil.makeURI(mch + "TypeSource_", nameType); // nameType est le nom du type de source
+                        String uri = NatclinnUtil.makeURI(mch + "TypeSource-", nameType); // nameType est le nom du type de source
                         Resource ts = om.createResource(uri).addProperty(sourceName, nameType);
                         if (fiability != null && !fiability.isEmpty()) ts.addProperty(typeFiability, fiability);
                         ts.addProperty(RDF.type, om.createResource(mch + "TypeSource"));
@@ -201,18 +201,18 @@ public class CreateMychoiceAbox {
                         if ((nameStake == null || nameStake.isEmpty()) || (nameCrit == null || nameCrit.isEmpty())) continue;
                         // create stakeholder and criterion if missing
                         Resource sh = stakeholders.computeIfAbsent(nameStake, k -> {
-                            String u = NatclinnUtil.makeURI(mch + "Stakeholder_", k); // k est le nom du stakeholder
+                            String u = NatclinnUtil.makeURI(mch + "Stakeholder-", k); // k est le nom du stakeholder
                             Resource r = om.createResource(u).addProperty(stakeholderName, k);
                             r.addProperty(RDF.type, Stakeholder);
                             return r;
                         });
                         Resource crit = criteria.computeIfAbsent(nameCrit, k -> {
-                            String u = NatclinnUtil.makeURI(mch + "Criterion_", k); // k est le nom du critère
+                            String u = NatclinnUtil.makeURI(mch + "Criterion-", k); // k est le nom du critère
                             Resource r = om.createResource(u).addProperty(criterionName, k);
                             r.addProperty(RDF.type, Criterion);
                             return r;
                         });
-                        String uri = NatclinnUtil.makeURI(mch + "HasExpertise_", nameStake + "_" + nameCrit); // Combinaison des noms pour l'expertise
+                        String uri = NatclinnUtil.makeURI(mch + "HasExpertise-", nameStake + "-" + nameCrit); // Combinaison des noms pour l'expertise
                         Resource he = om.createResource(uri);
                         he.addProperty(RDF.type, om.createResource(mch + "HasExpertise"));
                         he.addProperty(hasStakeholder, sh);
@@ -246,7 +246,7 @@ public class CreateMychoiceAbox {
 
                         if (idArg == null || idArg.isEmpty()) continue;
 
-                        String uriArg = NatclinnUtil.makeURI(mch + "Argument_", idArg); // idArg est l'identifiant de l'argument
+                        String uriArg = NatclinnUtil.makeURI(mch + "Argument-", idArg); // idArg est l'identifiant de l'argument
                         Resource arg = om.createResource(uriArg);
                         arg.addProperty(RDF.type, Argument);
                         if (assertionVal != null && !assertionVal.isEmpty()) arg.addProperty(assertion, assertionVal);
@@ -254,8 +254,8 @@ public class CreateMychoiceAbox {
                         // stakeholder
                         if (nameStake != null && !nameStake.isEmpty()) {
                             Resource sh = stakeholders.computeIfAbsent(nameStake, k -> {
-                                String u = NatclinnUtil.makeURI(mch + "Stakeholder_", k);
-                                if (u == null) u = mch + k.replaceAll("\\s+","_");
+                                String u = NatclinnUtil.makeURI(mch + "Stakeholder-", k);
+                                if (u == null) u = mch + k.replaceAll("\\s+","-");
                                 Resource r = om.createResource(u).addProperty(stakeholderName, k);
                                 r.addProperty(RDF.type, Stakeholder);
                                 return r;
@@ -265,9 +265,9 @@ public class CreateMychoiceAbox {
                         // alternative
                         if (nameAlt != null && !nameAlt.isEmpty()) {
                             Resource alt = alternatives.computeIfAbsent(nameAlt, k -> {
-                                String u = NatclinnUtil.makeURI(mch + "Alternative_", k);
-                                if (u == null) u = mch + k.replaceAll("\\s+","_");
-                                Resource r = om.createResource(u).addProperty(alternativeName, k);
+                                String u = NatclinnUtil.makeURI(mch + "Alternative-", k);
+                                if (u == null) u = mch + k.replaceAll("\\s+","-");
+                                Resource r = om.createResource(u).addProperty(nameAlternative, k);
                                 r.addProperty(RDF.type, Alternative);
                                 return r;
                             });
@@ -276,8 +276,8 @@ public class CreateMychoiceAbox {
                         // criterion
                         if (nameCrit != null && !nameCrit.isEmpty()) {
                             Resource crit = criteria.computeIfAbsent(nameCrit, k -> {
-                                String u = NatclinnUtil.makeURI(mch + "Criterion_", k);
-                                if (u == null) u = mch + k.replaceAll("\\s+","_");
+                                String u = NatclinnUtil.makeURI(mch + "Criterion-", k);
+                                if (u == null) u = mch + k.replaceAll("\\s+","-");
                                 Resource r = om.createResource(u).addProperty(criterionName, k);
                                 r.addProperty(RDF.type, Criterion);
                                 return r;
@@ -287,7 +287,7 @@ public class CreateMychoiceAbox {
                         // aim
                         if (aimVal != null && !aimVal.isEmpty()) {
                             Resource a = aims.computeIfAbsent(aimVal, k -> {
-                                String u = NatclinnUtil.makeURI(mch + "Aim_", k); // k est le nom de l'objectif
+                                String u = NatclinnUtil.makeURI(mch + "Aim-", k); // k est le nom de l'objectif
                                 Resource r = om.createResource(u).addProperty(aimDescription, k);
                                 r.addProperty(RDF.type, Aim);
                                 return r;
@@ -297,7 +297,7 @@ public class CreateMychoiceAbox {
                         // property
                         if (nameProp != null && !nameProp.isEmpty()) {
                             Resource p = properties.computeIfAbsent(nameProp, k -> {
-                                String u = NatclinnUtil.makeURI(mch + "Property_", k); // k est le nom de la propriété
+                                String u = NatclinnUtil.makeURI(mch + "Property-", k); // k est le nom de la propriété
                                 Resource r = om.createResource(u).addProperty(propertyName, k);
                                 r.addProperty(RDF.type, Property);
                                 return r;
@@ -324,7 +324,7 @@ public class CreateMychoiceAbox {
                         // source and typeSource
                         if (nameSourceVal != null && !nameSourceVal.isEmpty()) {
                             Resource src = sources.computeIfAbsent(nameSourceVal, k -> {
-                                String u = NatclinnUtil.makeURI(mch + "Source_", k); // k est le nom de la source
+                                String u = NatclinnUtil.makeURI(mch + "Source-", k); // k est le nom de la source
                                 Resource r = om.createResource(u).addProperty(sourceName, k);
                                 r.addProperty(RDF.type, Source);
                                 return r;
@@ -333,7 +333,7 @@ public class CreateMychoiceAbox {
                             if (nameTypeSourceVal != null && !nameTypeSourceVal.isEmpty()) {
                                 Resource ts = sources.get(nameTypeSourceVal);
                                 if (ts == null) {
-                                    String u = NatclinnUtil.makeURI(mch + "TypeSource_", nameTypeSourceVal); // nameTypeSourceVal est le nom du type de source
+                                    String u = NatclinnUtil.makeURI(mch + "TypeSource-", nameTypeSourceVal); // nameTypeSourceVal est le nom du type de source
                                     ts = om.createResource(u).addProperty(sourceName, nameTypeSourceVal);
                                     ts.addProperty(RDF.type, om.createResource(mch + "TypeSource"));
                                     sources.put(nameTypeSourceVal, ts);

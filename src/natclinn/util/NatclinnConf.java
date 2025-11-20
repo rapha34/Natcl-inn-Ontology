@@ -46,6 +46,7 @@ public final class NatclinnConf {
 	
 	//query prefix
 	public static String ncl = null;
+	public static String mch = null;
 	public static String afo = null;
 	public static String res = null;
 	public static String skos = null;
@@ -75,6 +76,8 @@ public final class NatclinnConf {
 	public static String wgs = null;
 	public static String sio = null;
 	public static String uom = null;
+	public static String dcat = null;
+	public static String prov = null;
 
 	public static String OFF_API_BASE_URL = null;
 	public static String OFF_API_TIMEOUT = null;
@@ -96,6 +99,9 @@ public final class NatclinnConf {
 	public static String CIQUAL_API_RATE_LIMIT_MS = null;
 	public static String CIQUAL_API_CACHE_EXPIRY_HOURS = null;
 
+	// Default images for MyChoice
+	public static String defaultProjectImage = null;
+	public static String defaultAlternativeImage = null;
 
 	
 	public static String queryPrefix = null;
@@ -188,6 +194,7 @@ public final class NatclinnConf {
 			fileNameTDBdatabase = prop.getProperty("fileNameTDBdatabase");
 			
 			ncl = prop.getProperty("ncl");
+			mch = prop.getProperty("mch");
 			afo = prop.getProperty("afo");
 			res = prop.getProperty("res");
 			skos = prop.getProperty("skos");
@@ -217,6 +224,8 @@ public final class NatclinnConf {
 			wgs = prop.getProperty("wgs");
 			sio = prop.getProperty("sio");
 			uom = prop.getProperty("uom");
+			dcat = prop.getProperty("dcat");
+			prov = prop.getProperty("prov");
 
 			OFF_API_BASE_URL = prop.getProperty("OFF_API_BASE_URL");
 			OFF_API_TIMEOUT = prop.getProperty("OFF_API_TIMEOUT");
@@ -237,11 +246,16 @@ public final class NatclinnConf {
 			CIQUAL_API_RETRY_DELAY_MS = prop.getProperty("CIQUAL_API_RETRY_DELAY_MS");
 			CIQUAL_API_RATE_LIMIT_MS = prop.getProperty("CIQUAL_API_RATE_LIMIT_MS");
 			CIQUAL_API_CACHE_EXPIRY_HOURS = prop.getProperty("CIQUAL_API_CACHE_EXPIRY_HOURS");
+
+			// Default images for MyChoice
+			defaultProjectImage = prop.getProperty("defaultProjectImage");
+			defaultAlternativeImage = prop.getProperty("defaultAlternativeImage");
 			
 			// Prefix pour les query
 			
 			queryPrefix =  
 					"prefix ncl: <" + ncl + ">\n" +
+					"prefix mch: <" + mch + ">\n" +
 					"prefix afo: <" + afo + ">\n" +	
 					"prefix afv: <" + afv + ">\n" +			
 					"prefix res: <" + res + ">\n" +
@@ -267,6 +281,8 @@ public final class NatclinnConf {
 					"prefix wgs: <" + wgs + ">\n" +
 					"prefix sio: <" + sio + ">\n" +
 					"prefix uom: <" + uom + ">\n" +
+					"prefix dcat: <" + dcat + ">\n" +
+					"prefix prov: <" + prov + ">\n" +
 					"prefix bfo: <" + bfo + ">\n" ;
 							
 			NatclinnConf.prop = prop;
