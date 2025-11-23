@@ -33,7 +33,7 @@ public class CreateNatclinnTbox {
 		
 		OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
 		
-		RDFParser.fromString(jsonString, Lang.JSONLD11).parse(om);
+		RDFParser.create().fromString(jsonString).lang(Lang.JSONLD).parse(om);
 
 		try {   
 

@@ -1,0 +1,382 @@
+@prefix ncl: <https://w3id.org/NCL/ontology/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+-> tableAll().
+
+# =============================================
+# Natclinn Additives & Functions Linking Rules
+# =============================================
+# Utilise deux primitives personnalisées:
+# - getIngredientFunction(?label, ?function) : identifie la fonction d'un ingrédient
+# - compareFunctionProperty(?product, ?arg) : compare (direct puis sémantique) les fonctions d'ingrédients du produit avec
+#   la propriété ncl:nameProperty (ou bindingAgentNameProperty) du ProductArgument, et décide du lien ncl:hasProductArgument
+
+# ---------------------------------------------
+# Helper: Recursive gathering of all ingredients
+# ---------------------------------------------
+
+[hasIngredientR_direct:
+    (?product ncl:hasIngredient ?ingredient)
+    ->
+    (?product ncl:hasIngredientR ?ingredient)
+]
+
+[hasIngredientR_viaComposed_1:
+    (?product ncl:hasComposedOf ?compositeProduct)
+    (?compositeProduct ncl:hasIngredient ?ingredient)
+    ->
+    (?product ncl:hasIngredientR ?ingredient)
+]
+
+[hasIngredientR_viaComposed_2:
+    (?product ncl:hasComposedOf ?compositeProduct)
+    (?compositeProduct ncl:hasIngredientR ?ingredient)
+    ->
+    (?product ncl:hasIngredientR ?ingredient)
+]
+
+[hasIngredientR_chainIngredient:
+    (?product ncl:hasIngredientR ?x)
+    (?x ncl:hasComposedOf ?y)
+    (?y ncl:hasIngredient ?ingredient)
+    ->
+    (?product ncl:hasIngredientR ?ingredient)
+]
+
+# ---------------------------------------------
+# Identification des fonctions d'ingrédients
+# Note: ncl:hasFunction est maintenant une ObjectProperty pointant vers ncl:<fonction>
+# ---------------------------------------------
+
+[IdentifyAdditif:
+    (?ingredient rdf:type ncl:Ingredient)
+    (?ingredient skos:prefLabel ?label)
+    getIngredientFunction(?label, ?functionURI)
+    ->
+    (?ingredient rdf:type ncl:AdditiveIngredient)
+    (?ingredient ncl:hasFunction ?functionURI)
+]
+
+# ---------------------------------------------
+# Agrégation des fonctions au niveau produit
+# Parce que on ne peux pas écrire dans les JENA rules de négation existantiel comme dans SPARQL:
+# [NoColorant:
+#    (?product rdf:type ncl:Product)
+#    NOT_EXISTS { (?product ncl:hasIngredientR ?ing) (?ing ncl:hasFunction ncl:colorant) }
+#    ->
+#    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_colorant)
+# ]
+# ---------------------------------------------
+
+[ProductIngredientFunction:
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?ingredient)
+    (?ingredient ncl:hasFunction ?functionURI)
+    ->
+    (?product ncl:containsIngredientWithFunction ?functionURI)
+]
+
+# ---------------------------------------------
+# Identification des additifs
+# Ces règles marquent les produits contenant des additifs
+# ---------------------------------------------
+[DetectAdditives:
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredient ?ingredient)
+    (?ingredient rdf:type ncl:AdditiveIngredient)
+    ->
+    (?product ncl:containsAdditives 'true'^^xsd:boolean)
+]
+
+# Pas d'additifs
+# Si le produit n'a pas été marqué comme contenant un additif, on infère l'absence
+[NoAddedAdditive:
+    (?product rdf:type ncl:Product)
+    noValue(?product, ncl:containsAdditives, 'true'^^xsd:boolean)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_additif)
+]
+
+
+# ---------------------------------------------
+# Linking produits -> arguments via fonctions
+# Critère: Composition (additifs)
+# Note: ?functionURI est maintenant une ressource URI (ncl:<fonction>)
+# ---------------------------------------------
+
+# Règle unique: comparaison directe d'abord, sémantique ensuite (dans la primitive)
+[linkArgByFunction:
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?ingredient)
+    (?ingredient ncl:hasFunction ?functionURI)
+    (?arg rdf:type ncl:ProductArgument)
+    compareFunctionProperty(?product, ?arg)
+    ->
+    (?product ncl:hasProductArgument ?arg)
+]
+
+ 
+
+# Règle via ContextIngredient (keywords)
+# Note: hasVerbatimKeyWord contient des strings, donc on compare le local name de la fonction URI
+[linkArgByFunction_contextKeyword:
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?ingredient)
+    (?ingredient ncl:hasFunction ?functionURI)
+    (?arg rdf:type ncl:ProductArgument)
+    (?arg ncl:nameCriterion "Composition"^^xsd:string)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextIngredient ?ctxIng)
+    (?ctxIng ncl:hasVerbatimKeyWord ?functionName)
+    uriLocalName(?functionURI, ?functionName)
+    ->
+    (?product ncl:hasProductArgument ?arg)
+]
+
+# Règle via le label de l'ingrédient dans le contexte
+[linkArgByIngredientLabel_contextKeyword:
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?ingredient)
+    (?ingredient skos:prefLabel ?ingredientLabel)
+    (?arg rdf:type ncl:ProductArgument)
+    (?arg ncl:nameCriterion "Composition"^^xsd:string)
+    (?arg ncl:hasContext ?ctx)
+    (?ctx ncl:hasContextIngredient ?ctxIng)
+    (?ctxIng ncl:hasVerbatimKeyWord ?ingredientLabel)
+    ->
+    (?product ncl:hasProductArgument ?arg)
+]
+
+# ---------------------------------------------
+# Anciennes règles de détection (conservées)
+# ---------------------------------------------
+
+[CountPreservatives:
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredient ?ingredient1)
+    (?ingredient1 ncl:hasFunction ncl:conservateur)
+    (?product ncl:hasIngredient ?ingredient2)
+    (?ingredient2 ncl:hasFunction ncl:conservateur)
+    notEqual(?ingredient1, ?ingredient2)
+    ->
+    (?product ncl:hasMultiplePreservatives 'true'^^xsd:boolean)
+]
+
+# =============================================
+# RÈGLES D'ABSENCE - DOIVENT S'EXÉCUTER EN DERNIER
+# =============================================
+# Ces règles utilisent noValue() et doivent être évaluées après
+# que toutes les règles positives aient créé les propriétés ncl:containsIngredientWithFunction
+# IMPORTANT: On ajoute une condition sur ncl:hasIngredientR pour forcer l'évaluation
+# après que les règles de récursion des ingrédients aient été appliquées
+
+ [NoColorant: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:colorant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_colorant)
+]
+
+ [NoPreservative: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:conservateur)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_conservateur)
+]
+
+ [NoEmulsifier: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:emulsifiant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_emulsifiant)
+]
+
+ [NoThickener: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:epaississant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_epaississant)
+]
+
+ [NoGellingAgent: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:gelifiant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_gelifiant)
+]
+
+ [NoAntioxidant: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:antioxydant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_antioxydant)
+]
+
+ [NoSweetener: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:edulcorant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_edulcorant)
+]
+
+ [NoFlavorEnhancer: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:exhausteur_de_gout)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_exhausteur_de_gout)
+]
+
+ [NoNaturalFlavorEnhancer: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:exhausteur_gout_naturel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_exhausteur_gout_naturel)
+]
+
+ [NoBulkingAgent: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:agent_charge)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_agent_charge)
+]
+
+ [NoAcidifier: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:acidifiant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_acidifiant)
+]
+
+ [NoAcidityRegulator: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:regulateur_acidite)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_regulateur_acidite)
+]
+
+ [NoAntiCakingAgent: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:anti_agglomerant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_anti_agglomerant)
+]
+
+ [NoRaisingAgent: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:agent_levant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_agent_levant)
+]
+
+ [NoStabilizer: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:stabilisant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_stabilisant)
+]
+
+ [NoEmulsifierStabilizer: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:emulsifiant_stabilisant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_emulsifiant_stabilisant)
+]
+
+ [NoTexturingAgent: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:agent_texture)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_agent_texture)
+]
+
+ [NoNaturalGellingAgent: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:gelifiant_naturel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_gelifiant_naturel)
+]
+
+ [NoNaturalPreservative: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:conservateur_naturel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_conservateur_naturel)
+]
+
+ [NoNaturalColorant: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:colorant_naturel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_colorant_naturel)
+]
+
+ [NoNaturalSweetener: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:edulcorant_naturel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_edulcorant_naturel)
+]
+
+ [NoNaturalAntioxidant: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:antioxydant_naturel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_antioxydant_naturel)
+]
+
+ [NoAntioxidantAcidifier: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:antioxydant_acidifiant)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_antioxydant_acidifiant)
+]
+
+ [NoBulkingAgentFiber: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:agent_charge_fibre)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_agent_charge_fibre)
+]
+
+ [NoAddedSalt: backward
+    (?product rdf:type ncl:Product)
+    (?product ncl:hasIngredientR ?anyIng)
+    noValue(?product, ncl:containsIngredientWithFunction, ncl:sel)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_sel_ajoute)
+]
+
+[NoAddedAdditive:
+    (?product rdf:type ncl:Product)
+    noValue(?product, ncl:containsAdditives, 'true'^^xsd:boolean)
+    ->
+    (?product ncl:hasAdditiveFunctionCheck ncl:pas_de_additif)
+]
+

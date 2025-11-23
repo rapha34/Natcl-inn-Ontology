@@ -98,7 +98,7 @@ public class CreateNatclinnArgumentsAbox {
 		/////////////////////////////////////
 		// Classes RDF                     //
 		/////////////////////////////////////
-		Resource ProductArgument = om.createResource(ncl + "ProductArgument");
+		Resource Argument = om.createResource(ncl + "Argument");
 		Resource Attribute = om.createResource(ncl + "Attribute");
 		Resource Verbatim = om.createResource(ncl + "Verbatim");
 		Resource Source = om.createResource(ncl + "Source");
@@ -352,7 +352,7 @@ public class CreateNatclinnArgumentsAbox {
 						if (idArgument != null && !idArgument.isEmpty()) {
 							// Créer l'argument
 							Resource argument = om.createResource(ncl + idArgument)
-									.addProperty(rdfType, ProductArgument);
+								.addProperty(rdfType, Argument);
 							
 							if (description != null && !description.isEmpty()) {
 								argument.addProperty(prefLabel, description);

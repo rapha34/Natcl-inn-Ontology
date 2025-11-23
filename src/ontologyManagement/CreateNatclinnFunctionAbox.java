@@ -58,7 +58,7 @@ public class CreateNatclinnFunctionAbox {
             return;
         }
         OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
-        RDFParser.create().source(new StringReader(json)).lang(Lang.JSONLD11).parse(om);
+        RDFParser.create().source(new StringReader(json)).lang(Lang.JSONLD).parse(om);
         try (FileOutputStream out = new FileOutputStream(NatclinnConf.folderForOntologies + "/NatclinnFunctionAbox.xml")) {
             om.write(out, "RDF/XML");
         } catch (IOException e) {

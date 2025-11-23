@@ -166,9 +166,9 @@ public class NatclinnCreateInferedModel {
 		reasonerOWL = reasonerOWL.bindSchema(infRDFS);  // important : lie le schéma RDFS déjà enrichi
 		InfModel infOWL = ModelFactory.createInfModel(reasonerOWL, modelTemp);
 
-		// Étape 3 - Règles personnalisées : complète avec tes propres règles Jena
+		// Étape 3 - Règles personnalisées : complètez avec règles Jena
 		GenericRuleReasoner reasonerCustom = new GenericRuleReasoner(allRules);
-        reasonerCustom.setMode(GenericRuleReasoner.FORWARD_RETE); // Utilisation de l'algorithme RETE pour de meilleures performances
+        reasonerCustom.setMode(GenericRuleReasoner.HYBRID); // Mode hybride pour exécuter les règles backward
 		// reasonerCustom.setMode(GenericRuleReasoner.HYBRID); // Mode hybride obligatoire pour OWLTranslation
 		reasonerCustom.setDerivationLogging(true); // utile pour debugger les inférences
 		reasonerCustom.setOWLTranslation(false);    // permet d'utiliser OWL équivalences dans les règles

@@ -15,26 +15,29 @@ import java.util.Set;
  * Primitive pour lier les produits aux arguments consommateurs via les métadonnées de fonctions.
  * 
  * Architecture:
- * - Product → hasIngredientR → Ingredient → hasFunction → AdditiveFunction
+ * - Product → hasIngredientR → Ingredient → hasFunction → AdditiveFunction (présence)
+ * - Product → hasAdditiveFunctionCheck → pas_de_<fonction> (absence)
  * - AdditiveFunctionArgumentBinding → aboutFunction → AdditiveFunction (métadonnées: bindingAgentNameProperty, etc.)
  * - ProductArgument (données enquêtes consommateurs: nameProperty, nameCriterion, etc.)
  * 
  * Signature: compareFunctionProperty(?product, ?productArgument)
- * - ?product : ressource Product avec ingrédients
+ * - ?product : ressource Product avec ingrédients et/ou vérifications d'absence
  * - ?productArgument : ressource ProductArgument (données consommateurs)
  * 
- * Retourne true si les fonctions des ingrédients du produit matchent avec les propriétés
- * du ProductArgument via les métadonnées AdditiveFunctionArgumentBinding.
+ * Retourne true si les fonctions des ingrédients du produit (présence ou absence) matchent
+ * avec les propriétés du ProductArgument via les métadonnées AdditiveFunctionArgumentBinding.
  */
 public class CompareFunctionProperty extends BaseBuiltin {
 
     private static final String ncl;
     private static final Node HAS_INGREDIENT_R;
     private static final Node HAS_FUNCTION;
+    private static final Node HAS_ADDITIVE_FUNCTION_CHECK;
     // Propriété sur ProductArgument (données consommateurs)
     private static final Node PRODUCT_ARG_NAME_PROPERTY;
     // Propriété sur AdditiveFunctionArgumentBinding (métadonnées fonction)
     private static final Node BINDING_AGENT_NAME_PROPERTY;
+    private static final Node FUNCTION_REQUIRED;
     private static final Node ABOUT_FUNCTION;
 
     static {
@@ -43,8 +46,10 @@ public class CompareFunctionProperty extends BaseBuiltin {
         ncl = NatclinnConf.ncl;
         HAS_INGREDIENT_R = NodeFactory.createURI(ncl + "hasIngredientR");
         HAS_FUNCTION = NodeFactory.createURI(ncl + "hasFunction");
+        HAS_ADDITIVE_FUNCTION_CHECK = NodeFactory.createURI(ncl + "hasAdditiveFunctionCheck");
         PRODUCT_ARG_NAME_PROPERTY = NodeFactory.createURI(ncl + "nameProperty");
         BINDING_AGENT_NAME_PROPERTY = NodeFactory.createURI(ncl + "bindingAgentNameProperty");
+        FUNCTION_REQUIRED = NodeFactory.createURI(ncl + "functionRequired");
         ABOUT_FUNCTION = NodeFactory.createURI(ncl + "aboutFunction");
     }
 
@@ -83,7 +88,21 @@ public class CompareFunctionProperty extends BaseBuiltin {
         }
         itIngR.close();
 
-        // Si aucun ingrédient ou aucune fonction détectée, le produit ne peut être lié à cet argument.
+        // 1b) Récupérer les fonctions d'absence via ncl:hasAdditiveFunctionCheck.
+        //     Ces fonctions indiquent l'ABSENCE d'additifs (e.g., "pas_de_colorant", "pas_de_conservateur").
+        //     On collecte les noms locaux depuis les ressources URI directement attachées au produit.
+        ExtendedIterator<Triple> itCheck = g.find(productNode, HAS_ADDITIVE_FUNCTION_CHECK, Node.ANY);
+        while (itCheck.hasNext()) {
+            Node val = itCheck.next().getObject();
+            if (val.isURI()) {
+                String uri = val.getURI();
+                String functionName = uri.substring(uri.lastIndexOf('/') + 1);
+                functions.add(functionName.toLowerCase().trim());
+            }
+        }
+        itCheck.close();
+
+        // Si aucune fonction (présence ou absence) détectée, le produit ne peut être lié à cet argument.
         if (functions.isEmpty()) return false;
 
         // 2) Récupérer les propriétés du ProductArgument (données enquêtes consommateurs).
@@ -129,10 +148,31 @@ public class CompareFunctionProperty extends BaseBuiltin {
 
                     // Comparer bindingAgentNameProperty (métadonnées) avec nameProperty (ProductArgument)
                     for (String argProp : argProperties) {
+                        boolean match = false;
+                        
                         // Comparaison exacte (insensible à la casse)
-                        if (argProp.equalsIgnoreCase(bp)) return true;
+                        if (argProp.equalsIgnoreCase(bp)) {
+                            match = true;
+                        }
                         // Comparaison normalisée (suppression accents et caractères spéciaux)
-                        if (normalizeString(argProp).equals(normalizeString(bp))) return true;
+                        else if (normalizeString(argProp).equals(normalizeString(bp))) {
+                            match = true;
+                        }
+                        
+                        // Si pas de correspondance nameProperty → rejet immédiat
+                        if (!match) continue;
+                        
+                        // Si correspondance trouvée, vérifier functionRequired
+                        boolean required = isFunctionRequired(g, bindingNode);
+                        
+                        // Si functionRequired="oui" (ou variantes) → lien accepté
+                        if (required) {
+                            itBindingProp.close();
+                            itBinding.close();
+                            return true;
+                        }
+                        // Si functionRequired n'est pas "oui" → rejet
+                        // (on continue la boucle pour vérifier d'autres bindings)
                     }
                 }
                 itBindingProp.close();
@@ -167,6 +207,42 @@ public class CompareFunctionProperty extends BaseBuiltin {
             }
         }
         itFunc.close();
+    }
+
+    /**
+     * Vérifie si la propriété functionRequired d'un AdditiveFunctionArgumentBinding
+     * indique que la fonction est obligatoire (valeurs: Oui, OUI, oui, Yes, yes, OK, ok, Ok).
+     * 
+     * Logique de matching :
+     * 1. Vérifier d'abord la correspondance nameProperty (bindingAgentNameProperty vs nameProperty)
+     * 2. Si pas de correspondance → rejet (return false)
+     * 3. Si correspondance ET functionRequired="oui" → lien créé (return true)
+     * 4. Si correspondance ET functionRequired≠"oui" → rejet (return false)
+     * 
+     * Le flag functionRequired filtre donc les liens : seuls les bindings avec functionRequired="oui"
+     * ET une correspondance nameProperty créent effectivement un lien Product-ProductArgument.
+     * 
+     * @param g Le graphe RDF contenant les données.
+     * @param bindingNode Le nœud AdditiveFunctionArgumentBinding à vérifier.
+     * @return true si functionRequired indique "oui", false sinon.
+     */
+    private boolean isFunctionRequired(Graph g, Node bindingNode) {
+        ExtendedIterator<Triple> itRequired = g.find(bindingNode, FUNCTION_REQUIRED, Node.ANY);
+        while (itRequired.hasNext()) {
+            Node val = itRequired.next().getObject();
+            if (val.isLiteral()) {
+                String required = val.getLiteralLexicalForm();
+                if (required != null) {
+                    String req = required.trim().toLowerCase();
+                    if (req.equals("oui") || req.equals("yes") || req.equals("ok")) {
+                        itRequired.close();
+                        return true;
+                    }
+                }
+            }
+        }
+        itRequired.close();
+        return false;
     }
 
     /**

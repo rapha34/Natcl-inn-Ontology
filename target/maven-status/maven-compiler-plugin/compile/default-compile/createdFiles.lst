@@ -1,3 +1,4 @@
+natclinn\util\CompareFunctionProperty.class
 natclinn\util\CreateEUadditivesTable.class
 natclinn\util\CalcGiveLabelOfRessource.class
 natclinn\util\NatclinnUtil$Ingredient.class
@@ -17,7 +18,6 @@ natclinn\util\NatclinnQueryOutputObject.class
 webService\Product.class
 ontologyManagement\EUFoodAdditivesExporter$Additive.class
 queriesForWebService\NatclinnQueryCreationInfModel.class
-ontologyManagement\OpenFoodFactsToExcelExporterCopy2$MatchResult.class
 ontologyManagement\ExcelMergerConfirmation.class
 ontologyManagement\ExtractMychoiceProjectToExcel$StakeholderData.class
 queriesForWebService\NatclinnSingletonInfModel.class
@@ -45,14 +45,16 @@ natclinn\util\NatclinnConf.class
 ontologyManagement\ExtractMychoiceProjectToExcel$SourceData.class
 natclinn\util\CalcNumberOfTriples.class
 ontologyManagement\ExcelMerger$1.class
+ontologyManagement\CreateMychoiceProjectFromPreliminaryProject.class
 ontologyManagement\ExtractMychoiceProjectToExcel$TypeSourceData.class
-ontologyManagement\OpenFoodFactsToExcelExporterCopy2.class
 natclinn\util\RUtil.class
 ontologyManagement\CreateNatclinnTbox.class
 ontologyManagement\ExcelMergerBack$1.class
 ontologyManagement\ExtractMychoiceProjectToExcel$ArgumentData.class
+ontologyManagement\CreateNatclinnFunctionAbox.class
 ontologyManagement\OpenFoodFactsToExcelExporter$MatchResult.class
 ontologyManagement\CreateNatclinnArgumentsAbox.class
+ontologyManagement\CreateNatclinnFunctionAbox$1.class
 ontologyManagement\CreateNatclinnOntology.class
 ontologyManagement\ExtractMychoiceProjectToExcel$ProjectData.class
 databaseManagement\NatclinnTDBInitialisation.class
@@ -69,4 +71,3 @@ ontologyManagement\CreateNatclinnArgumentsAbox$1.class
 inferencesAndQueries\NatclinnQueryStatistics.class
 ontologyManagement\CreateNatclinnProductsAbox$1.class
 ontologyManagement\CreateNatclinnProductsAbox.class
-ontologyManagement\OpenFoodFactsToExcelExporterCopy.class

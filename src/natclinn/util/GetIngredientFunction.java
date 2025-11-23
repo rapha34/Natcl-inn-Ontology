@@ -73,7 +73,8 @@ public class GetIngredientFunction extends BaseBuiltin {
     
     static {
         // Conservateurs
-        COMMON_INGREDIENTS.put("sel", "conservateur_naturel");
+        COMMON_INGREDIENTS.put("sel", "sel");
+        COMMON_INGREDIENTS.put("sel de Guérande", "sel");
         COMMON_INGREDIENTS.put("sucre", "conservateur_naturel");
         COMMON_INGREDIENTS.put("vinaigre", "conservateur_naturel");
         COMMON_INGREDIENTS.put("acide citrique", "acidifiant");

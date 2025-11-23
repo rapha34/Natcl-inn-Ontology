@@ -334,7 +334,7 @@ public class NatclinnQueryStatistics {
 		// 	"}";
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
-		titleQuery = "Résumé des fonctions dans un produit";
+		titleQuery = "Résumé des fonctions dans un produit par rapport aux ingrédients";
 		typeQuery = "SELECT";
 		stringQuery = prefix + "SELECT (?targetName AS ?Nom_Produit) (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
 				"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
@@ -357,6 +357,23 @@ public class NatclinnQueryStatistics {
 		"GROUP BY ?targetName " ;
 	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 	idQuery++;
+
+
+	titleQuery = "Résumé des fonctions dans un produit par rapport à l'absence d'ingrédients";
+		typeQuery = "SELECT";
+		stringQuery = prefix + "SELECT (?targetName AS ?Nom_Produit)  " +
+				"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
+			"WHERE { " +
+				"?targetProduct rdf:type ncl:Product . " +
+				"?targetProduct skos:prefLabel ?targetName . " +
+				"?targetProduct ncl:isProductIAA 'true'^^xsd:boolean . " +
+				"?targetProduct ncl:hasAdditiveFunctionCheck ?function . " +
+				"?function skos:prefLabel ?functionLabel . " +
+			"} " +
+		"GROUP BY ?targetName " ;
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;	
+
 
 	titleQuery = "Arguments disponibles (ncl:ProductArgument avec nameProperty)";
 	commentQuery = "Liste tous les arguments qui peuvent être liés aux fonctions";
@@ -423,6 +440,63 @@ public class NatclinnQueryStatistics {
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		idQuery++;
 
+
+        titleQuery = "Test sel";
+        typeQuery = "SELECT";
+        stringQuery = prefix + 
+            "SELECT ?ingredient ?prefLabel ?ciqual ?off ?hasIngredientR " +
+            "WHERE { " +
+            "  ncl:P-3564700423196 ncl:hasIngredient* ?ingredient . " +
+            "  OPTIONAL { ?ingredient skos:prefLabel ?prefLabel } " +
+            "  OPTIONAL { ?ingredient ncl:hasCiqualFoodCode ?ciqual } " +
+            "  OPTIONAL { ?ingredient ncl:hasIdIngredientOFF ?off } " +
+            "  OPTIONAL { ncl:P-3564700423196 ncl:hasIngredientR ?hasIngredientR . " +
+            "             FILTER(?hasIngredientR = ?ingredient) } " +
+            "  FILTER(CONTAINS(LCASE(STR(?prefLabel)), \"sel\") || " +
+            "         ?ciqual = \"11058\" || " +
+            "         ?off = \"en:salt\") " +
+            "}";
+        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        idQuery++;
+
+        titleQuery = "Test sel2";
+        typeQuery = "ASK";
+        stringQuery = prefix + 
+            "ASK { " +
+            "  ncl:P-3564700423196 ncl:hasIngredientR ?ing . " +
+            "  ?ing skos:prefLabel \"sel\"^^xsd:string . " +
+            "}";
+        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        idQuery++;
+
+        titleQuery = "Test sel3 - containsSalt";
+        typeQuery = "ASK";
+        stringQuery = prefix + 
+            "ASK { " +
+            "  ncl:P-3564700423196 ncl:containsSalt 'true'^^xsd:boolean . " +
+            "}";
+        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        idQuery++;
+
+        titleQuery = "Test sel4 - toutes propriétés sel";
+        typeQuery = "SELECT";
+        stringQuery = prefix + 
+            "SELECT ?p ?o " +
+            "WHERE { " +
+            "  ncl:P-3564700423196 ?p ?o . " +
+            "  FILTER(CONTAINS(STR(?p), \"Salt\") || CONTAINS(STR(?o), \"sel\")) " +
+            "}";
+        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        idQuery++;
+
+        titleQuery = "Test sel5 - containsIngredientWithFunction ncl:sel";
+        typeQuery = "ASK";
+        stringQuery = prefix + 
+            "ASK { " +
+            "  ncl:P-3564700423196 ncl:containsIngredientWithFunction ncl:sel . " +
+            "}";
+        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        idQuery++;
 		
 		
 		// titleQuery = "Périodes étudiées";

@@ -121,6 +121,12 @@ public class NatclinnQueryInferedModel {
                             ResultSet results = qe.execSelect();
                             ResultSetFormatter.out(System.out, results);
                         }
+                    } else if ("ASK".equalsIgnoreCase(type)) {
+                        Query query = QueryFactory.create(queryString);
+                        try (QueryExecution qe = QueryExecutionFactory.create(query, infModel)) {
+                            boolean result = qe.execAsk();
+                            System.out.println("Result: " + result);
+                        }
                     }
                 } catch (Exception e) {
                     System.err.println("Erreur dans la requête : " + objectQuery.getTitleQuery());
