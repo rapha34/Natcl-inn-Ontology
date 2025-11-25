@@ -9,12 +9,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.jena.ontology.AnnotationProperty;
-import org.apache.jena.ontology.DatatypeProperty;
-import org.apache.jena.ontology.OntClass;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.Ontology;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
@@ -37,37 +32,37 @@ import natclinn.util.NatclinnConf;
 import natclinn.util.NatclinnUtil;
 
 /**
- * Programme de création de l'ABox des fonctions d'additifs à partir
- * du fichier Excel AdditiveFunctionAbox.xlsx.
+ * Programme de création de l'ABox des rôles d'additifs à partir
+ * du fichier Excel AdditiveRoleAbox.xlsx.
  *
- * Onglet "FonctionAdditif" : IDFonction | Nom Fonction
- * Onglet "CritéreEtPropriété" : IDFonction | Nom Fonction | Fonction Requise | Attribut | Description | Polarité | Nom critère | Propriété | Valeur propriété
+ * Onglet "RoleAdditif" : IDRole | Nom Role
+ * Onglet "CritéreEtPropriété" : IDRole | Nom Role | Role Requise | Attribut | Description | Polarité | Nom critère | Propriété | Valeur propriété
  *
- * Pour chaque fonction on crée un individu de classe AdditiveFunction.
- * Pour chaque ligne critère/propriété associée à une fonction on crée un individu Argument
- * (réutilisation du modèle existant) et on le lie à la fonction via la propriété aboutFunction.
+ * Pour chaque rôle on crée un individu de classe AdditiveRole.
+ * Pour chaque ligne critère/propriété associée à une rôle on crée un individu Argument
+ * (réutilisation du modèle existant) et on le lie à la rôle via la propriété aboutRole.
  */
-public class CreateNatclinnFunctionAbox {
+public class CreateNatclinnRoleAbox {
 
     public static void main(String[] args) {
         new NatclinnConf();
-        String excelFile = NatclinnConf.folderForData + "/AdditiveFunctionAbox.xlsx";
-        String json = createFunctionABox(excelFile);
+        String excelFile = NatclinnConf.folderForData + "/AdditiveRoleAbox.xlsx";
+        String json = createRoleABox(excelFile);
         if (json == null) {
             System.out.println("Modèle vide – arrêt.");
             return;
         }
-        OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+        Model om = ModelFactory.createDefaultModel();
         RDFParser.create().source(new StringReader(json)).lang(Lang.JSONLD).parse(om);
-        try (FileOutputStream out = new FileOutputStream(NatclinnConf.folderForOntologies + "/NatclinnFunctionAbox.xml")) {
+        try (FileOutputStream out = new FileOutputStream(NatclinnConf.folderForOntologies + "/NatclinnRoleAbox.xml")) {
             om.write(out, "RDF/XML");
         } catch (IOException e) {
             System.err.println("Erreur écriture RDF/XML: " + e.getMessage());
         }
     }
 
-    public static String createFunctionABox(String excelFile) {
-        OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+    public static String createRoleABox(String excelFile) {
+        Model om = ModelFactory.createDefaultModel();
 
         // Namespaces
         String ncl = NatclinnConf.ncl; om.setNsPrefix("ncl", ncl);
@@ -76,57 +71,58 @@ public class CreateNatclinnFunctionAbox {
         String rdf = NatclinnConf.rdf; om.setNsPrefix("rdf", rdf);
         String dcterms = NatclinnConf.dcterms; om.setNsPrefix("dcterms", dcterms);
 
-        Ontology ont = om.createOntology(ncl + "NatclinnFunctionAbox");
-        om.add(ont, RDFS.label, "Ontology of Natclinn Additive Functions");
-        om.add(ont, DC.description, "ABox for additive functions and related criteria");
+        Resource ont = om.createResource(ncl + "NatclinnRoleAbox");
+        om.add(ont, RDFS.label, "Ontology of Natclinn Additive Roles");
+        om.add(ont, DC.description, "ABox for additive roles and related criteria");
 
         // Classes
-        OntClass NCL = om.createClass(ncl + "NCL");
-        OntClass AdditiveFunction = om.createClass(ncl + "AdditiveFunction");
-        OntClass AdditiveFunctionArgumentBinding = om.createClass(ncl + "AdditiveFunctionArgumentBinding");
-        OntClass Attribute = om.createClass(ncl + "Attribute");
+        // Resource NCL = om.createResource(ncl + "NCL");
+        Resource AdditiveRole = om.createResource(ncl + "AdditiveRole");
+        Resource AdditiveRoleArgumentBinding = om.createResource(ncl + "AdditiveRoleArgumentBinding");
+        Resource Attribute = om.createResource(ncl + "Attribute");
 
         /////////////////////////////
 	    // Inclusion de concepts   //
 	    /////////////////////////////
 	
-	    NCL.addSubClass(AdditiveFunction);
-        NCL.addSubClass(AdditiveFunctionArgumentBinding);
-        NCL.addSubClass(Attribute);
+	    // Note: Les relations de subsomption de classes ne sont plus créées avec Model
+        // NCL.addSubClass(AdditiveRole);
+        // NCL.addSubClass(AdditiveRoleArgumentBinding);
+        // NCL.addSubClass(Attribute);
 
         // Properties
         Property rdfType = om.createProperty(rdf, "type");
         Property hasAttribute = om.createProperty(ncl, "hasBindingAgentAttribute");
-        Property aboutFunction = om.createProperty(ncl, "aboutFunction"); // lien AdditiveFunctionArgumentBinding -> Fonction
-        DatatypeProperty functionRequired = om.createDatatypeProperty(ncl + "functionRequired");
-        DatatypeProperty descriptionProp = om.createDatatypeProperty(ncl + "bindingAgentDescription");
-        DatatypeProperty polarity = om.createDatatypeProperty(ncl + "bindingAgentPolarity");
-        DatatypeProperty nameCriterion = om.createDatatypeProperty(ncl + "bindingAgentNameCriterion");
-        DatatypeProperty nameProperty = om.createDatatypeProperty(ncl + "bindingAgentNameProperty");
-        DatatypeProperty valueProperty = om.createDatatypeProperty(ncl + "bindingAgentValueProperty");
-        AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
+        Property aboutRole = om.createProperty(ncl, "aboutRole"); // lien AdditiveRoleArgumentBinding -> Role
+        Property roleRequired = om.createProperty(ncl + "roleRequired");
+        Property descriptionProp = om.createProperty(ncl + "bindingAgentDescription");
+        Property polarity = om.createProperty(ncl + "bindingAgentPolarity");
+        Property nameCriterion = om.createProperty(ncl + "bindingAgentNameCriterion");
+        Property nameProperty = om.createProperty(ncl + "bindingAgentNameProperty");
+        Property valueProperty = om.createProperty(ncl + "bindingAgentValueProperty");
+        Property prefLabel = om.createProperty(skos + "prefLabel");
 
-        Map<String, Resource> functionMap = new HashMap<>();
+        Map<String, Resource> roleMap = new HashMap<>();
         Map<String, Resource> attributeMap = new HashMap<>();
         Map<String, Integer> argCountersByLabel = new HashMap<>();
 
         try (FileInputStream fis = new FileInputStream(excelFile)) {
             ZipSecureFile.setMinInflateRatio(0.001);
             try (Workbook workbook = new XSSFWorkbook(fis)) {
-                // Sheet FonctionAdditif
-                Sheet fonctionsSheet = workbook.getSheet("FonctionAdditif");
-                if (fonctionsSheet != null) {
-                    for (Row row : fonctionsSheet) {
+                // Sheet RoleAdditif
+                Sheet rolesSheet = workbook.getSheet("RoleAdditif");
+                if (rolesSheet != null) {
+                    for (Row row : rolesSheet) {
                         if (row.getRowNum() == 0) continue; // header
-                        String idFonction = getCellValue(row.getCell(0));
-                        String nomFonction = getCellValue(row.getCell(1));
-                        if (idFonction != null && !idFonction.isEmpty()) {
-                            Resource f = om.createResource(ncl + nomFonction.replaceAll("\\s+", "_"))
-                                    .addProperty(rdfType, AdditiveFunction);
-                            if (nomFonction != null && !nomFonction.isEmpty()) {
-                                f.addLiteral(prefLabel, nomFonction);
+                        String idRole = getCellValue(row.getCell(0));
+                        String nomRole = getCellValue(row.getCell(1));
+                        if (idRole != null && !idRole.isEmpty()) {
+                            Resource f = om.createResource(ncl + nomRole.replaceAll("\\s+", "_"))
+                                    .addProperty(rdfType, AdditiveRole);
+                            if (nomRole != null && !nomRole.isEmpty()) {
+                                f.addLiteral(prefLabel, nomRole);
                             }
-                            functionMap.put(idFonction, f);
+                            roleMap.put(idRole, f);
                         }
                     }
                 }
@@ -136,9 +132,9 @@ public class CreateNatclinnFunctionAbox {
                 if (critSheet != null) {
                     for (Row row : critSheet) {
                         if (row.getRowNum() == 0) continue; // header
-                        String idFonction = getCellValue(row.getCell(0));
-                        // Ignorer la colonne B (Nom Fonction) pour cet onglet
-                        String fonctionRequise = getCellValue(row.getCell(2));
+                        String idRole = getCellValue(row.getCell(0));
+                        // Ignorer la colonne B (Nom Role) pour cet onglet
+                        String roleRequis = getCellValue(row.getCell(2));
                         String attribut = getCellValue(row.getCell(3));
                         String description = getCellValue(row.getCell(4));
                         String polarite = getCellValue(row.getCell(5));
@@ -146,41 +142,41 @@ public class CreateNatclinnFunctionAbox {
                         String propriete = getCellValue(row.getCell(7));
                         String valeurPropriete = getCellValue(row.getCell(8));
 
-                        // Ne créer un AdditiveFunctionArgumentBinding que si IDFonction est non vide
-                        if (idFonction != null && !idFonction.isEmpty()) {
+                        // Ne créer un AdditiveRoleArgumentBinding que si IDRole est non vide
+                        if (idRole != null && !idRole.isEmpty()) {
                             // Et s'il y a au moins une info utile
                             if ((propriete != null && !propriete.isEmpty()) || (description != null && !description.isEmpty())
-                                    || (fonctionRequise != null && !fonctionRequise.isEmpty()) || (attribut != null && !attribut.isEmpty())
+                                    || (roleRequis != null && !roleRequis.isEmpty()) || (attribut != null && !attribut.isEmpty())
                                     || (nomCritere != null && !nomCritere.isEmpty()) || (valeurPropriete != null && !valeurPropriete.isEmpty())) {
-                                String funcLabel = null;
-                                if (functionMap.containsKey(idFonction)) {
+                                String rolLabel = null;
+                                if (roleMap.containsKey(idRole)) {
                                     try {
-                                        funcLabel = functionMap.get(idFonction).getProperty(prefLabel).getString();
+                                        rolLabel = roleMap.get(idRole).getProperty(prefLabel).getString();
                                     } catch (Exception ignored) {}
                                 }
-                                String baseLabel = (funcLabel != null && !funcLabel.isEmpty()) ? funcLabel : idFonction;
+                                String baseLabel = (rolLabel != null && !rolLabel.isEmpty()) ? rolLabel : idRole;
                                 String safeLabel = baseLabel
                                         .trim()
                                         .replaceAll("\\s+", "-")
                                         .replaceAll("[^A-Za-z0-9_-]", "");
                                 int nextIndex = argCountersByLabel.getOrDefault(safeLabel, 0) + 1;
-                                // Identifiant de l'individu AdditiveFunctionArgumentBinding (ancien préfixe ArgDet- puis AFAB- remplacé par FuncBind-)
-                                String argId = "FuncBind-" + safeLabel + "-" + nextIndex;
+                                // Identifiant de l'individu AdditiveRoleArgumentBinding (ancien préfixe ArgDet- puis AFAB- remplacé par RolBind-)
+                                String argId = "RolBind-" + safeLabel + "-" + nextIndex;
                                 // Sécurité: éviter collision si précédemment créé
                                 while (om.containsResource(om.createResource(ncl + argId))) {
                                     nextIndex++;
-                                    // Re-génération de l'identifiant avec le nouveau préfixe FuncBind-
-                                    argId = "FuncBind-" + safeLabel + "-" + nextIndex;
+                                    // Re-génération de l'identifiant avec le nouveau préfixe RolBind-
+                                    argId = "RolBind-" + safeLabel + "-" + nextIndex;
                                 }
                                 argCountersByLabel.put(safeLabel, nextIndex);
-                                Resource arg = om.createResource(ncl + argId).addProperty(rdfType, AdditiveFunctionArgumentBinding);
+                                Resource arg = om.createResource(ncl + argId).addProperty(rdfType, AdditiveRoleArgumentBinding);
 
                                 if (description != null && !description.isEmpty()) arg.addLiteral(descriptionProp, description);
                                 if (polarite != null && !polarite.isEmpty()) arg.addLiteral(polarity, polarite);
                                 if (nomCritere != null && !nomCritere.isEmpty()) arg.addLiteral(nameCriterion, nomCritere);
                                 if (propriete != null && !propriete.isEmpty()) arg.addLiteral(nameProperty, propriete);
                                 if (valeurPropriete != null && !valeurPropriete.isEmpty()) arg.addLiteral(valueProperty, valeurPropriete);
-                                if (fonctionRequise != null && !fonctionRequise.isEmpty()) arg.addLiteral(functionRequired, fonctionRequise);
+                                if (roleRequis != null && !roleRequis.isEmpty()) arg.addLiteral(roleRequired, roleRequis);
 
                                 // Attribut (création si nécessaire)
                                 if (attribut != null && !attribut.isEmpty()) {
@@ -193,9 +189,9 @@ public class CreateNatclinnFunctionAbox {
                                     arg.addProperty(hasAttribute, attributeMap.get(attribut));
                                 }
 
-                                // Lien vers la fonction (IDFonction est non vide et attendu existant)
-                                if (functionMap.containsKey(idFonction)) {
-                                    arg.addProperty(aboutFunction, functionMap.get(idFonction));
+                                // Lien vers la rôle (IDRole est non vide et attendu existant)
+                                if (roleMap.containsKey(idRole)) {
+                                    arg.addProperty(aboutRole, roleMap.get(idRole));
                                 }
                             }
                         }

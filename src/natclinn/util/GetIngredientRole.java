@@ -15,19 +15,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Primitive pour identifier la fonction d'un ingrédient via Open Food Facts
- * Usage: getIngredientFunction(?ingredientLabel, ?function)
- * Retourne: une ressource URI ncl:<fonction> (ex: ncl:conservateur, ncl:emulsifiant_stabilisant)
+ * Primitive pour identifier la rôle d'un ingrédient via Open Food Facts
+ * Usage: getIngredientRole(?ingredientLabel, ?role)
+ * Retourne: une ressource URI ncl:<rôle> (ex: ncl:conservateur, ncl:emulsifiant_stabilisant)
  */
-public class GetIngredientFunction extends BaseBuiltin {
+public class GetIngredientRole extends BaseBuiltin {
     
     private static final String ncl;
     
     // Cache pour éviter les appels API répétés
     private static Map<String, String> cache = new HashMap<>();
     
-    // Mapping des catégories E-numbers vers les fonctions
-    private static final Map<String, String> E_NUMBER_FUNCTIONS = new HashMap<>();
+    // Mapping des catégories E-numbers vers les rôles
+    private static final Map<String, String> E_NUMBER_ROLES = new HashMap<>();
     
     static {
         // Initialisation de la configuration
@@ -36,36 +36,36 @@ public class GetIngredientFunction extends BaseBuiltin {
         
         // Conservateurs (E200-E299)
         for (int i = 200; i <= 299; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "conservateur");
+            E_NUMBER_ROLES.put("E" + i, "conservateur");
         }
         // Antioxydants (E300-E399)
         for (int i = 300; i <= 321; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "antioxydant");
+            E_NUMBER_ROLES.put("E" + i, "antioxydant");
         }
         // Émulsifiants, stabilisants, épaississants (E400-E499)
         for (int i = 400; i <= 499; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "emulsifiant_stabilisant");
+            E_NUMBER_ROLES.put("E" + i, "emulsifiant_stabilisant");
         }
         // Régulateurs d'acidité (E500-E599)
         for (int i = 500; i <= 599; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "regulateur_acidite");
+            E_NUMBER_ROLES.put("E" + i, "regulateur_acidite");
         }
         // Exhausteurs de goût (E620-E640)
         for (int i = 620; i <= 640; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "exhausteur_gout");
+            E_NUMBER_ROLES.put("E" + i, "exhausteur_gout");
         }
         // Édulcorants (E950-E969)
         for (int i = 950; i <= 969; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "edulcorant");
+            E_NUMBER_ROLES.put("E" + i, "edulcorant");
         }
         // Colorants (E100-E199)
         for (int i = 100; i <= 199; i++) {
-            E_NUMBER_FUNCTIONS.put("E" + i, "colorant");
+            E_NUMBER_ROLES.put("E" + i, "colorant");
         }
         
         // Ajouts spécifiques connus
-        E_NUMBER_FUNCTIONS.put("E330", "acidifiant"); // Acide citrique
-        E_NUMBER_FUNCTIONS.put("E322", "emulsifiant"); // Lécithine
+        E_NUMBER_ROLES.put("E330", "acidifiant"); // Acide citrique
+        E_NUMBER_ROLES.put("E322", "emulsifiant"); // Lécithine
     }
     
     // Base de données locale des ingrédients courants
@@ -129,7 +129,7 @@ public class GetIngredientFunction extends BaseBuiltin {
 
         // Antioxydants
         COMMON_INGREDIENTS.put("antioxydant", "antioxydant");
-         COMMON_INGREDIENTS.put("anti oxydant", "antioxydant");
+        COMMON_INGREDIENTS.put("anti oxydant", "antioxydant");
         COMMON_INGREDIENTS.put("anti_oxydant", "antioxydant");
         COMMON_INGREDIENTS.put("anti-oxydant", "antioxydant");
         COMMON_INGREDIENTS.put("vitamine e", "antioxydant");
@@ -197,12 +197,12 @@ public class GetIngredientFunction extends BaseBuiltin {
     
     @Override
     public String getName() {
-        return "getIngredientFunction";
+        return "getIngredientRole";
     }
 
     @Override
     public int getArgLength() {
-        return 2; // ingredientLabel, function
+        return 2; // ingredientLabel, role
     }
 
     @Override
@@ -217,27 +217,27 @@ public class GetIngredientFunction extends BaseBuiltin {
             // Vérifier le cache
             if (cache.containsKey(label)) {
                 // Créer une ressource URI au lieu d'un literal
-                Node functionNode = NodeFactory.createURI(ncl + cache.get(label));
-                return context.getEnv().bind(args[1], functionNode);
+                Node roleNode = NodeFactory.createURI(ncl + cache.get(label));
+                return context.getEnv().bind(args[1], roleNode);
             }
             
-            String function = identifyFunction(label);
+            String role = identifyRole(label);
             
-            if (function != null) {
-                cache.put(label, function);
+            if (role != null) {
+                cache.put(label, role);
                 // Créer une ressource URI au lieu d'un literal
-                Node functionNode = NodeFactory.createURI(ncl + function);
-                return context.getEnv().bind(args[1], functionNode);
+                Node roleNode = NodeFactory.createURI(ncl + role);
+                return context.getEnv().bind(args[1], roleNode);
             }
         }
         return false;
     }
     
-    private String identifyFunction(String label) {
+    private String identifyRole(String label) {
         // 1. Vérifier si c'est un E-number
         String eNumber = extractENumber(label);
-        if (eNumber != null && E_NUMBER_FUNCTIONS.containsKey(eNumber)) {
-            return E_NUMBER_FUNCTIONS.get(eNumber);
+        if (eNumber != null && E_NUMBER_ROLES.containsKey(eNumber)) {
+            return E_NUMBER_ROLES.get(eNumber);
         }
         
         // 2. Vérifier dans la base locale
@@ -249,9 +249,9 @@ public class GetIngredientFunction extends BaseBuiltin {
         
         // // 3. Appeler l'API Open Food Facts
         // try {
-        //     String function = queryOFFIngredient(label);
-        //     if (function != null) {
-        //         return function;
+        //     String role = queryOFFIngredient(label);
+        //     if (role != null) {
+        //         return role;
         //     }
         // } catch (Exception e) {
         //     System.err.println("Erreur lors de la requête OFF pour: " + label + " - " + e.getMessage());
@@ -310,7 +310,7 @@ public class GetIngredientFunction extends BaseBuiltin {
                             // Mapping basé sur les préfixes d'ID OFF
                             if (id.startsWith("en:e")) {
                                 String eNum = id.substring(3).toUpperCase();
-                                return E_NUMBER_FUNCTIONS.getOrDefault("E" + eNum, "additif");
+                                return E_NUMBER_ROLES.getOrDefault("E" + eNum, "additif");
                             }
                             
                             // Catégories spécifiques OFF

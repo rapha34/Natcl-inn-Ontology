@@ -1,0 +1,334 @@
+<mxfile host="app.diagrams.net" modified="2025-01-01T00:00:00.000Z" agent="GitHub Copilot" version="24.0.0" etag="natclinn-architecture-v1" type="device">
+  <diagram id="natclinn-architecture" name="Architecture Globale Natcl'inn">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1654" pageHeight="2339" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- TITRE PRINCIPAL -->
+        <mxCell id="title" value="Architecture Globale du Projet Natcl'inn&#xa;Système d'Inférence de Naturalité des Produits Agroalimentaires" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=20;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="800" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- COUCHE 1: DONNÉES ET STOCKAGE -->
+        <mxCell id="layer1-title" value="COUCHE 1: DONNÉES ET STOCKAGE" style="text;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="140" width="1480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- TDB Dataset -->
+        <mxCell id="tdb" value="&lt;b&gt;TDB2 Dataset&lt;/b&gt;&#xa;(Apache Jena Triple Store)&#xa;&#xa;• Stockage persistant RDF&#xa;• Graphes nommés par ontologie&#xa;• ReadWrite transactions" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="120" y="220" width="280" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Ontologies OWL -->
+        <mxCell id="owl-files" value="&lt;b&gt;Fichiers OWL/RDF&lt;/b&gt;&#xa;&#xa;• NatclinnOntology.owl&#xa;• TBox: Classes, Propriétés&#xa;• ABox: Instances Produits&#xa;• Ingrédients, Arguments" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="480" y="220" width="280" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Sources Excel -->
+        <mxCell id="excel-sources" value="&lt;b&gt;Sources Excel&lt;/b&gt;&#xa;&#xa;• Listes produits IAA&#xa;• Arguments consommateurs&#xa;• Fonctions additives&#xa;• Liaisons métadonnées" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="840" y="220" width="280" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Config Files -->
+        <mxCell id="config" value="&lt;b&gt;Configuration&lt;/b&gt;&#xa;&#xa;• natclinn.properties&#xa;• log4j2.properties&#xa;• listOntologies.json&#xa;• listRules.json&#xa;• listPrimitives.json&#xa;• parameters.json" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="220" width="280" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- COUCHE 2: GESTION ONTOLOGIE -->
+        <mxCell id="layer2-title" value="COUCHE 2: GESTION ONTOLOGIE ET INITIALISATION" style="text;html=1;strokeColor=#b85450;fillColor=#f8cecc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="420" width="1480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- TDB Initialisation -->
+        <mxCell id="tdb-init" value="&lt;b&gt;NatclinnTDBInitialisation&lt;/b&gt;&#xa;&#xa;• Création base TDB&#xa;• Chargement ontologies&#xa;• Import Excel → RDF&#xa;• Graphes nommés" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="500" width="320" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- Ontology Management -->
+        <mxCell id="onto-mgmt" value="&lt;b&gt;Ontology Management&lt;/b&gt;&#xa;&#xa;• CreateNatclinnOntology&#xa;• CreateNatclinnTbox&#xa;• CreateNatclinnProductsAbox&#xa;• CreateNatclinnFunctionAbox&#xa;• CreateNatclinnArgumentsAbox&#xa;• ExcelMerger utilities" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="500" width="320" height="160" as="geometry" />
+        </mxCell>
+
+        <!-- NatclinnConf -->
+        <mxCell id="natclinn-conf" value="&lt;b&gt;NatclinnConf&lt;/b&gt;&#xa;&#xa;• Chargement config&#xa;• Chemins fichiers&#xa;• Préfixes SPARQL&#xa;• Paramètres globaux" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="500" width="280" height="120" as="geometry" />
+        </mxCell>
+
+        <!-- COUCHE 3: MOTEUR D'INFÉRENCE -->
+        <mxCell id="layer3-title" value="COUCHE 3: MOTEUR D'INFÉRENCE (TWO-PASS)" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="720" width="1480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- NatclinnCreateInferedModel -->
+        <mxCell id="inf-model" value="&lt;b&gt;NatclinnCreateInferedModel&lt;/b&gt;&#xa;(Two-Pass Inference Engine)&#xa;&#xa;&lt;b&gt;PASSE 1 - PRÉSENCE:&lt;/b&gt;&#xa;• Chargement ontologies TDB&#xa;• Chargement règles (filtre: !No*)&#xa;• GenericRuleReasoner (FORWARD)&#xa;• Configuration GeoSPARQL&#xa;• Enregistrement primitives custom&#xa;• Inférence fonctions additives&#xa;&#xa;&lt;b&gt;PASSE 2 - ABSENCE:&lt;/b&gt;&#xa;• Matérialisation Passe 1&#xa;• Ajout triple gating (ncl:control ncl:hasValuePasse 2)&#xa;• Chargement règles absence (filtre: No*)&#xa;• GenericRuleReasoner (FORWARD)&#xa;• Inférence arguments absences" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#d5e8d4;strokeColor=#82b366;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;fontStyle=0" vertex="1" parent="1">
+          <mxGeometry x="120" y="800" width="480" height="320" as="geometry" />
+        </mxCell>
+
+        <!-- Rules Files -->
+        <mxCell id="rules" value="&lt;b&gt;Fichiers Règles Jena&lt;/b&gt;&#xa;&#xa;• natclinn_additives.rules&#xa;&#xa;&lt;b&gt;Règles Présence:&lt;/b&gt;&#xa;• ProductIngredientFunction&#xa;• IdentifyAdditif&#xa;• hasIngredientRecursive&#xa;&#xa;&lt;b&gt;Règles Absence (27):&lt;/b&gt;&#xa;• NoColorant (Colorant E1xx)&#xa;• NoPreservative (Conservateur E2xx)&#xa;• NoEmulsifier (Émulsifiant E4xx)&#xa;• NoThickener (Épaississant E4xx)&#xa;• NoSweetener (Édulcorant E9xx)&#xa;• NoAddedSalt (pas_de_sel_ajoute)&#xa;• ... 21 autres règles&#xa;&#xa;Toutes gatées: (ncl:control ncl:hasValuePasse 2)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#fff2cc;strokeColor=#d6b656;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="680" y="800" width="380" height="320" as="geometry" />
+        </mxCell>
+
+        <!-- Custom Built-ins -->
+        <mxCell id="builtins" value="&lt;b&gt;Primitives Personnalisées Jena&lt;/b&gt;&#xa;(natclinn.util)&#xa;&#xa;• &lt;b&gt;GetIngredientFunction&lt;/b&gt;&#xa;  Extrait fonction additive d'un ingrédient&#xa;&#xa;• &lt;b&gt;CompareFunctionProperty&lt;/b&gt;&#xa;  Compare propriété fonction avec métadonnées&#xa;  liaison (bindingAgentNameProperty)&#xa;&#xa;• GetCiqualProperty&#xa;• GetOFFProperty&#xa;• CalcNumberOfTriples&#xa;• CalcPercent&#xa;• CalcGiveLabelOfRessource" style="rounded=1;whiteSpace=wrap;html=1;fontSize=11;fillColor=#e1d5e7;strokeColor=#9673a6;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1140" y="800" width="340" height="280" as="geometry" />
+        </mxCell>
+
+        <!-- COUCHE 4: REQUÊTES -->
+        <mxCell id="layer4-title" value="COUCHE 4: REQUÊTES ET EXPORTS" style="text;html=1;strokeColor=#9673a6;fillColor=#e1d5e7;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="1180" width="1480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Query Engine -->
+        <mxCell id="query-engine" value="&lt;b&gt;NatclinnQueryInferedModel&lt;/b&gt;&#xa;&#xa;• Exécution requêtes SPARQL&#xa;• Sur InfModel final (2 passes)&#xa;• Extraction résultats&#xa;• Formatage JSON/CSV" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1260" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Query Statistics -->
+        <mxCell id="query-stats" value="&lt;b&gt;NatclinnQueryStatistics&lt;/b&gt;&#xa;&#xa;• Requêtes statistiques&#xa;• Instances Product&#xa;• Ingrédients + fonctions&#xa;• Arguments consommateurs&#xa;• Tests validation (Test sel4)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1260" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Query Products -->
+        <mxCell id="query-products" value="&lt;b&gt;NatclinnQueryProducts&lt;/b&gt;&#xa;&#xa;• Lister produits&#xa;• Récupérer propriétés&#xa;• EAN, labels, arguments&#xa;• Pour Web Service" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#dae8fc;strokeColor=#6c8ebf;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="1260" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- MyChoice Export -->
+        <mxCell id="mychoice-export" value="&lt;b&gt;Export MyChoice&lt;/b&gt;&#xa;&#xa;• CreateMychoiceProjectFromPreliminaryProject&#xa;• Conversion ncl:Product → mch:Alternative&#xa;• Conversion ncl:ProductArgument → mch:Argument&#xa;• Traçabilité: mch:relatedToNatclinnProductArgument&#xa;• Export multi-projets" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#f8cecc;strokeColor=#b85450;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1320" y="1260" width="440" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- COUCHE 5: WEB SERVICE -->
+        <mxCell id="layer5-title" value="COUCHE 5: WEB SERVICE JAX-RS" style="text;html=1;strokeColor=#d79b00;fillColor=#ffe6cc;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="80" y="1460" width="1480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- NatclinnService -->
+        <mxCell id="web-service" value="&lt;b&gt;NatclinnService (JAX-RS)&lt;/b&gt;&#xa;&#xa;• GET /api_natclinn/products/list&#xa;• GET /api_natclinn/products/{id}&#xa;• GET /api_natclinn/products/search?id=...&#xa;&#xa;Encodage: percent-encoding ou hex" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1540" width="420" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- FileUploadService -->
+        <mxCell id="upload-service" value="&lt;b&gt;FileUploadService&lt;/b&gt;&#xa;&#xa;• Upload fichiers Excel&#xa;• Import produits&#xa;• Mise à jour ontologie" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="600" y="1540" width="280" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Singleton InfModel -->
+        <mxCell id="singleton" value="&lt;b&gt;NatclinnSingletonInfModel&lt;/b&gt;&#xa;&#xa;• InfModel partagé&#xa;• Lazy initialization&#xa;• NatclinnQueryCreationInfModel&#xa;• NatclinnQueryInitInfModel" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1540" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- AppContextListener -->
+        <mxCell id="listener" value="&lt;b&gt;AppContextListener&lt;/b&gt;&#xa;&#xa;• Init au démarrage Tomcat&#xa;• Chargement config&#xa;• Création InfModel&#xa;• Enregistrement primitives" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffe6cc;strokeColor=#d79b00;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;" vertex="1" parent="1">
+          <mxGeometry x="1340" y="1540" width="300" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- COUCHE 6: DÉPLOIEMENT -->
+        <mxCell id="layer6-title" value="COUCHE 6: DÉPLOIEMENT ET BUILD" style="text;html=1;strokeColor=#666666;fillColor=#f5f5f5;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="80" y="1740" width="1480" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Maven Build -->
+        <mxCell id="maven" value="&lt;b&gt;Maven Build&lt;/b&gt;&#xa;&#xa;• pom.xml&#xa;• Apache Jena 5.2.0&#xa;• Apache Thrift 0.18.1&#xa;• GeoSPARQL&#xa;• JAX-RS (Jersey)&#xa;• Jackson (JSON)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="120" y="1820" width="340" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- Deployment -->
+        <mxCell id="deploy" value="&lt;b&gt;Déploiement Tomcat&lt;/b&gt;&#xa;&#xa;• scripts/deploy-windows.ps1&#xa;• Task VS Code: Build &amp; Deploy&#xa;• WAR: target/*.war&#xa;• WebContent: fileuploader.html" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="520" y="1820" width="360" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- External APIs -->
+        <mxCell id="external-apis" value="&lt;b&gt;APIs Externes&lt;/b&gt;&#xa;&#xa;• OpenFoodFacts API&#xa;  https://world.openfoodfacts.org/api/v2/&#xa;&#xa;• Ciqual API (ANSES)&#xa;  https://ciqual.anses.fr/api/foods/&#xa;&#xa;• Rate limiting, caching, retry" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#f5f5f5;strokeColor=#666666;align=left;verticalAlign=top;spacingLeft=10;spacingTop=10;fontColor=#333333;" vertex="1" parent="1">
+          <mxGeometry x="940" y="1820" width="400" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- ============ FLUX DE DONNÉES (ARROWS) ============ -->
+
+        <!-- Excel → TDB Init -->
+        <mxCell id="flow1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#d79b00;" edge="1" parent="1" source="excel-sources" target="tdb-init">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="980" y="420" />
+              <mxPoint x="280" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow1-label" value="Import Excel" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#d79b00;fontStyle=1" vertex="1" connectable="0" parent="flow1">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="20" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- OWL → TDB Init -->
+        <mxCell id="flow2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#d6b656;" edge="1" parent="1" source="owl-files" target="onto-mgmt">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow2-label" value="Load OWL" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#d6b656;fontStyle=1" vertex="1" connectable="0" parent="flow2">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Config → NatclinnConf -->
+        <mxCell id="flow3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#82b366;" edge="1" parent="1" source="config" target="natclinn-conf">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1340" y="420" />
+              <mxPoint x="1060" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow3-label" value="Load Config" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#82b366;fontStyle=1" vertex="1" connectable="0" parent="flow3">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="20" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- TDB → CreateInferedModel -->
+        <mxCell id="flow4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.25;entryY=0;entryDx=0;entryDy=0;strokeWidth=3;strokeColor=#82b366;dashed=1;" edge="1" parent="1" source="tdb" target="inf-model">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="260" y="740" />
+              <mxPoint x="240" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow4-label" value="Load Graphs" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#82b366;fontStyle=1" vertex="1" connectable="0" parent="flow4">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="-20" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Rules → CreateInferedModel -->
+        <mxCell id="flow5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=3;strokeColor=#d6b656;dashed=1;" edge="1" parent="1" source="rules" target="inf-model">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow5-label" value="2-Pass Rules&#xa;(Presence + Absence)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#d6b656;fontStyle=1" vertex="1" connectable="0" parent="flow5">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="10" y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Built-ins → CreateInferedModel -->
+        <mxCell id="flow6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.75;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#9673a6;dashed=1;" edge="1" parent="1" source="builtins" target="inf-model">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1310" y="740" />
+              <mxPoint x="480" y="740" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow6-label" value="Register Primitives" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#9673a6;fontStyle=1" vertex="1" connectable="0" parent="flow6">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="60" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- InfModel → Query Engine -->
+        <mxCell id="flow7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=4;strokeColor=#6c8ebf;" edge="1" parent="1" source="inf-model" target="query-engine">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="1160" />
+              <mxPoint x="290" y="1160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow7-label" value="InfModel Final&#xa;(2 passes complètes)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=11;fontColor=#6c8ebf;fontStyle=1" vertex="1" connectable="0" parent="flow7">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="-60" y="-20" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- InfModel → Query Statistics -->
+        <mxCell id="flow8" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=4;strokeColor=#6c8ebf;" edge="1" parent="1" source="inf-model" target="query-stats">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- InfModel → Query Products -->
+        <mxCell id="flow9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=4;strokeColor=#6c8ebf;" edge="1" parent="1" source="inf-model" target="query-products">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="1160" />
+              <mxPoint x="1090" y="1160" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- InfModel → MyChoice Export -->
+        <mxCell id="flow10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=3;strokeColor=#b85450;" edge="1" parent="1" source="query-stats" target="mychoice-export">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow10-label" value="Convert to MyChoice" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#b85450;fontStyle=1" vertex="1" connectable="0" parent="flow10">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="20" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Singleton → Web Service -->
+        <mxCell id="flow11" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=3;strokeColor=#d79b00;" edge="1" parent="1" source="singleton" target="web-service">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1110" y="1720" />
+              <mxPoint x="330" y="1720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow11-label" value="Shared InfModel" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#d79b00;fontStyle=1" vertex="1" connectable="0" parent="flow11">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="140" y="-9" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Query Products → Singleton -->
+        <mxCell id="flow12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#6c8ebf;dashed=1;" edge="1" parent="1" source="query-products" target="singleton">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow12-label" value="SPARQL Queries" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#6c8ebf;fontStyle=1" vertex="1" connectable="0" parent="flow12">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- External APIs → Upload Service -->
+        <mxCell id="flow13" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;strokeWidth=2;strokeColor=#666666;dashed=1;" edge="1" parent="1" source="external-apis" target="upload-service">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1140" y="2000" />
+              <mxPoint x="740" y="2000" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="flow13-label" value="Fetch Data" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=10;fontColor=#666666;fontStyle=1" vertex="1" connectable="0" parent="flow13">
+          <mxGeometry x="-0.2" y="1" relative="1" as="geometry">
+            <mxPoint x="40" y="11" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ============ LÉGENDE ============ -->
+        <mxCell id="legend-box" value="" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fillColor=#ffffff;strokeColor=#000000;strokeWidth=2;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="2040" width="1480" height="180" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-title" value="LÉGENDE - ARCHITECTURE NATCL'INN" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="2050" width="1400" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-flow1" value="FLUX PRINCIPAL:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1" vertex="1" parent="1">
+          <mxGeometry x="120" y="2090" width="1400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-desc1" value="1. Excel/OWL → TDB Initialisation → TDB Dataset&#xa;2. TDB + Règles + Primitives → NatclinnCreateInferedModel (Two-Pass: Présence puis Absence)&#xa;3. InfModel Final → Requêtes SPARQL (Query Engine, Statistics, Products)&#xa;4. Résultats → Export MyChoice / Web Service JAX-RS&#xa;5. Web Service → Tomcat (deploy-windows.ps1)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=top;whiteSpace=wrap;rounded=0;fontSize=11;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="2110" width="1400" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="legend-note" value="NOTE: Two-Pass Inference garantit absence correcte (pas de faux positifs comme pas_de_sel_ajoute sur produits avec sel)" style="text;html=1;strokeColor=#82b366;fillColor=#d5e8d4;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;fontSize=11;fontStyle=2;spacingLeft=10;" vertex="1" parent="1">
+          <mxGeometry x="120" y="2190" width="1400" height="20" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

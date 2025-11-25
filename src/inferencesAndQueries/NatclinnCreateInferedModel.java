@@ -149,7 +149,7 @@ public class NatclinnCreateInferedModel {
         System.out.println("Durée chargement règles : " + Duration.between(startRules, endRules).toMillis() + " ms");
 
         // ---------------------------------------------------
-        // Étape 4 : Raisonnement et création du modèle inféré
+        // Étape 4 : Raisonnement (Passe 1 : présence uniquement)
         // ---------------------------------------------------
         Instant startInfer = Instant.now();
 		
@@ -166,31 +166,92 @@ public class NatclinnCreateInferedModel {
 		reasonerOWL = reasonerOWL.bindSchema(infRDFS);  // important : lie le schéma RDFS déjà enrichi
 		InfModel infOWL = ModelFactory.createInfModel(reasonerOWL, modelTemp);
 
-		// Étape 3 - Règles personnalisées : complètez avec règles Jena
-		GenericRuleReasoner reasonerCustom = new GenericRuleReasoner(allRules);
-        reasonerCustom.setMode(GenericRuleReasoner.HYBRID); // Mode hybride pour exécuter les règles backward
-		// reasonerCustom.setMode(GenericRuleReasoner.HYBRID); // Mode hybride obligatoire pour OWLTranslation
-		reasonerCustom.setDerivationLogging(true); // utile pour debugger les inférences
-		reasonerCustom.setOWLTranslation(false);    // permet d'utiliser OWL équivalences dans les règles
-        // reasonerCustom.setOWLTranslation(true);    // permet d'utiliser OWL équivalences dans les règles
-		reasonerCustom.setTransitiveClosureCaching(true);
+        // Séparation des règles par passe selon leur préfixe
+        ArrayList<Rule> pass1Rules = new ArrayList<>();
+        ArrayList<Rule> pass2Rules = new ArrayList<>();
+        ArrayList<Rule> pass3Rules = new ArrayList<>();
+        
+        for (Rule r : allRules) {
+            String rn = r.getName() == null ? "" : r.getName();
+            if (rn.startsWith("Pass2")) {
+                pass2Rules.add(r);
+            } else if (rn.startsWith("Pass3")) {
+                pass3Rules.add(r);
+            } else {
+                pass1Rules.add(r);
+            }
+        }
+        System.out.println("Règles Pass1: " + pass1Rules.size() + " | Règles Pass2: " + pass2Rules.size() + " | Règles Pass3: " + pass3Rules.size());
 
-		// Combine les inférences OWL avec les règles personnalisées
-		InfModel infModel = ModelFactory.createInfModel(reasonerCustom, infOWL);
+        // ---------------------------------------------------
+        // Étape 5 : Passe 1 - Règles du premier passage
+        // ---------------------------------------------------
+        System.out.println("=== Passe 1 démarrage ===");
+        GenericRuleReasoner reasonerPass1 = new GenericRuleReasoner(pass1Rules);
+        reasonerPass1.setMode(GenericRuleReasoner.FORWARD);
+        reasonerPass1.setDerivationLogging(false);
+        reasonerPass1.setTransitiveClosureCaching(true);
 
-        // Rechargement et préparation du modèle inféré
-        infModel.rebind();
-        infModel.prepare();
+        InfModel infModelPass1 = ModelFactory.createInfModel(reasonerPass1, infOWL);
+        infModelPass1.prepare();
+        System.out.println("Passe 1 terminée. Taille modèle: " + infModelPass1.size());
+
+        // ---------------------------------------------------
+        // Étape 6 : Passe 2 si des règles Pass2 existent
+        // ---------------------------------------------------
+        InfModel infModelPass2 = infModelPass1;
+        if (!pass2Rules.isEmpty()) {
+            System.out.println("=== Passe 2 démarrage ===");
+            new NatclinnConf();
+            
+            // Base = modèle Pass1 matérialisé
+            Model basePass2 = ModelFactory.createDefaultModel().add(infModelPass1);
+
+            GenericRuleReasoner reasonerPass2 = new GenericRuleReasoner(pass2Rules);
+            reasonerPass2.setMode(GenericRuleReasoner.FORWARD);
+            reasonerPass2.setDerivationLogging(false);
+            reasonerPass2.setTransitiveClosureCaching(true);
+
+            infModelPass2 = ModelFactory.createInfModel(reasonerPass2, basePass2);
+            infModelPass2.prepare();
+            System.out.println("Passe 2 terminée. Taille modèle: " + infModelPass2.size());
+        } else {
+            System.out.println("Aucune règle Pass2 détectée. Passage à Pass3 avec modèle Pass1.");
+        }
+        
+        // ---------------------------------------------------
+        // Étape 7 : Passe 3 si des règles Pass3 existent
+        // ---------------------------------------------------
+        InfModel infModelPass3 = infModelPass2;
+        if (!pass3Rules.isEmpty()) {
+            System.out.println("=== Passe 3 démarrage ===");
+            new NatclinnConf();
+            String ncl = NatclinnConf.ncl;
+            
+            // Base = modèle Pass2 matérialisé
+            Model basePass3 = ModelFactory.createDefaultModel().add(infModelPass2);
+
+            GenericRuleReasoner reasonerPass3 = new GenericRuleReasoner(pass3Rules);
+            reasonerPass3.setMode(GenericRuleReasoner.FORWARD);
+            reasonerPass3.setDerivationLogging(false);
+            reasonerPass3.setTransitiveClosureCaching(true);
+
+            infModelPass3 = ModelFactory.createInfModel(reasonerPass3, basePass3);
+            infModelPass3.prepare();
+            System.out.println("Passe 3 terminée. Taille modèle finale: " + infModelPass3.size());
+        } else {
+            System.out.println("Aucune règle Pass3 détectée. Modèle final = Pass2.");
+        }
 
         Instant endInfer = Instant.now();
-        System.out.println("Durée création modèle inféré : " + Duration.between(startInfer, endInfer).toMillis() + " ms");
+        System.out.println("Durée création modèle inféré (3 passes) : " + Duration.between(startInfer, endInfer).toMillis() + " ms");
 
         System.out.printf(
-            "=== Modèle inféré prêt ===%nOntologies : %d | Règles : %d | Primitives : %d%n",
-            listOntologiesFileName.size(), allRules.size(), listPrimitives.size()
+            "=== Modèle inféré prêt ===%nOntologies : %d | Règles totales : %d | Primitives : %d | Taille finale : %d%n",
+            listOntologiesFileName.size(), allRules.size(), listPrimitives.size(), infModelPass3.size()
         );
 
-        return infModel;
+        return infModelPass3;
     }
 
     /**

@@ -292,12 +292,12 @@ public class NatclinnQueryStatistics {
 	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 	idQuery++;
 
-	titleQuery = "Tous les ingrédients avec leurs fonctions associées pour un produit donné P-3564700423196";
+	titleQuery = "Tous les ingrédients avec leurs rôles associés pour un produit donné P-3564700423196";
 	commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
 	typeQuery = "SELECT";
 	stringQuery = prefix + 
 		"SELECT DISTINCT ?ingredientLabel " +
-		"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
+		"(GROUP_CONCAT(DISTINCT ?roleLabel; separator=\", \") AS ?roles) " +
 		"WHERE { " +
 		"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3564700423196> } " +
 		"    " +
@@ -309,8 +309,8 @@ public class NatclinnQueryStatistics {
 		"    ?ingredient a ncl:Ingredient ; " +
 		"                skos:prefLabel ?ingredientLabel . " +
 		"    " +
-		// Optionnel : récupérer les fonctions des ingrédients
-		"    OPTIONAL { ?ingredient ncl:hasFunction ?function . ?function skos:prefLabel ?functionLabel . } " +
+		// Optionnel : récupérer les rôles des ingrédients
+		"    OPTIONAL { ?ingredient ncl:hasRole ?role . ?role skos:prefLabel ?roleLabel . } " +
 		"} " +
 		"GROUP BY ?ingredient ?ingredientLabel " +
 		"ORDER BY ?ingredient";
@@ -334,10 +334,10 @@ public class NatclinnQueryStatistics {
 		// 	"}";
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
-		titleQuery = "Résumé des fonctions dans un produit par rapport aux ingrédients";
+		titleQuery = "Résumé des rôles dans un produit par rapport aux ingrédients";
 		typeQuery = "SELECT";
 		stringQuery = prefix + "SELECT (?targetName AS ?Nom_Produit) (COUNT(DISTINCT ?ingredient) AS ?nbIngredients) " +
-				"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
+				"(GROUP_CONCAT(DISTINCT ?roleLabel; separator=\", \") AS ?Role_additif) " +
 			"WHERE { " +
 				"?targetProduct rdf:type ncl:Product . " +
 				"?targetProduct skos:prefLabel ?targetName . " +
@@ -345,11 +345,11 @@ public class NatclinnQueryStatistics {
 				// Naviguer récursivement : Product -> hasIngredient|hasComposedOf -> Ingredient
 				"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
 				"    " +
-				// S'assurer que c'est bien un ingrédient et récupérer son label et sa fonction
+				// S'assurer que c'est bien un ingrédient et récupérer son label et sa role
 				"    ?ingredient a ncl:Ingredient ; " +
 				"                skos:prefLabel ?ingredientLabel ; " +
-				"                ncl:hasFunction ?function . " +
-				"    ?function   skos:prefLabel ?functionLabel . " +
+				"                ncl:hasRole ?role . " +
+				"    ?role   skos:prefLabel ?roleLabel . " +
 				"    " +
 				// EXCLURE les CompositeIngredient
         		"FILTER NOT EXISTS { ?ingredient a ncl:CompositeIngredient } " +
@@ -359,16 +359,16 @@ public class NatclinnQueryStatistics {
 	idQuery++;
 
 
-	titleQuery = "Résumé des fonctions dans un produit par rapport à l'absence d'ingrédients";
+	titleQuery = "Résumé des rôles dans un produit par rapport à l'absence d'ingrédients";
 		typeQuery = "SELECT";
 		stringQuery = prefix + "SELECT (?targetName AS ?Nom_Produit)  " +
-				"(GROUP_CONCAT(DISTINCT ?functionLabel; separator=\", \") AS ?functions) " +
+				"(GROUP_CONCAT(DISTINCT ?roleLabel; separator=\", \") AS ?Role_additif) " +
 			"WHERE { " +
 				"?targetProduct rdf:type ncl:Product . " +
 				"?targetProduct skos:prefLabel ?targetName . " +
 				"?targetProduct ncl:isProductIAA 'true'^^xsd:boolean . " +
-				"?targetProduct ncl:hasAdditiveFunctionCheck ?function . " +
-				"?function skos:prefLabel ?functionLabel . " +
+				"?targetProduct ncl:hasAdditiveRoleCheck ?role . " +
+				"?role skos:prefLabel ?roleLabel . " +
 			"} " +
 		"GROUP BY ?targetName " ;
 	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
@@ -376,7 +376,7 @@ public class NatclinnQueryStatistics {
 
 
 	titleQuery = "Arguments disponibles (ncl:ProductArgument avec nameProperty)";
-	commentQuery = "Liste tous les arguments qui peuvent être liés aux fonctions";
+	commentQuery = "Liste tous les arguments qui peuvent être liés aux rôles";
 	typeQuery = "SELECT";
 	stringQuery = prefix + "SELECT ?argument ?nameProperty WHERE { " +
 		"?argument rdf:type ncl:ProductArgument . " +
@@ -386,23 +386,23 @@ public class NatclinnQueryStatistics {
 	idQuery++;		
 	
 	
-		// titleQuery = "Fonctions des additifs avec leurs labels";
-		// commentQuery = "Vérifie comment les fonctions sont étiquetées (skos:prefLabel, rdfs:label)";
+		// titleQuery = "Roles des additifs avec leurs labels";
+		// commentQuery = "Vérifie comment les rôles sont étiquetées (skos:prefLabel, rdfs:label)";
 		// typeQuery = "SELECT";
-		// stringQuery = prefix + "SELECT DISTINCT ?function ?labelSkos ?labelRdfs WHERE { " +
-		// 	"?ingredient ncl:hasFunction ?function . " +
-		// 	"OPTIONAL { ?function skos:prefLabel ?labelSkos } " +
-		// 	"OPTIONAL { ?function rdfs:label ?labelRdfs } " +
-		// 	"} ORDER BY ?function";
+		// stringQuery = prefix + "SELECT DISTINCT ?role ?labelSkos ?labelRdfs WHERE { " +
+		// 	"?ingredient ncl:hasRole ?role . " +
+		// 	"OPTIONAL { ?role skos:prefLabel ?labelSkos } " +
+		// 	"OPTIONAL { ?role rdfs:label ?labelRdfs } " +
+		// 	"} ORDER BY ?role";
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
-		// titleQuery = "Propriétés des fonctions (toutes)";
-		// commentQuery = "Montre toutes les propriétés des fonctions pour comprendre leur structure";
+		// titleQuery = "Propriétés des rôles (toutes)";
+		// commentQuery = "Montre toutes les propriétés des rôles pour comprendre leur structure";
 		// typeQuery = "SELECT";
-		// stringQuery = prefix + "SELECT DISTINCT ?function ?property ?value WHERE { " +
-		// 	"?ingredient ncl:hasFunction ?function . " +
-		// 	"?function ?property ?value . " +
-		// 	"} ORDER BY ?function ?property";
+		// stringQuery = prefix + "SELECT DISTINCT ?role ?property ?value WHERE { " +
+		// 	"?ingredient ncl:hasRole ?role . " +
+		// 	"?role ?property ?value . " +
+		// 	"} ORDER BY ?role ?property";
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 
 		// titleQuery = "test";
@@ -441,62 +441,216 @@ public class NatclinnQueryStatistics {
 		idQuery++;
 
 
-        titleQuery = "Test sel";
-        typeQuery = "SELECT";
-        stringQuery = prefix + 
-            "SELECT ?ingredient ?prefLabel ?ciqual ?off ?hasIngredientR " +
-            "WHERE { " +
-            "  ncl:P-3564700423196 ncl:hasIngredient* ?ingredient . " +
-            "  OPTIONAL { ?ingredient skos:prefLabel ?prefLabel } " +
-            "  OPTIONAL { ?ingredient ncl:hasCiqualFoodCode ?ciqual } " +
-            "  OPTIONAL { ?ingredient ncl:hasIdIngredientOFF ?off } " +
-            "  OPTIONAL { ncl:P-3564700423196 ncl:hasIngredientR ?hasIngredientR . " +
-            "             FILTER(?hasIngredientR = ?ingredient) } " +
-            "  FILTER(CONTAINS(LCASE(STR(?prefLabel)), \"sel\") || " +
-            "         ?ciqual = \"11058\" || " +
-            "         ?off = \"en:salt\") " +
-            "}";
-        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-        idQuery++;
+		/////////////////////////////////////////////////////
+		// CONTRÔLES EMBALLAGES                            //
+		/////////////////////////////////////////////////////
 
-        titleQuery = "Test sel2";
-        typeQuery = "ASK";
-        stringQuery = prefix + 
-            "ASK { " +
-            "  ncl:P-3564700423196 ncl:hasIngredientR ?ing . " +
-            "  ?ing skos:prefLabel \"sel\"^^xsd:string . " +
-            "}";
-        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-        idQuery++;
+		titleQuery = "Types d'emballages détectés";
+		commentQuery = "Liste tous les types d'emballages identifiés par la primitive getTypePackaging (compte les produits distincts)";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT DISTINCT ?packagingType (COUNT(DISTINCT ?product) AS ?nbProducts) " +
+			"WHERE { " +
+			"  ?product ncl:hasTypePackaging ?packagingType . " +
+			"} " +
+			"GROUP BY ?packagingType " +
+			"ORDER BY DESC(?nbProducts)";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
 
-        titleQuery = "Test sel3 - containsSalt";
-        typeQuery = "ASK";
-        stringQuery = prefix + 
-            "ASK { " +
-            "  ncl:P-3564700423196 ncl:containsSalt 'true'^^xsd:boolean . " +
-            "}";
-        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-        idQuery++;
+		titleQuery = "Nombre d'emballages par produit";
+		commentQuery = "Montre combien de matériaux d'emballage différents chaque produit possède";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct (COUNT(?packaging) AS ?nbPackagings) " +
+			"(GROUP_CONCAT(DISTINCT ?materialLabel; separator=\", \") AS ?materials) " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackaging ?packaging . " +
+			"  ?packaging ncl:hasMaterial ?material . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"  OPTIONAL { ?material skos:prefLabel ?materialLabel } " +
+			"} " +
+			"GROUP BY ?product ?nameProduct " +
+			"ORDER BY DESC(?nbPackagings)";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
 
-        titleQuery = "Test sel4 - toutes propriétés sel";
-        typeQuery = "SELECT";
-        stringQuery = prefix + 
-            "SELECT ?p ?o " +
-            "WHERE { " +
-            "  ncl:P-3564700423196 ?p ?o . " +
-            "  FILTER(CONTAINS(STR(?p), \"Salt\") || CONTAINS(STR(?o), \"sel\")) " +
-            "}";
-        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-        idQuery++;
+		titleQuery = "Produits avec emballage plastique";
+		commentQuery = "Liste les produits contenant du plastique dans leur emballage";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasTypePackaging ncl:emballage_plastique . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"} " +
+			"ORDER BY ?nameProduct";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
 
-        titleQuery = "Test sel5 - containsIngredientWithFunction ncl:sel";
-        typeQuery = "ASK";
-        stringQuery = prefix + 
-            "ASK { " +
-            "  ncl:P-3564700423196 ncl:containsIngredientWithFunction ncl:sel . " +
-            "}";
-        listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-        idQuery++;
+		titleQuery = "Produits sans plastique";
+		commentQuery = "Liste les produits ayant reçu l'annotation ncl:sans_plastique";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackagingCheck ncl:sans_plastique . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"} " +
+			"ORDER BY ?nameProduct";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		titleQuery = "Produits avec emballage naturel";
+		commentQuery = "Produits avec emballages naturels (verre, carton, bois, métal)";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct (GROUP_CONCAT(DISTINCT ?packagingType; separator=\", \") AS ?types) " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackagingCheck ncl:emballage_naturel . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"  OPTIONAL { ?product ncl:hasTypePackaging ?packagingType } " +
+			"} " +
+			"GROUP BY ?product ?nameProduct " +
+			"ORDER BY ?nameProduct";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		titleQuery = "Produits avec emballage biodégradable/compostable";
+		commentQuery = "Produits avec emballages biodégradables, compostables ou biosourcés";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct ?checkType " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackagingCheck ?checkType . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"  FILTER(?checkType IN (ncl:emballage_biodegradable, ncl:emballage_compostable, ncl:emballage_biosource)) " +
+			"} " +
+			"ORDER BY ?nameProduct ?checkType";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		titleQuery = "Produits sans emballage (vrac)";
+		commentQuery = "Produits n'ayant aucun emballage détecté";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackagingCheck ncl:sans_emballage . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"} " +
+			"ORDER BY ?nameProduct";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		titleQuery = "Produits avec emballage composite";
+		commentQuery = "Produits avec emballages composites (multi-matériaux, difficiles à recycler)";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackagingCheck ncl:emballage_composite . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"} " +
+			"ORDER BY ?nameProduct";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		titleQuery = "Détail des emballages par produit";
+		commentQuery = "Affiche tous les matériaux d'emballage et leurs types pour chaque produit";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?product ?nameProduct ?packaging ?material ?materialLabel ?packagingType " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasPackaging ?packaging . " +
+			"  ?packaging ncl:hasMaterial ?material . " +
+			"  OPTIONAL { ?product skos:prefLabel ?nameProduct } " +
+			"  OPTIONAL { ?material skos:prefLabel ?materialLabel } " +
+			"  OPTIONAL { ?packaging ncl:hasTypePackaging ?packagingType } " +
+			"} " +
+			"ORDER BY ?nameProduct ?materialLabel";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		titleQuery = "Statistiques types d'emballages par catégorie";
+		commentQuery = "Compte les occurrences de chaque type d'emballage détecté";
+		typeQuery = "SELECT";
+		stringQuery = prefix + 
+			"SELECT ?packagingType (COUNT(DISTINCT ?product) AS ?nbProducts) " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product ncl:hasTypePackaging ?packagingType . " +
+			"} " +
+			"GROUP BY ?packagingType " +
+			"ORDER BY DESC(?nbProducts)";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+
+        // titleQuery = "Test sel";
+        // typeQuery = "SELECT";
+        // stringQuery = prefix + 
+        //     "SELECT ?ingredient ?prefLabel ?ciqual ?off ?hasIngredientR " +
+        //     "WHERE { " +
+        //     "  ncl:P-3564700423196 ncl:hasIngredient* ?ingredient . " +
+        //     "  OPTIONAL { ?ingredient skos:prefLabel ?prefLabel } " +
+        //     "  OPTIONAL { ?ingredient ncl:hasCiqualFoodCode ?ciqual } " +
+        //     "  OPTIONAL { ?ingredient ncl:hasIdIngredientOFF ?off } " +
+        //     "  OPTIONAL { ncl:P-3564700423196 ncl:hasIngredientR ?hasIngredientR . " +
+        //     "             FILTER(?hasIngredientR = ?ingredient) } " +
+        //     "  FILTER(CONTAINS(LCASE(STR(?prefLabel)), \"sel\") || " +
+        //     "         ?ciqual = \"11058\" || " +
+        //     "         ?off = \"en:salt\") " +
+        //     "}";
+        // listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        // idQuery++;
+
+        // titleQuery = "Test sel2";
+        // typeQuery = "ASK";
+        // stringQuery = prefix + 
+        //     "ASK { " +
+        //     "  ncl:P-3564700423196 ncl:hasIngredientR ?ing . " +
+        //     "  ?ing skos:prefLabel \"sel\"^^xsd:string . " +
+        //     "}";
+        // listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        // idQuery++;
+
+        // titleQuery = "Test sel3 - containsSalt";
+        // typeQuery = "ASK";
+        // stringQuery = prefix + 
+        //     "ASK { " +
+        //     "  ncl:P-3564700423196 ncl:containsSalt 'true'^^xsd:boolean . " +
+        //     "}";
+        // listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        // idQuery++;
+
+        // titleQuery = "Test sel4 - toutes propriétés sel";
+        // typeQuery = "SELECT";
+        // stringQuery = prefix + 
+        //     "SELECT ?p ?o " +
+        //     "WHERE { " +
+        //     "  ncl:P-3564700423196 ?p ?o . " +
+        //     "  FILTER(CONTAINS(STR(?p), \"Salt\") || CONTAINS(STR(?o), \"sel\")) " +
+        //     "}";
+        // listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        // idQuery++;
+
+        // titleQuery = "Test sel5 - containsIngredientWithRole ncl:sel";
+        // typeQuery = "ASK";
+        // stringQuery = prefix + 
+        //     "ASK { " +
+        //     "  ncl:P-3564700423196 ncl:containsIngredientWithRole ncl:sel . " +
+        //     "}";
+        // listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+        // idQuery++;
 		
 		
 		// titleQuery = "Périodes étudiées";
@@ -1013,15 +1167,15 @@ public class NatclinnQueryStatistics {
 		Instant start0 = Instant.now();
 		
 		listRulesFileName.add("Natclinn.rules");
-		listRulesFileName.add("Natclinn_1.rules");
 		listRulesFileName.add("Natclinn_additives.rules");
-		// Nouveau fichier de règles pour relier automatiquement produits et arguments
-		listRulesFileName.add("Natclinn_product_arguments.rules");
+		listRulesFileName.add("Natclinn_packaging.rules");
 		listPrimitives.add("CalcNumberOfTriples");
 		listPrimitives.add("GetOFFProperty");
 		listPrimitives.add("GetCiqualProperty");
-		listPrimitives.add("GetIngredientFunction");
-		listPrimitives.add("CompareFunctionProperty");
+		listPrimitives.add("GetIngredientRole");
+		listPrimitives.add("CompareRoleProperty");
+		listPrimitives.add("GetTypePackaging");
+		listPrimitives.add("ComparePackagingTypeProperty");
 		topSpatial = "false";
 		
 		// Récupération du nom du fichier contenant la liste des ontologies à traiter.

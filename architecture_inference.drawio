@@ -52,8 +52,8 @@
           <mxGeometry x="400" y="215" width="160" height="50" as="geometry" />
         </mxCell>
 
-        <!-- hasFunction arrow -->
-        <mxCell id="hasFunction-arrow" value="ncl:hasFunction" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=11" edge="1" parent="1" source="ingredient" target="additive-function">
+        <!-- hasRole arrow -->
+        <mxCell id="hasRole-arrow" value="ncl:hasRole" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeWidth=2;fontSize=11" edge="1" parent="1" source="ingredient" target="additive-function">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="330" y="315" as="sourcePoint" />
           </mxGeometry>

@@ -789,11 +789,11 @@ public class CreateNatclinnTbox {
 		hasCiqualProxyFoodCode.addComment("Ciqual code for a similar food industry product.", "en");
 		hasCiqualProxyFoodCode.addComment("Code Ciqual d'un produit similaire de l'industrie agroalimentaire.", "fr");
 		
-		DatatypeProperty hasFunction = om.createDatatypeProperty(ncl + "hasFunction");
-		hasFunction.addDomain(Ingredient);
-		hasFunction.addRange(om.createResource(XSD.xstring.getURI()));
-		hasFunction.addComment("The technological or sensory function of an ingredient (preservative, flavor enhancer, etc.).", "en");
-		hasFunction.addComment("La fonction technologique ou sensorielle d'un ingrédient (conservateur, exhausteur de goût, etc.).", "fr");
+		DatatypeProperty hasRole = om.createDatatypeProperty(ncl + "hasRole");
+		hasRole.addDomain(Ingredient);
+		hasRole.addRange(om.createResource(XSD.xstring.getURI()));
+		hasRole.addComment("The technological or sensory function of an ingredient (preservative, flavor enhancer, etc.).", "en");
+		hasRole.addComment("La fonction technologique ou sensorielle d'un ingrédient (conservateur, exhausteur de goût, etc.).", "fr");
 
 		DatatypeProperty containsAdditives = om.createDatatypeProperty(ncl + "containsAdditives");
 		containsAdditives.addDomain(Product);

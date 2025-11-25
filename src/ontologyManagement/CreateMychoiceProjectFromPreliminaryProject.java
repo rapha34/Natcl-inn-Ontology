@@ -673,7 +673,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
     Property rdfType = model.getProperty(rdf + "type");
     Property hasIngredientR = model.getProperty(ncl + "hasIngredientR");
     Property aboutFunction = model.getProperty(ncl + "aboutFunction");
-    Property hasFunction = model.getProperty(ncl + "hasFunction");
+    Property hasRole = model.getProperty(ncl + "hasRole");
         StmtIterator iter = model.listStatements();
         while (iter.hasNext()) {
             Statement stmt = iter.nextStatement();
@@ -698,8 +698,8 @@ public class CreateMychoiceProjectFromPreliminaryProject {
         // Filtrer ncl:aboutFunction (lien AdditiveFunctionArgumentBinding -> AdditiveFunction)
         boolean isAboutFunction = stmt.getPredicate().equals(aboutFunction);
 
-        // Filtrer ncl:hasFunction (lien Ingredient -> AdditiveFunction)
-        boolean isHasFunction = stmt.getPredicate().equals(hasFunction);
+        // Filtrer ncl:hasRole (lien Ingredient -> AdditiveFunction)
+        boolean isHasRole = stmt.getPredicate().equals(hasRole);
 
         if (!stmt.getPredicate().equals(differentFrom)
             && !isBlankSubject
@@ -709,7 +709,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             && !isTypeRdfsResource
             && !isHasIngredientR
             && !isAboutFunction
-            && !isHasFunction) {
+            && !isHasRole) {
         cleanModel.add(stmt);
         }
         }

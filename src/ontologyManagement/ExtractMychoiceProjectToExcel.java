@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 
@@ -58,7 +57,7 @@ public class ExtractMychoiceProjectToExcel {
             throws FileNotFoundException, IOException {
         
         // Charger le modèle RDF
-        OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+        Model om = ModelFactory.createDefaultModel();
         try (FileInputStream fis = new FileInputStream(aboxFile)) {
             om.read(fis, null, "RDF/XML");
         }
@@ -143,7 +142,7 @@ public class ExtractMychoiceProjectToExcel {
                      new ArrayList<>(hasExpertises));
     }
     
-    private static ProjectData extractProject(OntModel om, Resource projRes, String mch) {
+    private static ProjectData extractProject(Model om, Resource projRes, String mch) {
         ProjectData data = new ProjectData();
         data.uri = projRes.getURI();
         data.name = getStringProperty(om, projRes, mch + "projectName");
@@ -152,7 +151,7 @@ public class ExtractMychoiceProjectToExcel {
         return data;
     }
     
-    private static AlternativeData extractAlternative(OntModel om, Resource altRes, String mch) {
+    private static AlternativeData extractAlternative(Model om, Resource altRes, String mch) {
         AlternativeData data = new AlternativeData();
         data.uri = altRes.getURI();
         data.name = getStringProperty(om, altRes, mch + "nameAlternative");
@@ -162,7 +161,7 @@ public class ExtractMychoiceProjectToExcel {
         return data;
     }
     
-    private static ArgumentData extractArgument(OntModel om, Resource argRes, String mch) {
+    private static ArgumentData extractArgument(Model om, Resource argRes, String mch) {
         ArgumentData data = new ArgumentData();
         data.idArgument = extractIdFromURI(argRes.getURI());
         data.assertion = getStringProperty(om, argRes, mch + "assertion");
@@ -196,10 +195,18 @@ public class ExtractMychoiceProjectToExcel {
             data.stakeholder = extractStakeholder(om, stakeholderRes, mch);
         }
         
-        // nameAlternative : récupéré depuis l'objet Alternative lié via hasAlternative
-        Resource alternativeRes = getObjectProperty(om, argRes, mch + "hasAlternative");
-        if (alternativeRes != null) {
-            data.nameAlternative = getStringProperty(om, alternativeRes, mch + "nameAlternative");
+        // nameAlternatives : récupérer toutes les alternatives liées via hasAlternative
+        Property hasAlternative = om.getProperty(mch + "hasAlternative");
+        StmtIterator altStmtIter = om.listStatements(argRes, hasAlternative, (RDFNode) null);
+        while (altStmtIter.hasNext()) {
+            Statement altStmt = altStmtIter.nextStatement();
+            if (altStmt.getObject().isResource()) {
+                Resource alternativeRes = altStmt.getResource();
+                String altName = getStringProperty(om, alternativeRes, mch + "nameAlternative");
+                if (!altName.isEmpty()) {
+                    data.nameAlternatives.add(altName);
+                }
+            }
         }
         
         // nameCriterion = nameCriterionStr (priorité à nameCriterionStr depuis mch:nameCriterion)
@@ -245,35 +252,35 @@ public class ExtractMychoiceProjectToExcel {
         return data;
     }
     
-    private static StakeholderData extractStakeholder(OntModel om, Resource shRes, String mch) {
+    private static StakeholderData extractStakeholder(Model om, Resource shRes, String mch) {
         StakeholderData data = new StakeholderData();
         data.uri = shRes.getURI();
         data.name = getStringProperty(om, shRes, mch + "nameStakeholder");
         return data;
     }
     
-    private static CriterionData extractCriterion(OntModel om, Resource critRes, String mch) {
+    private static CriterionData extractCriterion(Model om, Resource critRes, String mch) {
         CriterionData data = new CriterionData();
         data.uri = critRes.getURI();
         data.name = getStringProperty(om, critRes, mch + "criterionName");
         return data;
     }
     
-    private static PropertyData extractProperty(OntModel om, Resource propRes, String mch) {
+    private static PropertyData extractProperty(Model om, Resource propRes, String mch) {
         PropertyData data = new PropertyData();
         data.uri = propRes.getURI();
         data.name = getStringProperty(om, propRes, mch + "propertyName");
         return data;
     }
     
-    private static SourceData extractSource(OntModel om, Resource srcRes, String mch) {
+    private static SourceData extractSource(Model om, Resource srcRes, String mch) {
         SourceData data = new SourceData();
         data.uri = srcRes.getURI();
         data.name = getStringProperty(om, srcRes, mch + "nameSource");
         return data;
     }
     
-    private static TypeSourceData extractTypeSource(OntModel om, Resource tsRes, String mch) {
+    private static TypeSourceData extractTypeSource(Model om, Resource tsRes, String mch) {
         TypeSourceData data = new TypeSourceData();
         data.uri = tsRes.getURI();
         // TypeSource : récupérer nameTypeSource (pas de prefLabel nécessaire)
@@ -282,7 +289,7 @@ public class ExtractMychoiceProjectToExcel {
         return data;
     }
     
-    private static HasExpertiseData extractHasExpertise(OntModel om, Resource heRes, String mch) {
+    private static HasExpertiseData extractHasExpertise(Model om, Resource heRes, String mch) {
         HasExpertiseData data = new HasExpertiseData();
         
         Resource stakeholderRes = getObjectProperty(om, heRes, mch + "hasStakeholder");
@@ -298,12 +305,12 @@ public class ExtractMychoiceProjectToExcel {
         return (data.stakeholder != null && data.criterion != null) ? data : null;
     }
     
-    private static String getStringProperty(OntModel om, Resource res, String propURI) {
+    private static String getStringProperty(Model om, Resource res, String propURI) {
         Statement stmt = om.getProperty(res, om.getProperty(propURI));
         return (stmt != null) ? stmt.getString() : "";
     }
     
-    private static Resource getObjectProperty(OntModel om, Resource res, String propURI) {
+    private static Resource getObjectProperty(Model om, Resource res, String propURI) {
         Statement stmt = om.getProperty(res, om.getProperty(propURI));
         return (stmt != null && stmt.getObject().isResource()) ? stmt.getResource() : null;
     }
@@ -312,6 +319,32 @@ public class ExtractMychoiceProjectToExcel {
         if (uri == null) return "";
         int lastUnderscore = uri.lastIndexOf('-');
         return (lastUnderscore >= 0) ? uri.substring(lastUnderscore + 1) : uri;
+    }
+    
+    /**
+     * Remplit une ligne d'argument avec toutes les cellules (sauf idArgument, nameStakeHolder, nameAlternative, typeProCon déjà remplies)
+     */
+    private static void fillArgumentRow(Row row, ArgumentData arg) {
+        // nameCriterion : priorité à la string directe, sinon nom du Criterion objet
+        String nameCriterion = !arg.nameCriterionStr.isEmpty() ? arg.nameCriterionStr : 
+                               (arg.criterion != null ? arg.criterion.name : "");
+        row.createCell(4).setCellValue(nameCriterion);
+        row.createCell(5).setCellValue(arg.aim);
+        // nameProperty : priorité à la string directe, sinon nom du Property objet
+        String nameProperty = !arg.nameProperty.isEmpty() ? arg.nameProperty : 
+                              (arg.property != null ? arg.property.name : "");
+        row.createCell(6).setCellValue(nameProperty);
+        row.createCell(7).setCellValue(arg.value);
+        row.createCell(8).setCellValue(arg.condition);
+        row.createCell(9).setCellValue(arg.infValue);
+        row.createCell(10).setCellValue(arg.supValue);
+        row.createCell(11).setCellValue(arg.unit);
+        row.createCell(12).setCellValue(arg.assertion);
+        row.createCell(13).setCellValue(arg.explanation);
+        row.createCell(14).setCellValue(arg.isProspective);
+        row.createCell(15).setCellValue(arg.date);
+        row.createCell(16).setCellValue(arg.source != null ? arg.source.name : "");
+        row.createCell(17).setCellValue(arg.typeSource != null ? arg.typeSource.name : "");
     }
     
     private static void writeToExcel(String outputFile, ProjectData project,
@@ -350,33 +383,28 @@ public class ExtractMychoiceProjectToExcel {
 
             int rowIdx = 1;
             for (ArgumentData arg : arguments) {
-                Row row = argSheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(arg.idArgument);
-                row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
-                row.createCell(2).setCellValue(arg.nameAlternative);
-                row.createCell(3).setCellValue(arg.typeProCon);
-                // nameCriterion : priorité à la string directe, sinon nom du Criterion objet
-                String nameCriterion = !arg.nameCriterionStr.isEmpty() ? arg.nameCriterionStr : 
-                                       (arg.criterion != null ? arg.criterion.name : "");
-                row.createCell(4).setCellValue(nameCriterion);
-                row.createCell(5).setCellValue(arg.aim);
-                // nameProperty : priorité à la string directe, sinon nom du Property objet
-                String nameProperty = !arg.nameProperty.isEmpty() ? arg.nameProperty : 
-                                      (arg.property != null ? arg.property.name : "");
-                row.createCell(6).setCellValue(nameProperty);
-                row.createCell(7).setCellValue(arg.value);
-                row.createCell(8).setCellValue(arg.condition);
-                row.createCell(9).setCellValue(arg.infValue);
-                row.createCell(10).setCellValue(arg.supValue);
-                row.createCell(11).setCellValue(arg.unit);
-                row.createCell(12).setCellValue(arg.assertion);
-                row.createCell(13).setCellValue(arg.explanation);
-                row.createCell(14).setCellValue(arg.isProspective);
-                row.createCell(15).setCellValue(arg.date);
-                row.createCell(16).setCellValue(arg.source != null ? arg.source.name : "");
-                row.createCell(17).setCellValue(arg.typeSource != null ? arg.typeSource.name : "");
+                // Si l'argument a plusieurs alternatives, créer une ligne par alternative
+                // Sinon créer une seule ligne (même si liste vide)
+                if (arg.nameAlternatives.isEmpty()) {
+                    // Pas d'alternative liée
+                    Row row = argSheet.createRow(rowIdx++);
+                    row.createCell(0).setCellValue(arg.idArgument);
+                    row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
+                    row.createCell(2).setCellValue("");
+                    row.createCell(3).setCellValue(arg.typeProCon);
+                    fillArgumentRow(row, arg);
+                } else {
+                    // Une ligne par alternative
+                    for (String altName : arg.nameAlternatives) {
+                        Row row = argSheet.createRow(rowIdx++);
+                        row.createCell(0).setCellValue(arg.idArgument);
+                        row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
+                        row.createCell(2).setCellValue(altName);
+                        row.createCell(3).setCellValue(arg.typeProCon);
+                        fillArgumentRow(row, arg);
+                    }
+                }
             }
-
             // Feuille Project (ensuite)
             Sheet projectSheet = workbook.createSheet("project");
             headerRow = projectSheet.createRow(0);
@@ -506,11 +534,13 @@ public class ExtractMychoiceProjectToExcel {
     }
     
     static class ArgumentData {
-        String idArgument = "", nameAlternative = "", typeProCon = "", value = "", condition = "";
+        String idArgument = "", typeProCon = "", value = "", condition = "";
         String infValue = "", supValue = "", unit = "", assertion = "", explanation = "";
         String isProspective = "", date = "", aim = "";
         // Champs pour les strings directs (prioritaires sur les objets)
         String nameCriterionStr = "", nameProperty = "";
+        // Liste des alternatives liées à cet argument
+        List<String> nameAlternatives = new ArrayList<>();
         StakeholderData stakeholder;
         CriterionData criterion;
         PropertyData property;
