@@ -204,7 +204,7 @@ if __name__ == '__main__':
     
     try:
         parse_markdown_to_word(md_file, docx_file)
-        print("✓ Conversion réussie !")
+        print("Conversion réussie !")
     except Exception as e:
         print(f"✗ Erreur : {e}")
         import traceback

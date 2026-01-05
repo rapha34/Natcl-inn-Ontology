@@ -24,7 +24,7 @@ public class CreateAIFTbox {
 
 		String jsonString = CreationTBox();
 		
-		OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
+		OntModel om = ModelFactory.createOntologyModel();
 		
 		RDFParser.fromString(jsonString,Lang.JSONLD11).parse(om);
 

@@ -7,6 +7,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import natclinn.util.NatclinnConf;
 
 import java.io.*;
+import java.time.Duration;
+import java.time.Instant;
 
 public class ExcelMergerBack {
 
@@ -17,26 +19,65 @@ public class ExcelMergerBack {
     }
 
     public static void backAddExcelSheet(String sourceFilePath) throws IOException {
+        Instant startTotal = Instant.now();
+        System.out.println("\n=== DÉBUT DU TRAITEMENT ===");
+        
         ZipSecureFile.setMinInflateRatio(0.001);
+        
+        Instant startLoad = Instant.now();
+        System.out.println("Chargement du fichier...");
         try (FileInputStream fis = new FileInputStream(sourceFilePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
+            
+            System.out.println("Fichier chargé en " + Duration.between(startLoad, Instant.now()).toSeconds() + "s");
+            System.out.println("Nombre de feuilles: " + workbook.getNumberOfSheets());
 
+            java.util.List<Sheet> treatedSheets = new java.util.ArrayList<>();
+            
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
-                if (sheet.getSheetName().equals("Categories")) {
-                    continue; // Ignore la feuille cachée Categories
+                if (sheet.getSheetName().equals("Feuilles")) {
+                    continue; // Ignore la feuille cachée 
                 }
+                if (sheet.getSheetName().equals("Racines")) {
+                    continue; // Ignore la feuille cachée 
+                }
+                if (sheet.getSheetName().equals("Liste")) {
+                    continue; // Ignore la feuille cachée 
+                }
+                
+                Instant startSheet = Instant.now();
+                System.out.println("\nTraitement de la feuille: " + sheet.getSheetName());
                 clearGreenCellsAndRemoveBackground(sheet, workbook);
+                treatedSheets.add(sheet);
+                System.out.println("  -> Feuille traitée en " + Duration.between(startSheet, Instant.now()).toSeconds() + "s");
             }
 
-            // Recalcule toutes les formules via Apache POI
+            // Recalcule uniquement les formules des feuilles traitées
+            Instant startFormula = Instant.now();
+            System.out.println("\nRecalcul des formules (feuilles traitées uniquement)...");
             FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
-            evaluator.evaluateAll();
+            for (Sheet sheet : treatedSheets) {
+                System.out.println("  Recalcul feuille: " + sheet.getSheetName());
+                for (Row row : sheet) {
+                    for (Cell cell : row) {
+                        if (cell != null && cell.getCellType() == CellType.FORMULA) {
+                            evaluator.evaluateFormulaCell(cell);
+                        }
+                    }
+                }
+            }
+            System.out.println("Formules recalculées en " + Duration.between(startFormula, Instant.now()).toSeconds() + "s");
 
+            Instant startSave = Instant.now();
+            System.out.println("\nSauvegarde du fichier...");
             try (FileOutputStream fos = new FileOutputStream(sourceFilePath)) {
                 workbook.write(fos);
             }
+            System.out.println("Fichier sauvegardé en " + Duration.between(startSave, Instant.now()).toSeconds() + "s");
 
+            System.out.println("\n=== FIN DU TRAITEMENT ===");
+            System.out.println("TEMPS TOTAL: " + Duration.between(startTotal, Instant.now()).toSeconds() + "s");
             System.out.println("Suppression des cellules vertes terminée dans : " + sourceFilePath);
         }
     }

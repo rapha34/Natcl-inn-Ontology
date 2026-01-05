@@ -284,6 +284,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
         
         // Requête SPARQL pour récupérer les produits avec leurs arguments
         // Filtrée pour ce projet spécifique - récupère TOUTES les propriétés de ncl:ProductArgument
+        // Mise à jour pour l'architecture V5 avec LinkToArgument
         String queryString = prefix +
             "SELECT ?product ?productLabel ?productDesc ?argument ?argLabel \n" +
             "  ?assertion ?polarity ?nameCriterion ?aim ?nameProperty ?valueProperty \n" +
@@ -294,13 +295,13 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             // Récupérer les alternatives du projet
             "  ?alternative mch:hasProject <" + projectUri + "> . \n" +
             "  ?alternative mch:relatedToProduct ?product . \n" +
-            // Récupérer les arguments inférés du produit
+            // Récupérer les arguments inférés du produit via LinkToArgument (architecture V5)
             "  ?product rdf:type ncl:Product . \n" +
             "  ?product skos:prefLabel ?productLabel . \n" +
             "  OPTIONAL { ?product ncl:description ?productDesc } \n" +
-            "  ?product ncl:hasProductArgument ?argument . \n" +
+            "  ?product ncl:hasLinkToArgument ?link . \n" +
+            "  ?link ncl:hasReferenceProductArgument ?argument . \n" +
             "  ?argument rdf:type ncl:ProductArgument . \n" +
-            // (Filtre sur AdditiveFunctionArgumentBinding supprimé: les bindings ne sont plus susceptibles d'être typés ProductArgument)
             // Toutes les propriétés de ncl:ProductArgument
             "  OPTIONAL { ?argument skos:prefLabel ?argLabel } \n" +
             "  OPTIONAL { ?argument ncl:assertion ?assertion } \n" +
@@ -313,9 +314,8 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             "  OPTIONAL { ?argument ncl:infValue ?infValue } \n" +
             "  OPTIONAL { ?argument ncl:supValue ?supValue } \n" +
             "  OPTIONAL { ?argument ncl:unit ?unit } \n" +
-            // Verbatim/hasText devient explanation dans MyChoice
-            "  OPTIONAL { ?argument ncl:hasVerbatim ?verbatim . \n" +
-            "             ?verbatim ncl:hasText ?verbatimText } \n" +
+            // V5: Verbatim devient une dataProperty sur ProductArgument
+            "  OPTIONAL { ?argument ncl:verbatim ?verbatimText } \n" +
             // Source avec TypeSource et fiability
             "  OPTIONAL { ?argument ncl:hasSource ?source . \n" +
             "             OPTIONAL { ?source skos:prefLabel ?sourceLabel } \n" +
@@ -563,7 +563,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                             mychSource.addProperty(nameSourceProp, sourceLabelLit.getString());
                         }
                         // Création/Lien du TypeSource si présent
-                        System.out.println("typeSourceResource : " + typeSourceResource);
+                        // System.out.println("typeSourceResource : " + typeSourceResource);
                         if (typeSourceResource != null) {
                             String tsUri = typeSourceResource.getURI();
                             Individual mychTypeSource;

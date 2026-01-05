@@ -98,9 +98,9 @@ public class CreateNatclinnArgumentsAbox {
 		/////////////////////////////////////
 		// Classes RDF                     //
 		/////////////////////////////////////
-		Resource Argument = om.createResource(ncl + "Argument");
+		Resource ProductArgument = om.createResource(ncl + "ProductArgument");
 		Resource Attribute = om.createResource(ncl + "Attribute");
-		Resource Verbatim = om.createResource(ncl + "Verbatim");
+		// V5: Suppression de la classe Verbatim (remplacée par la dataProperty ncl:verbatim)
 		Resource Source = om.createResource(ncl + "Source");
 		Resource TypeSource = om.createResource(ncl + "TypeSource");
 		Resource Stakeholder = om.createResource(ncl + "Stakeholder");
@@ -115,7 +115,7 @@ public class CreateNatclinnArgumentsAbox {
 		AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
 		Property rdfType = om.createProperty(rdf, "type");
 		Property hasAttribute = om.createProperty(ncl, "hasAttribute");
-		Property hasVerbatim = om.createProperty(ncl, "hasVerbatim");
+		// V5: Suppression de l'objectProperty ncl:hasVerbatim; on conserve hasVerbatimKeyWord pour les contextes
 		Property hasVerbatimKeyWord = om.createProperty(ncl, "hasVerbatimKeyWord");
 		Property hasSource = om.createProperty(ncl, "hasSource");
 		Property hasTypeSource = om.createProperty(ncl, "hasTypeSource");
@@ -141,8 +141,8 @@ public class CreateNatclinnArgumentsAbox {
 		DatatypeProperty supValue = om.createDatatypeProperty(ncl + "supValue");
 		DatatypeProperty unit = om.createDatatypeProperty(ncl + "unit");
 		
-		// Propriété pour Verbatim
-		DatatypeProperty hasText = om.createDatatypeProperty(ncl + "hasText");
+		// V5: Nouvelle dataProperty directement sur ProductArgument
+		DatatypeProperty verbatim = om.createDatatypeProperty(ncl + "verbatim");
 		
 	// Propriété pour TypeSource (nouvelle TBox)
 	DatatypeProperty fiability = om.createDatatypeProperty(ncl + "fiability");
@@ -352,7 +352,7 @@ public class CreateNatclinnArgumentsAbox {
 						if (idArgument != null && !idArgument.isEmpty()) {
 							// Créer l'argument
 							Resource argument = om.createResource(ncl + idArgument)
-								.addProperty(rdfType, Argument);
+								.addProperty(rdfType, ProductArgument);
 							
 							if (description != null && !description.isEmpty()) {
 								argument.addProperty(prefLabel, description);
@@ -372,13 +372,9 @@ public class CreateNatclinnArgumentsAbox {
 							
 	
 							
-							// Verbatim
+							// V5: Verbatim devient une dataProperty sur ProductArgument
 							if (verbatimText != null && !verbatimText.isEmpty()) {
-								String verbatimId = "Verbatim-" + idArgument;
-								Resource verbatim = om.createResource(ncl + verbatimId)
-									.addProperty(rdfType, Verbatim)
-									.addProperty(hasText, verbatimText);
-								argument.addProperty(hasVerbatim, verbatim);
+								argument.addLiteral(verbatim, verbatimText);
 							}
 							
 							// Propriétés de données

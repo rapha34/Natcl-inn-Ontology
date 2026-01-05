@@ -13,6 +13,7 @@ import java.util.Set;
 
 /**
  * Primitive pour lier les produits aux arguments consommateurs via les métadonnées de types d'emballage.
+ * Crée des instances LinkToArgument pour établir la relation Product -> LinkToArgument -> ProductArgument.
  * 
  * Architecture:
  * - Product → hasTypePackaging → PackagingType (présence de types d'emballage)
@@ -26,6 +27,7 @@ import java.util.Set;
  * 
  * Retourne true si les types d'emballage du produit (présence ou absence) matchent
  * avec les propriétés du ProductArgument via les métadonnées PackagingTypeArgumentBinding.
+ * Crée alors un LinkToArgument pour établir le lien.
  */
 public class ComparePackagingTypeProperty extends BaseBuiltin {
 
@@ -38,6 +40,12 @@ public class ComparePackagingTypeProperty extends BaseBuiltin {
     private static final Node BINDING_AGENT_NAME_PROPERTY;
     private static final Node PACKAGING_TYPE_REQUIRED;
     private static final Node ABOUT_PACKAGING_TYPE;
+    private static final Node HAS_LINK_TO_ARGUMENT;
+    private static final Node HAS_REFERENCE_PRODUCT_ARGUMENT;
+    private static final Node INITIATOR;
+    private static final Node LINK_SUPPORT_TYPE;
+    private static final Node LINK_NAME_PROPERTY;
+    private static final Node LINK_VALUE_PROPERTY;
 
     static {
         // Initialisation de la configuration
@@ -49,6 +57,12 @@ public class ComparePackagingTypeProperty extends BaseBuiltin {
         BINDING_AGENT_NAME_PROPERTY = NodeFactory.createURI(ncl + "bindingAgentNameProperty");
         PACKAGING_TYPE_REQUIRED = NodeFactory.createURI(ncl + "packagingTypeRequired");
         ABOUT_PACKAGING_TYPE = NodeFactory.createURI(ncl + "aboutPackagingType");
+        HAS_LINK_TO_ARGUMENT = NodeFactory.createURI(ncl + "hasLinkToArgument");
+        HAS_REFERENCE_PRODUCT_ARGUMENT = NodeFactory.createURI(ncl + "hasReferenceProductArgument");
+        INITIATOR = NodeFactory.createURI(ncl + "initiator");
+        LINK_SUPPORT_TYPE = NodeFactory.createURI(ncl + "linkSupportType");
+        LINK_NAME_PROPERTY = NodeFactory.createURI(ncl + "LinkNameProperty");
+        LINK_VALUE_PROPERTY = NodeFactory.createURI(ncl + "LinkValueProperty");
     }
 
     @Override
@@ -168,6 +182,8 @@ public class ComparePackagingTypeProperty extends BaseBuiltin {
                         
                         // Si packagingTypeRequired="oui" (ou variantes) → lien accepté
                         if (required) {
+                            // Créer un LinkToArgument instance
+                            createLinkToArgument(g, productNode, argumentNode, packagingTypeUri, bp, context);
                             itBindingProp.close();
                             itBinding.close();
                             return true;
@@ -182,6 +198,51 @@ public class ComparePackagingTypeProperty extends BaseBuiltin {
         }
 
         return false;
+    }
+
+    /**
+     * Crée un LinkToArgument pour établir le lien Product -> LinkToArgument -> ProductArgument
+     * @param g le graphe
+     * @param productNode le noeud Product
+     * @param argumentNode le noeud ProductArgument
+     * @param packagingTypeNode le noeud PackagingType
+     * @param propertyName la propriété qui a matché
+     * @param context le contexte de la règle
+     */
+    private void createLinkToArgument(Graph g, Node productNode, Node argumentNode, Node packagingTypeNode, String propertyName, RuleContext context) {
+        // Créer un nouvel identifiant unique pour le LinkToArgument
+        String linkId = "LinkToArgument_" + System.currentTimeMillis() + "_" + Math.abs((productNode.toString() + argumentNode.toString()).hashCode());
+        Node linkNode = NodeFactory.createURI(ncl + linkId);
+        
+        // Créer les triples pour le LinkToArgument
+        // Product -> hasLinkToArgument -> LinkToArgument
+        Triple t1 = Triple.create(productNode, HAS_LINK_TO_ARGUMENT, linkNode);
+        g.add(t1);
+        
+        // LinkToArgument -> hasReferenceProductArgument -> ProductArgument
+        Triple t2 = Triple.create(linkNode, HAS_REFERENCE_PRODUCT_ARGUMENT, argumentNode);
+        g.add(t2);
+        
+        // LinkToArgument -> initiator -> "PackagingType"
+        Node initiatorValue = NodeFactory.createLiteral("PackagingType");
+        Triple t3 = Triple.create(linkNode, INITIATOR, initiatorValue);
+        g.add(t3);
+        
+        // LinkToArgument -> linkSupportType -> "For" (par défaut)
+        Node supportTypeValue = NodeFactory.createLiteral("For");
+        Triple t4 = Triple.create(linkNode, LINK_SUPPORT_TYPE, supportTypeValue);
+        g.add(t4);
+        
+        // LinkToArgument -> LinkNameProperty -> propertyName
+        Node nameValue = NodeFactory.createLiteral(propertyName);
+        Triple t5 = Triple.create(linkNode, LINK_NAME_PROPERTY, nameValue);
+        g.add(t5);
+        
+        // LinkToArgument -> LinkValueProperty -> packaging type URI
+        String packagingUri = packagingTypeNode.isURI() ? packagingTypeNode.getURI() : packagingTypeNode.toString();
+        Node valueNode = NodeFactory.createLiteral(packagingUri);
+        Triple t6 = Triple.create(linkNode, LINK_VALUE_PROPERTY, valueNode);
+        g.add(t6);
     }
 
     /**

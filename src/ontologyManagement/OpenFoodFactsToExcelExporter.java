@@ -23,6 +23,7 @@ public class OpenFoodFactsToExcelExporter {
         // extractOFFToExcel("code", "3835100000004");
         // 3270160865826 Saumon, duo de guinoa et orge, purée aux légumes verts, sauce
         // vierge à la framboise
+        // 3302740030932 Parmentier de saumon, sauce ricotta épinards – Fleury Michon – 300 g
         // 3564700423196 Moussaka – Marque Repère – 300 g
         // 3250392814908 Moussaka – Monique ranou – 300 g
         // 3302740044786 La Moussaka Boeuf & Aubergines avec une touche de menthe douce
@@ -31,7 +32,7 @@ public class OpenFoodFactsToExcelExporter {
         // 3564709163871 Madeleine coquilles au sel de Guérande – Nos régions ont du talent – 330 g (10 x 33 g)
         // 3178530410105 Petites Madeleines – St Michel – 500 g
         // 3245412343810 Madeleines Moelleuses – Carrefour – 500 g
-        extractOFFToExcel("code", "3245412343810");
+        extractOFFToExcel("code", "3270160865826");
     }
 
     public static void extractOFFToExcel(String searchProperty, String searchPropertyString) throws Exception {
@@ -66,8 +67,9 @@ public class OpenFoodFactsToExcelExporter {
         Sheet nutriScoreDetailsSheet = workbook.createSheet("NutriScoreDetails");
         Sheet novaSheet = workbook.createSheet("Nova");
 
-        createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque", "MotClefCategorie",
-                "Categorie");
+        // createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque", "MotClefCategorie",
+        //         "Categorie");
+        createHeaders(productsSheet, "IDProduit", "NomProduit", "EANCode", "TypeProduit", "Marque");
         createHeaders(ingredientsSheet, "IDIngredient", "NomIngredient", "Ciqual_food_code", "Ciqual_proxi_food_code",
                 "IdIngredientOFF");
         createHeaders(compositionsSheet, "IDProduit", "TypeComposant", "IDComposant", "Quantité", "Unité",
@@ -149,8 +151,8 @@ public class OpenFoodFactsToExcelExporter {
                 Cell cellTypeProduct = prodRow.createCell(3);
                 cellTypeProduct.setCellValue("SimpleProduct");
                 prodRow.createCell(4).setCellValue(brand);
-                prodRow.createCell(5).setCellValue("");
-                prodRow.createCell(6).setCellValue(categories);
+                // prodRow.createCell(5).setCellValue("");
+                // prodRow.createCell(6).setCellValue(categories);
 
                 // Enregistrement du packaging
                 JsonNode packagingNode = p.path("packagings");
@@ -327,6 +329,7 @@ public class OpenFoodFactsToExcelExporter {
                             System.out.println("Incohérence : l'ingrédient '" + labelIngredient
                                     + "' est trouvé selon le parsing mais pas dans la liste d'ingrédients du produit "
                                     + productId + ".");
+                            ingredientLabel = labelIngredient;
                         } else {
                             ingredientLabel = matchResult.getIngredientLabel();
                             ingredientId = matchResult.getIngredientId();
@@ -844,13 +847,13 @@ public class OpenFoodFactsToExcelExporter {
         }
     }
 
-    private static void hexViewer(String input) {
-        for (int i = 0; i < input.length(); i++) {
-            char ch = input.charAt(i);
-            String hex = String.format("%04x", (int) ch); // affichage sur 4 chiffres
-            System.out.println("Char: '" + ch + "' | Code point: U+" + hex);
-        }
-    }
+    // private static void hexViewer(String input) {
+    //     for (int i = 0; i < input.length(); i++) {
+    //         char ch = input.charAt(i);
+    //         String hex = String.format("%04x", (int) ch); // affichage sur 4 chiffres
+    //         System.out.println("Char: '" + ch + "' | Code point: U+" + hex);
+    //     }
+    // }
 
     /**
      * Extrait les composants Nutri-Score (negative / positive) et les écrit dans

@@ -5,12 +5,6 @@ import org.apache.jena.reasoner.rulesys.RuleContext;
 import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
 import org.apache.jena.sparql.expr.NodeValue;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import org.json.JSONObject;
-
 /**
  * Primitive pour interroger l'API Ciqual
  * Usage: getCiqualProperty(?ingredient, 'energy', ?energyValue)

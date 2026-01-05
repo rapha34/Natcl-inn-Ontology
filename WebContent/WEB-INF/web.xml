@@ -49,5 +49,19 @@
     <servlet-name>Jersey REST Service</servlet-name>
     <url-pattern>/api_natclinn/*</url-pattern>
 </servlet-mapping>
+
+<!-- Default servlet for static content -->
+<servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.html</url-pattern>
+</servlet-mapping>
+<servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.css</url-pattern>
+</servlet-mapping>
+<servlet-mapping>
+    <servlet-name>default</servlet-name>
+    <url-pattern>*.js</url-pattern>
+</servlet-mapping>
   
 </web-app>

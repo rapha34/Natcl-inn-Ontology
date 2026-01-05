@@ -39,6 +39,13 @@ public class CompareRoleProperty extends BaseBuiltin {
     private static final Node BINDING_AGENT_NAME_PROPERTY;
     private static final Node ROLE_REQUIRED;
     private static final Node ABOUT_ROLE;
+    // LinkToArgument architecture
+    private static final Node HAS_LINK_TO_ARGUMENT;
+    private static final Node HAS_REFERENCE_PRODUCT_ARGUMENT;
+    private static final Node INITIATOR;
+    private static final Node LINK_SUPPORT_TYPE;
+    private static final Node LINK_NAME_PROPERTY;
+    private static final Node LINK_VALUE_PROPERTY;
 
     static {
         // Initialisation de la configuration
@@ -51,6 +58,12 @@ public class CompareRoleProperty extends BaseBuiltin {
         BINDING_AGENT_NAME_PROPERTY = NodeFactory.createURI(ncl + "bindingAgentNameProperty");
         ROLE_REQUIRED = NodeFactory.createURI(ncl + "roleRequired");
         ABOUT_ROLE = NodeFactory.createURI(ncl + "aboutRole");
+        HAS_LINK_TO_ARGUMENT = NodeFactory.createURI(ncl + "hasLinkToArgument");
+        HAS_REFERENCE_PRODUCT_ARGUMENT = NodeFactory.createURI(ncl + "hasReferenceProductArgument");
+        INITIATOR = NodeFactory.createURI(ncl + "initiator");
+        LINK_SUPPORT_TYPE = NodeFactory.createURI(ncl + "linkSupportType");
+        LINK_NAME_PROPERTY = NodeFactory.createURI(ncl + "LinkNameProperty");
+        LINK_VALUE_PROPERTY = NodeFactory.createURI(ncl + "LinkValueProperty");
     }
 
     @Override
@@ -165,8 +178,10 @@ public class CompareRoleProperty extends BaseBuiltin {
                         // Si correspondance trouvée, vérifier roleRequired
                         boolean required = isRoleRequired(g, bindingNode);
                         
-                        // Si roleRequired="oui" (ou variantes) → lien accepté
+                        // Si roleRequired="oui" (ou variantes) → lien accepté et création du LinkToArgument
                         if (required) {
+                            // Créer un LinkToArgument instance
+                            createLinkToArgument(g, productNode, argumentNode, roleUri, bp);
                             itBindingProp.close();
                             itBinding.close();
                             return true;
@@ -181,6 +196,30 @@ public class CompareRoleProperty extends BaseBuiltin {
         }
 
         return false;
+    }
+
+    /**
+     * Crée un LinkToArgument pour établir le lien Product -> LinkToArgument -> ProductArgument
+     * @param g le graphe
+     * @param productNode le noeud Product
+     * @param argumentNode le noeud ProductArgument
+     * @param roleNode le noeud AdditiveRole ou Check (URI)
+     * @param propertyName la propriété (bindingAgentNameProperty) qui a matché
+     */
+    private void createLinkToArgument(Graph g, Node productNode, Node argumentNode, Node roleNode, String propertyName) {
+        String linkId = "LinkToArgument_" + System.currentTimeMillis() + "_" + Math.abs((productNode.toString() + argumentNode.toString()).hashCode());
+        Node linkNode = NodeFactory.createURI(ncl + linkId);
+
+        // Product -> hasLinkToArgument -> LinkToArgument
+        g.add(Triple.create(productNode, HAS_LINK_TO_ARGUMENT, linkNode));
+        // LinkToArgument -> hasReferenceProductArgument -> ProductArgument
+        g.add(Triple.create(linkNode, HAS_REFERENCE_PRODUCT_ARGUMENT, argumentNode));
+        // Metadata
+        g.add(Triple.create(linkNode, INITIATOR, NodeFactory.createLiteral("IngredientRole")));
+        g.add(Triple.create(linkNode, LINK_SUPPORT_TYPE, NodeFactory.createLiteral("For")));
+        g.add(Triple.create(linkNode, LINK_NAME_PROPERTY, NodeFactory.createLiteral(propertyName)));
+        String roleUri = roleNode.isURI() ? roleNode.getURI() : roleNode.toString();
+        g.add(Triple.create(linkNode, LINK_VALUE_PROPERTY, NodeFactory.createLiteral(roleUri)));
     }
 
     /**

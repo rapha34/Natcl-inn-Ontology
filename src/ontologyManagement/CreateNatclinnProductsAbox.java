@@ -108,19 +108,19 @@ public static String CreationProductABox(String excelFile) {
 		Resource Shape = om.createResource(ncl + "Shape");
 		Resource ControlledOriginLabel = om.createResource(ncl + "ControlledOriginLabel");
 		Resource ManufacturingProcess = om.createResource(ncl + "ManufacturingProcess");
-        Resource NutriScore = om.createResource(ncl + "NutriScore");
+		Resource NutriScore = om.createResource(ncl + "NutriScore");
 		Resource NutriScoreAlpha = om.createResource(ncl + "NutriScoreAlpha");
 		Resource AdditiveIngredient = om.createResource(ncl + "AdditiveIngredient");
 		Resource NutriScoreDetail = om.createResource(ncl + "NutriScoreDetail");
-
-        /////////////////////////////////////
+		Resource NOVAgroupDetails = om.createResource(ncl + "NOVAgroupDetails");        /////////////////////////////////////
 	    // Propriétés RDF                  //
 	    /////////////////////////////////////
 		AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
 		AnnotationProperty hasEAN13 = om.createAnnotationProperty(ncl + "hasEAN13");
 		AnnotationProperty hasTrademark = om.createAnnotationProperty(ncl + "hasTrademark");
 		AnnotationProperty hasIdIngredientOFF = om.createAnnotationProperty(ncl + "hasIdIngredientOFF");
-		Property hasCategory = om.createProperty(ncl + "hasCategory");
+		Property hasRootCategory = om.createProperty(ncl + "hasRootCategory");
+		Property hasLeafCategory = om.createProperty(ncl + "hasLeafCategory");
 		Property hasCiqualFoodCode = om.createProperty(ncl + "hasCiqualFoodCode");
 		Property hasCiqualProxyFoodCode = om.createProperty(ncl + "hasCiqualProxyFoodCode");
 		Property hasComposedOf = om.createProperty(ncl, "hasComposedOf");
@@ -135,6 +135,13 @@ public static String CreationProductABox(String excelFile) {
 		Property hasNutriScore = om.createProperty(ncl, "hasNutriScore");
 		Property hasNutriScoreAlpha = om.createProperty(ncl, "hasNutriScoreAlpha");
 		Property hasNutriScoreNum = om.createProperty(ncl, "hasNutriScoreNum");
+		// OFF: groupe NOVA (valeur 1..4) fourni par OFF
+		Property hasNOVAgroup = om.createProperty(ncl, "hasNOVAgroup");
+		Property hasNOVAgroupDetails = om.createProperty(ncl, "hasNOVAgroupDetails");
+		Property groupe1 = om.createProperty(ncl, "groupe1");
+		Property groupe2 = om.createProperty(ncl, "groupe2");
+		Property groupe3 = om.createProperty(ncl, "groupe3");
+		Property groupe4 = om.createProperty(ncl, "groupe4");
 		Property hasFoodContact = om.createProperty(ncl, "hasFoodContact");
 		Property hasNumberOfUnits = om.createProperty(ncl, "hasNumberOfUnits");
 		Property hasWeightSpecified = om.createProperty(ncl, "hasWeightSpecified");
@@ -182,7 +189,8 @@ public static String CreationProductABox(String excelFile) {
 					String code = getCellValue(row.getCell(2)); 
 					String typeProduct = getCellValue(row.getCell(3));
 					String marque = getCellValue(row.getCell(4));
-					String category = getCellValue(row.getCell(5));
+					String rootCategory = getCellValue(row.getCell(8));
+					String leafCategory = getCellValue(row.getCell(9));
 
 
 					Resource product = om.createResource(ncl + id)
@@ -200,8 +208,11 @@ public static String CreationProductABox(String excelFile) {
 					if (marque != null && !marque.isEmpty()) {
 						product.addProperty(hasTrademark, marque);
 					}
-					if (category != null && !category.isEmpty()) {
-						product.addProperty(hasCategory, category);
+					if (rootCategory != null && !rootCategory.isEmpty()) {
+						product.addProperty(hasRootCategory, rootCategory	);
+					}
+					if (leafCategory != null && !leafCategory.isEmpty()) {
+						product.addProperty(hasLeafCategory, leafCategory);
 					}
 					products.put(id, product);		
 				}
@@ -446,6 +457,68 @@ public static String CreationProductABox(String excelFile) {
 
 				}
 
+				// Lecture de l'onglet Nova (OFF) pour rattacher le groupe NOVA aux produits
+				Sheet novaSheet = workbook.getSheet("Nova");
+
+				if (novaSheet != null) {
+					for (Row row : novaSheet) {
+						if (row.getRowNum() == 0) continue; // entête
+
+						String prodId = getCellValue(row.getCell(0)); // IDProduit
+						// Le groupe NOVA peut être stocké comme numérique ou texte
+						Double gNovaNum = getNumericCellValueSafe(row.getCell(1)); // GroupeNova
+						String gNovaTxt = getCellValue(row.getCell(1));
+						String g1 = getCellValue(row.getCell(2)); // Groupe1
+						String g2 = getCellValue(row.getCell(3)); // Groupe2
+						String g3 = getCellValue(row.getCell(4)); // Groupe3
+						String g4 = getCellValue(row.getCell(5)); // Groupe4
+
+						if (prodId == null || prodId.isEmpty()) {
+							continue;
+						}
+
+						Resource product = products.get(prodId);
+						if (product != null) {
+							Integer group = null;
+							if (gNovaNum != null) {
+								group = gNovaNum.intValue();
+							} else if (gNovaTxt != null && !gNovaTxt.isEmpty()) {
+								try {
+									// Autoriser d'éventuels formats "4" ou "4.0"
+									double d = Double.parseDouble(gNovaTxt.trim());
+									group = (int) Math.round(d);
+								} catch (NumberFormatException e) {
+									group = null;
+								}
+							}
+
+							if (group != null && group >= 1 && group <= 4) {
+								product.addLiteral(hasNOVAgroup, group);
+								
+								// Créer un nœud NOVAgroupDetails avec les listes groupe1..4
+								String detailsURI = ncl + "NOVAgroupDetails-" + prodId;
+								Resource novaDetails = om.createResource(detailsURI)
+									.addProperty(rdfType, NOVAgroupDetails);
+								
+								if (g1 != null && !g1.isEmpty()) {
+									novaDetails.addProperty(groupe1, g1);
+								}
+								if (g2 != null && !g2.isEmpty()) {
+									novaDetails.addProperty(groupe2, g2);
+								}
+								if (g3 != null && !g3.isEmpty()) {
+									novaDetails.addProperty(groupe3, g3);
+								}
+								if (g4 != null && !g4.isEmpty()) {
+									novaDetails.addProperty(groupe4, g4);
+								}
+								
+								product.addProperty(hasNOVAgroupDetails, novaDetails);
+							}
+						}
+					}
+				}
+
 
 				Sheet compositionsSheet = workbook.getSheet("Compositions");
 
@@ -552,7 +625,17 @@ public static String CreationProductABox(String excelFile) {
 			case BOOLEAN:
 				return String.valueOf(cell.getBooleanCellValue());
 			case FORMULA:
-				return cell.getCellFormula();
+				// Obtenir la valeur calculée de la formule, pas la formule elle-même
+				switch (cell.getCachedFormulaResultType()) {
+					case STRING:
+						return cell.getStringCellValue().trim();
+					case NUMERIC:
+						return new java.math.BigDecimal(cell.getNumericCellValue()).toPlainString();
+					case BOOLEAN:
+						return String.valueOf(cell.getBooleanCellValue());
+					default:
+						return "";
+				}
 			default:
 				return "";
 		}

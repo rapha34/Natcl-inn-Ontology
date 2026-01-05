@@ -906,4 +906,314 @@ public static String removeOrphanClosingParentheses(String text) {
 }
 	
 
+	/**
+	 * ===== FUZZY MATCHING HEURISTICS FOR INGREDIENT TAXONOMY LOOKUP =====
+	 * Suite de méthodes pour normaliser et comparer des labels d'ingrédients
+	 * avec matching flou dans la taxonomie OFF
+	 */
+
+	/**
+	 * Normalise un label pour comparaison : minuscules, accents, ponctuation, stopwords
+	 */
+	public static String normalizeLabel(String label) {
+		if (label == null || label.isEmpty()) return "";
+		
+		// Minuscules
+		String normalized = label.toLowerCase();
+		
+		// Suppression accents (à, é, è, ê, ë, etc.)
+		normalized = normalized.replaceAll("[àâäáã]", "a");
+		normalized = normalized.replaceAll("[èêëé]", "e");
+		normalized = normalized.replaceAll("[îïìíİ]", "i");
+		normalized = normalized.replaceAll("[ôöòóõ]", "o");
+		normalized = normalized.replaceAll("[ùûüú]", "u");
+		normalized = normalized.replaceAll("[ç]", "c");
+		normalized = normalized.replaceAll("[ñ]", "n");
+		normalized = normalized.replaceAll("[æœ]", "ae");
+		
+		// Suppression ponctuation/caractères spéciaux (sauf espaces)
+		normalized = normalized.replaceAll("[\\-_()\\[\\]{}.,;:!?'\"]", " ");
+		
+		// Normalisation espaces (collapse multiples)
+		normalized = normalized.replaceAll("\\s+", " ").trim();
+		
+		// Suppression stopwords français courants
+        String[] stopwords = {"le", "la", "les", "de", "du", "et", "un", "une", "des", "pasteurise", "pasteurisé", "graines", "graine"};
+		for (String stopword : stopwords) {
+			normalized = normalized.replaceAll("\\b" + stopword + "\\b", " ");
+		}
+		normalized = normalized.replaceAll("\\s+", " ").trim();
+		
+		return normalized;
+	}
+
+	/**
+	 * Singularise un mot français en ôtant les terminaisons plurielles courantes
+	 */
+	public static String singularize(String word) {
+		if (word == null || word.isEmpty()) return word;
+		
+		String lower = word.toLowerCase();
+		
+		// Règles de singularisation français simplifié
+		if (lower.endsWith("aux")) return word.substring(0, word.length() - 3) + "al";
+		if (lower.endsWith("eux")) return word.substring(0, word.length() - 3) + "eux"; // -eux = -eux (invariant)
+		if (lower.endsWith("ies")) return word.substring(0, word.length() - 3) + "ie";
+		if (lower.endsWith("es") && word.length() > 3) return word.substring(0, word.length() - 1); // tomatoes -> tomate
+		if (lower.endsWith("s") && word.length() > 2) return word.substring(0, word.length() - 1);
+		
+		return word;
+	}
+
+	/**
+	 * Divise un label en tokens (mots)
+	 */
+	public static java.util.Set<String> getTokens(String label) {
+		java.util.Set<String> tokens = new java.util.HashSet<>();
+		if (label == null || label.isEmpty()) return tokens;
+		
+		String[] parts = label.split("\\s+");
+		for (String part : parts) {
+			if (!part.isEmpty()) {
+                String sg = singularize(part);
+                String gn = normalizeFrenchGenderToken(sg);
+                tokens.add(gn);
+			}
+		}
+		return tokens;
+	}
+
+    /**
+     * Normalise le genre français pour certains adjectifs après suppression des accents.
+     * Cas ciblé: féminin en "ée" -> devient masculin "é" (après normalisation: "ee" -> "e").
+     * On évite d'impacter des mots comme "tomate" (seule un double 'e' est traité).
+     */
+    public static String normalizeFrenchGenderToken(String token) {
+        if (token == null || token.isEmpty()) return token;
+        String lower = token.toLowerCase();
+        // Traite uniquement les fins en "ee" (ex: "concassee", "concentree") -> retire un 'e'
+        if (lower.endsWith("ee") && token.length() > 3) {
+            return token.substring(0, token.length() - 1);
+        }
+        return token;
+    }
+
+	/**
+	 * Coefficient Jaccard entre deux ensembles de tokens
+	 */
+	public static double jaccardSimilarity(java.util.Set<String> set1, java.util.Set<String> set2) {
+		if (set1.isEmpty() && set2.isEmpty()) return 1.0;
+		if (set1.isEmpty() || set2.isEmpty()) return 0.0;
+		
+		java.util.Set<String> intersection = new java.util.HashSet<>(set1);
+		intersection.retainAll(set2);
+		
+		java.util.Set<String> union = new java.util.HashSet<>(set1);
+		union.addAll(set2);
+		
+		return (double) intersection.size() / union.size();
+	}
+
+	/**
+	 * Coefficient de Dice entre deux ensembles de tokens
+	 */
+	public static double diceSimilarity(java.util.Set<String> set1, java.util.Set<String> set2) {
+		if (set1.isEmpty() && set2.isEmpty()) return 1.0;
+		if (set1.isEmpty() || set2.isEmpty()) return 0.0;
+		
+		java.util.Set<String> intersection = new java.util.HashSet<>(set1);
+		intersection.retainAll(set2);
+		
+		return 2.0 * intersection.size() / (set1.size() + set2.size());
+	}
+
+	/**
+	 * Token Sort Ratio : normalise les tokens et les trie avant comparaison
+	 */
+	public static double tokenSortRatio(String label1, String label2) {
+		String norm1 = normalizeLabel(label1);
+		String norm2 = normalizeLabel(label2);
+		
+		String[] tokens1 = norm1.split("\\s+");
+		String[] tokens2 = norm2.split("\\s+");
+		
+		Arrays.sort(tokens1);
+		Arrays.sort(tokens2);
+		
+		String sorted1 = String.join(" ", tokens1);
+		String sorted2 = String.join(" ", tokens2);
+		
+		// Distance normalisée (0-1) basée sur Levenshtein
+		double maxLen = Math.max(sorted1.length(), sorted2.length());
+		if (maxLen == 0) return 1.0;
+		
+		double dist = levenshteinDistance(sorted1, sorted2);
+		return 1.0 - (dist / maxLen);
+	}
+
+	/**
+	 * Distance de Levenshtein (nombre de substitutions/insertions/suppressions)
+	 */
+	public static int levenshteinDistance(String s1, String s2) {
+		if (s1 == null) s1 = "";
+		if (s2 == null) s2 = "";
+		
+		int len1 = s1.length();
+		int len2 = s2.length();
+		
+		int[][] dp = new int[len1 + 1][len2 + 1];
+		
+		for (int i = 0; i <= len1; i++) dp[i][0] = i;
+		for (int j = 0; j <= len2; j++) dp[0][j] = j;
+		
+		for (int i = 1; i <= len1; i++) {
+			for (int j = 1; j <= len2; j++) {
+				int cost = (s1.charAt(i - 1) == s2.charAt(j - 1)) ? 0 : 1;
+				dp[i][j] = Math.min(Math.min(
+					dp[i - 1][j] + 1,      // deletion
+					dp[i][j - 1] + 1),     // insertion
+					dp[i - 1][j - 1] + cost // substitution
+				);
+			}
+		}
+		
+		return dp[len1][len2];
+	}
+
+	/**
+	 * Distance de Levenshtein normalisée (0-1, où 1 = identique)
+	 */
+	public static double levenshteinSimilarity(String s1, String s2) {
+		if (s1 == null) s1 = "";
+		if (s2 == null) s2 = "";
+		
+		int maxLen = Math.max(s1.length(), s2.length());
+		if (maxLen == 0) return 1.0;
+		
+		int dist = levenshteinDistance(s1, s2);
+		return 1.0 - ((double) dist / maxLen);
+	}
+
+	/**
+	 * Applique des règles spécifiques au français
+	 * Détecte inversions de mots, accords de genre, variantes de "de"
+	 */
+	public static boolean applyFrenchRules(String label1, String label2) {
+		String norm1 = normalizeLabel(label1);
+		String norm2 = normalizeLabel(label2);
+		
+		// Détection inversion mot (ex : "tomate concentree" vs "concentre de tomate")
+		String[] tokens1 = norm1.split("\\s+");
+		String[] tokens2 = norm2.split("\\s+");
+		
+		// Inversion simple : mêmes tokens dans ordre différent
+		java.util.Set<String> set1 = new java.util.HashSet<>(Arrays.asList(tokens1));
+		java.util.Set<String> set2 = new java.util.HashSet<>(Arrays.asList(tokens2));
+		
+		if (set1.equals(set2) && tokens1.length == tokens2.length) {
+			// Mêmes tokens, ordre potentiellement différent = pattern de base OK
+			return true;
+		}
+		
+		// Détection accord de genre français (é/ée, etc.)
+		if (label1.toLowerCase().replaceAll("[éee]", "e").equals(
+			label2.toLowerCase().replaceAll("[éee]", "e"))) {
+			return true;
+		}
+		
+		return false;
+	}
+
+	/**
+	 * Calcule un score composite basé sur multiple métriques
+	 * Scoring : 0.4 × Jaccard + 0.4 × TokenSort + 0.2 × (1-Levenshtein)
+	 */
+	public static double computeMatchScore(String label1, String label2) {
+		String norm1 = normalizeLabel(label1);
+		String norm2 = normalizeLabel(label2);
+		
+		// Composantes
+		java.util.Set<String> tokens1 = getTokens(norm1);
+		java.util.Set<String> tokens2 = getTokens(norm2);
+		
+		double jaccard = jaccardSimilarity(tokens1, tokens2);
+		double tokenSort = tokenSortRatio(norm1, norm2);
+		double levenshtein = levenshteinSimilarity(norm1, norm2);
+		
+		// Score pondéré
+		double score = (0.4 * jaccard) + (0.4 * tokenSort) + (0.2 * levenshtein);
+		
+		// Bonus français
+		if (applyFrenchRules(label1, label2)) {
+			score = Math.min(1.0, score + 0.05);
+		}
+		
+		return score;
+	}
+
+	/**
+	 * Représente un résultat de matching d'ingrédient
+	 */
+	public static class IngredientMatch {
+		public String taxonomyLabel;
+		public double score;
+		public String taxonomyUri;
+
+		public IngredientMatch(String label, double score, String uri) {
+			this.taxonomyLabel = label;
+			this.score = score;
+			this.taxonomyUri = uri;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("Match{label='%s', score=%.3f, uri='%s'}", 
+				taxonomyLabel, score, taxonomyUri);
+		}
+	}
+
+	/**
+	 * Cherche un ingrédient dans la taxonomie par son label
+	 * Retourne le meilleur match si score >= 0.78, sinon null
+	 * Seuil adaptif : 0.15 pour labels courts, 0.20-0.25 pour longs
+	 */
+	public static IngredientMatch findIngredientInTaxonomy(String ingredientLabel, 
+			java.util.List<Map<String, Object>> taxonomyEntries) {
+		
+		if (ingredientLabel == null || ingredientLabel.isEmpty()) {
+			return null;
+		}
+		
+		double bestScore = 0.0;
+		IngredientMatch bestMatch = null;
+		
+		for (Map<String, Object> entry : taxonomyEntries) {
+			String taxonomyLabel = (String) entry.get("label");
+			String taxonomyUri = (String) entry.get("uri");
+			
+			if (taxonomyLabel == null || taxonomyLabel.isEmpty()) continue;
+			
+			double score = computeMatchScore(ingredientLabel, taxonomyLabel);
+			
+			if (score > bestScore) {
+				bestScore = score;
+				bestMatch = new IngredientMatch(taxonomyLabel, score, taxonomyUri);
+			}
+		}
+		
+		// Seuil : 0.78 requis pour acceptance
+		if (bestMatch != null && bestScore >= 0.78) {
+			return bestMatch;
+		}
+		
+		// En cas de borderline (0.70-0.78), log pour revue manuelle
+		if (bestMatch != null && bestScore >= 0.70) {
+			System.out.println("⚠️  FUZZY MATCH BORDERLINE: '" + ingredientLabel + 
+				"' ~= '" + bestMatch.taxonomyLabel + "' (score: " + 
+				String.format("%.3f", bestScore) + ") - MANUAL REVIEW NEEDED");
+		}
+		
+		return null; // Aucun match acceptable
+	}
+
 }

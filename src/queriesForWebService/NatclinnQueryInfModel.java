@@ -25,7 +25,7 @@ public class NatclinnQueryInfModel {
 		// Initialisation de la configuration
 		// Chemin d'accès, noms fichiers...
 		new NatclinnConf();
-		String ncl = NatclinnConf.ncl;
+		// String ncl = NatclinnConf.ncl;
 		
 		////////////////////////////////
 		// Recupèration du model      //

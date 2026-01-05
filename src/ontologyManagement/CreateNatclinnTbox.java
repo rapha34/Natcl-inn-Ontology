@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 
@@ -403,6 +404,14 @@ public class CreateNatclinnTbox {
 		NutriScoreDetail.addComment("Nutri-Score detail	.", "en");
 		NutriScoreDetail.addComment("Nutri-Score detail.", "fr");
 
+		OntClass NOVAgroupDetails = om.createClass(ncl + "NOVAgroupDetails");
+		NOVAgroupDetails.addComment("Details of NOVA group classification from Open Food Facts.", "en");
+		NOVAgroupDetails.addComment("Détails de la classification NOVA depuis Open Food Facts.", "fr");
+
+		OntClass CalculatedNOVAgroupDetails = om.createClass(ncl + "CalculatedNOVAgroupDetails");
+		CalculatedNOVAgroupDetails.addComment("Details of locally calculated NOVA group, listing ingredients by category.", "en");
+		CalculatedNOVAgroupDetails.addComment("Détails du groupe NOVA calculé localement, listant les ingrédients par catégorie.", "fr");
+
 		OntClass NaturalnessScore = om.createClass(ncl + "NaturalnessScore");
 		NaturalnessScore.addComment("Naturalness-Score.", "en");
 		NaturalnessScore.addComment("Score de naturalité.", "fr");
@@ -415,6 +424,10 @@ public class CreateNatclinnTbox {
 		OntClass ProductArgument = om.createClass(ncl + "ProductArgument");
 		ProductArgument.addComment("An argument related to the naturalness of a product.", "en");
 		ProductArgument.addComment("Un argument lié à la naturalité d'un produit.", "fr");
+
+		OntClass LinkToArgument = om.createClass(ncl + "LinkToArgument");
+		LinkToArgument.addComment("A link between a product and an argument, containing metadata about the relationship.", "en");
+		LinkToArgument.addComment("Un lien entre un produit et un argument, contenant des métadonnées sur la relation.", "fr");
 
 		OntClass Stakeholder = om.createClass(ncl + "Stakeholder");
 		Stakeholder.addComment("The stakeholder making the argument (consumer, manufacturer, etc.).", "en");
@@ -472,7 +485,7 @@ public class CreateNatclinnTbox {
 
 	    // add disjoint individuals axiom assertion:
 	   
-	    List<OntClass> classes = Arrays.asList(
+	   List<OntClass> classes = Arrays.asList(
 			ProductArgument,
 			CleanLabel,
 			Context,
@@ -487,6 +500,8 @@ public class CreateNatclinnTbox {
 			NutriScore,
 			NutriScoreDetail,
 			NutriScoreAlpha,
+			NOVAgroupDetails,
+			CalculatedNOVAgroupDetails,
 			NaturalnessScore,
 			Allegation,
 			Packaging,
@@ -497,10 +512,10 @@ public class CreateNatclinnTbox {
 			Source,
 			TypeSource,
 			Stakeholder,
-			Verbatim
-		);
-
-		// Création de toutes les disjonctions possibles entre chaque paire de classes
+			Verbatim,
+			LinkToArgument
+			
+		);		// Création de toutes les disjonctions possibles entre chaque paire de classes
 		for (int i = 0; i < classes.size(); i++) {
 			for (int j = i + 1; j < classes.size(); j++) {
 				classes.get(i).addDisjointWith(classes.get(j));
@@ -558,6 +573,18 @@ public class CreateNatclinnTbox {
 		hasNutriScore.addDomain(Product);
 		hasNutriScore.addRange(NutriScore);
 
+		ObjectProperty hasNOVAgroupDetails = om.createObjectProperty(ncl + "hasNOVAgroupDetails");
+		hasNOVAgroupDetails.addDomain(Product);
+		hasNOVAgroupDetails.addRange(NOVAgroupDetails);
+		hasNOVAgroupDetails.addComment("Links a product to its NOVA group classification details.", "en");
+		hasNOVAgroupDetails.addComment("Relie un produit aux détails de sa classification NOVA.", "fr");
+
+		ObjectProperty hasCalculatedNOVAgroupDetails = om.createObjectProperty(ncl + "hasCalculatedNOVAgroupDetails");
+		hasCalculatedNOVAgroupDetails.addDomain(Product);
+		hasCalculatedNOVAgroupDetails.addRange(CalculatedNOVAgroupDetails);
+		hasCalculatedNOVAgroupDetails.addComment("Links a product to its calculated NOVA group details.", "en");
+		hasCalculatedNOVAgroupDetails.addComment("Relie un produit aux détails de son groupe NOVA calculé.", "fr");
+
 		ObjectProperty hasNaturalnessScore = om.createObjectProperty(ncl + "hasNaturalnessScore");
 		hasNaturalnessScore.addDomain(Product);
 		hasNaturalnessScore.addRange(NaturalnessScore);
@@ -595,7 +622,22 @@ public class CreateNatclinnTbox {
 	hasProductArgument.addDomain(Product);
 	hasProductArgument.addRange(ProductArgument);
 	hasProductArgument.addComment("Link a food industry product to an argument.", "en");
-	hasProductArgument.addComment("Relie un produit de l'industrie agro-alimentaire à un argument.", "fr");		RDFList unionListTarget = om.createList(new RDFNode[] { Ingredient, Product, Packaging, Allegation, CleanLabel, ManufacturingProcess, NutriScore, Origin, ControlledOriginLabel});
+	hasProductArgument.addComment("Relie un produit de l'industrie agro-alimentaire à un argument.", "fr");
+
+	// New architecture with LinkToArgument intermediate entity
+	ObjectProperty hasLinkToArgument = om.createObjectProperty(ncl + "hasLinkToArgument");
+	hasLinkToArgument.addDomain(Product);
+	hasLinkToArgument.addRange(LinkToArgument);
+	hasLinkToArgument.addComment("Links a food industry product to a LinkToArgument that connects to a ProductArgument.", "en");
+	hasLinkToArgument.addComment("Relie un produit de l'industrie agro-alimentaire à un LinkToArgument qui se connecte à un ProductArgument.", "fr");
+
+	ObjectProperty hasReferenceProductArgument = om.createObjectProperty(ncl + "hasReferenceProductArgument");
+	hasReferenceProductArgument.addDomain(LinkToArgument);
+	hasReferenceProductArgument.addRange(ProductArgument);
+	hasReferenceProductArgument.addComment("Links a LinkToArgument to the referenced ProductArgument.", "en");
+	hasReferenceProductArgument.addComment("Relie un LinkToArgument au ProductArgument référencé.", "fr");
+
+	RDFList unionListTarget = om.createList(new RDFNode[] { Ingredient, Product, Packaging, Allegation, CleanLabel, ManufacturingProcess, NutriScore, Origin, ControlledOriginLabel});
 		Resource unionClassTarget = om.createResource()
 		 .addProperty(OWL.unionOf, unionListTarget);
 		ObjectProperty target = om.createObjectProperty(ncl + "target");
@@ -670,6 +712,30 @@ public class CreateNatclinnTbox {
 		containsIngredientWithFunction.addComment("Links a product to the function of its ingredients.", "en");
 		containsIngredientWithFunction.addComment("Relie un produit à la fonction de ses ingrédients.", "fr");
 
+		ObjectProperty hasAdditiveIngredients = om.createObjectProperty(ncl + "hasAdditiveIngredients");
+		hasAdditiveIngredients.addDomain(CalculatedNOVAgroupDetails);
+		hasAdditiveIngredients.addRange(Ingredient);
+		hasAdditiveIngredients.addComment("Lists additive ingredients found during NOVA calculation.", "en");
+		hasAdditiveIngredients.addComment("Liste les ingrédients additifs trouvés lors du calcul NOVA.", "fr");
+
+		ObjectProperty hasTechnologicalIngredients = om.createObjectProperty(ncl + "hasTechnologicalIngredients");
+		hasTechnologicalIngredients.addDomain(CalculatedNOVAgroupDetails);
+		hasTechnologicalIngredients.addRange(Ingredient);
+		hasTechnologicalIngredients.addComment("Lists technological ingredients found during NOVA calculation.", "en");
+		hasTechnologicalIngredients.addComment("Liste les ingrédients technologiques trouvés lors du calcul NOVA.", "fr");
+
+		ObjectProperty hasProcessedIngredients = om.createObjectProperty(ncl + "hasProcessedIngredients");
+		hasProcessedIngredients.addDomain(CalculatedNOVAgroupDetails);
+		hasProcessedIngredients.addRange(Ingredient);
+		hasProcessedIngredients.addComment("Lists processed ingredients found during NOVA calculation.", "en");
+		hasProcessedIngredients.addComment("Liste les ingrédients transformés trouvés lors du calcul NOVA.", "fr");
+
+		ObjectProperty hasRawIngredients = om.createObjectProperty(ncl + "hasRawIngredients");
+		hasRawIngredients.addDomain(CalculatedNOVAgroupDetails);
+		hasRawIngredients.addRange(Ingredient);
+		hasRawIngredients.addComment("Lists raw ingredients found during NOVA calculation.", "en");
+		hasRawIngredients.addComment("Liste les ingrédients bruts trouvés lors du calcul NOVA.", "fr");
+
 
 	    //////////////////////////////////////////////////////////
 	    // Définition des data property                         //
@@ -709,6 +775,31 @@ public class CreateNatclinnTbox {
 		supportType.addRange(om.createResource(XSD.xstring.getURI()));
 		supportType.addComment("Type of argument (positive or negative) in relation to its target.", "en");
 		supportType.addComment("Type de l'argument (positif ou négatif) vis à vis de sa cible.", "fr");
+
+		// LinkToArgument properties
+		DatatypeProperty initiator = om.createDatatypeProperty(ncl + "initiator");
+		initiator.addDomain(LinkToArgument);
+		initiator.addRange(om.createResource(XSD.xstring.getURI()));
+		initiator.addComment("The initiator element that triggered the link (Ingredient, Product, Packaging, ControlledOriginLabel, CleanLabel, ManufacturingProcess, NutriScore).", "en");
+		initiator.addComment("L'élément initiateur qui a déclenché le lien (Ingredient, Product, Packaging, ControlledOriginLabel, CleanLabel, ManufacturingProcess, NutriScore).", "fr");
+
+		DatatypeProperty linkSupportType = om.createDatatypeProperty(ncl + "linkSupportType");
+		linkSupportType.addDomain(LinkToArgument);
+		linkSupportType.addRange(om.createResource(XSD.xstring.getURI()));
+		linkSupportType.addComment("Type of support for the link (For or Against).", "en");
+		linkSupportType.addComment("Type de support pour le lien (For ou Against).", "fr");
+
+		DatatypeProperty LinkNameProperty = om.createDatatypeProperty(ncl + "LinkNameProperty");
+		LinkNameProperty.addDomain(LinkToArgument);
+		LinkNameProperty.addRange(om.createResource(XSD.xstring.getURI()));
+		LinkNameProperty.addComment("Name property of the link providing additional context.", "en");
+		LinkNameProperty.addComment("Propriété de nom du lien fournissant un contexte supplémentaire.", "fr");
+
+		DatatypeProperty LinkValueProperty = om.createDatatypeProperty(ncl + "LinkValueProperty");
+		LinkValueProperty.addDomain(LinkToArgument);
+		LinkValueProperty.addRange(om.createResource(XSD.xstring.getURI()));
+		LinkValueProperty.addComment("Value property of the link providing additional context.", "en");
+		LinkValueProperty.addComment("Propriété de valeur du lien fournissant un contexte supplémentaire.", "fr");
 
 		DatatypeProperty fiability = om.createDatatypeProperty(ncl + "fiability");
 		fiability.addDomain(TypeSource);
@@ -800,6 +891,44 @@ public class CreateNatclinnTbox {
 		containsAdditives.addRange(om.createResource(XSD.xboolean.getURI()));
 		containsAdditives.addComment("Indicates whether the product contains additives.", "en");
 		containsAdditives.addComment("Indique si le produit contient des additifs.", "fr");			
+
+		// Calculated NOVA group (1..4) stored on Product when derived locally
+		DatatypeProperty hasCalculatedNOVAgroup = om.createDatatypeProperty(ncl + "hasCalculatedNOVAgroup");
+		hasCalculatedNOVAgroup.addDomain(Product);
+		hasCalculatedNOVAgroup.addRange(om.createResource(XSD.nonNegativeInteger.getURI()));
+		hasCalculatedNOVAgroup.addComment("Calculated NOVA group (1..4) inferred by rules, not the OFF-provided value.", "en");
+		hasCalculatedNOVAgroup.addComment("Groupe NOVA calculé (1..4) inféré par les règles, distinct de la valeur fournie par OFF.", "fr");
+
+		// OFF-provided NOVA group (1..4), dedicated property to store exact OFF value
+		DatatypeProperty hasNOVAgroup = om.createDatatypeProperty(ncl + "hasNOVAgroup");
+		hasNOVAgroup.addDomain(Product);
+		hasNOVAgroup.addRange(om.createResource(XSD.nonNegativeInteger.getURI()));
+		hasNOVAgroup.addComment("NOVA group (1..4) as provided by Open Food Facts.", "en");
+		hasNOVAgroup.addComment("Groupe NOVA (1..4) tel que fourni par Open Food Facts.", "fr");
+
+		DatatypeProperty groupe1 = om.createDatatypeProperty(ncl + "groupe1");
+		groupe1.addDomain(NOVAgroupDetails);
+		groupe1.addRange(om.createResource(XSD.xstring.getURI()));
+		groupe1.addComment("NOVA group 1 characteristics (unprocessed or minimally processed foods).", "en");
+		groupe1.addComment("Caractéristiques du groupe NOVA 1 (aliments non transformés ou minimalement transformés).", "fr");
+
+		DatatypeProperty groupe2 = om.createDatatypeProperty(ncl + "groupe2");
+		groupe2.addDomain(NOVAgroupDetails);
+		groupe2.addRange(om.createResource(XSD.xstring.getURI()));
+		groupe2.addComment("NOVA group 2 characteristics (processed culinary ingredients).", "en");
+		groupe2.addComment("Caractéristiques du groupe NOVA 2 (ingrédients culinaires transformés).", "fr");
+
+		DatatypeProperty groupe3 = om.createDatatypeProperty(ncl + "groupe3");
+		groupe3.addDomain(NOVAgroupDetails);
+		groupe3.addRange(om.createResource(XSD.xstring.getURI()));
+		groupe3.addComment("NOVA group 3 characteristics (processed foods).", "en");
+		groupe3.addComment("Caractéristiques du groupe NOVA 3 (aliments transformés).", "fr");
+
+		DatatypeProperty groupe4 = om.createDatatypeProperty(ncl + "groupe4");
+		groupe4.addDomain(NOVAgroupDetails);
+		groupe4.addRange(om.createResource(XSD.xstring.getURI()));
+		groupe4.addComment("NOVA group 4 characteristics (ultra-processed foods and drinks).", "en");
+		groupe4.addComment("Caractéristiques du groupe NOVA 4 (produits ultra-transformés).", "fr");
 	
 		//////////////////////////////////////////////////////////
 	    // Définition des annotation property                   //
@@ -831,13 +960,15 @@ public class CreateNatclinnTbox {
 	NCL.addSubClass(ProductArgument);
 	NCL.addSubClass(CleanLabel);
 	NCL.addSubClass(Context);
-	NCL.addSubClass(ContextIngredient);
-	NCL.addSubClass(ContextProduct);
+	// NCL.addSubClass(ContextIngredient);
+	// NCL.addSubClass(ContextProduct);
 	NCL.addSubClass(ControlledOriginLabel);
 	NCL.addSubClass(FNI);
 	NCL.addSubClass(NutriScore);
 	NCL.addSubClass(NutriScoreDetail);
 	NCL.addSubClass(NutriScoreAlpha);
+	NCL.addSubClass(NOVAgroupDetails);
+	NCL.addSubClass(CalculatedNOVAgroupDetails);
 	NCL.addSubClass(Packaging);
 	NCL.addSubClass(Shape);
 	NCL.addSubClass(Material);
@@ -851,6 +982,9 @@ public class CreateNatclinnTbox {
 	NCL.addSubClass(Attribute);
 	NCL.addSubClass(Category);
 	NCL.addSubClass(Subcategory);
+	NCL.addSubClass(Stakeholder);
+	NCL.addSubClass(LinkToArgument);
+	NCL.addSubClass(TypeSource);
 
 	
 	CompositeProduct.addSuperClass(Product);

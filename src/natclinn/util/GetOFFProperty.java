@@ -11,8 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import org.json.JSONObject;
 
-import natclinn.util.NatclinnConf;
-
 /**
  * Primitive pour interroger l'API Open Food Facts
  * Usage: getOFFProperty(?ingredient, 'nova_group', ?novaGroup)
@@ -70,7 +68,7 @@ public class GetOFFProperty extends BaseBuiltin {
     
     private String getOFFIdFromModel(String ingredientURI, RuleContext context) {
         // Récupérer ncl:hasIdIngredientOFF depuis le modèle
-        String query = "SELECT ?id WHERE { <" + ingredientURI + "> <https://w3id.org/NCL/ontology/hasIdIngredientOFF> ?id }";
+        //String query = "SELECT ?id WHERE { <" + ingredientURI + "> <https://w3id.org/NCL/ontology/hasIdIngredientOFF> ?id }";
         // Implémentation de la requête SPARQL sur context.getGraph()
         // ... (simplifié ici)
         return null; // À implémenter

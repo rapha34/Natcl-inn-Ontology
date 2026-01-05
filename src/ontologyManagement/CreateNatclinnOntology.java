@@ -1,5 +1,6 @@
 package ontologyManagement;
 
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,9 +9,9 @@ import java.io.InputStream;
 import org.apache.jena.ontology.*;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.jena.vocabulary.DC;
 import org.apache.jena.vocabulary.OWL;
-import org.apache.jena.vocabulary.RDFS;
 import natclinn.util.NatclinnConf;
 
 /**
@@ -37,7 +38,13 @@ public class CreateNatclinnOntology {
         String inputFileProductsAbox = folderForOntologies + "/NatclinnProductsAbox.xml";
         String inputFileArgumentsAbox = folderForOntologies + "/NatclinnArgumentsAbox.xml";
         String inputFileClassificationAttribute = folderForOntologies + "/NatclinnClassificationAttribute.xml";
-        String inputFileFunctionAbox = folderForOntologies + "/NatclinnFunctionAbox.xml";
+        String inputFileRoleAbox = folderForOntologies + "/NatclinnRoleAbox.xml";
+        String inputFilePackagingTypeAbox = folderForOntologies + "/NatclinnPackagingTypeAbox.xml";
+        String inputFileControlledOriginTypeAbox = folderForOntologies + "/NatclinnControlledOriginTypeAbox.xml";
+        String inputFileNOVAmarkersAbox = folderForOntologies + "/NatclinnNOVAmarkers.xml";
+        String inputFileNatclinnOFFTaxonomy = folderForOntologies + "/NatclinnOFFTaxonomy.xml";
+
+
 
         // Modèle ontologique principal
         OntModel om = ModelFactory.createOntologyModel(OntModelSpec.OWL_DL_MEM);
@@ -137,7 +144,11 @@ public class CreateNatclinnOntology {
             mergeOntology(om, modelTemp, inputFileProductsAbox, ncl + "NatclinnProductAbox");
             mergeOntology(om, modelTemp, inputFileArgumentsAbox, ncl + "NatclinnArgumentAbox");
             mergeOntology(om, modelTemp, inputFileClassificationAttribute, ncl + "ClassificationAttribute");
-            mergeOntology(om, modelTemp, inputFileFunctionAbox, ncl + "NatclinnFunctionAbox");
+            mergeOntology(om, modelTemp, inputFileRoleAbox, ncl + "NatclinnRoleAbox");
+            mergeOntology(om, modelTemp, inputFilePackagingTypeAbox, ncl + "NatclinnPackagingTypeAbox");
+            mergeOntology(om, modelTemp, inputFileControlledOriginTypeAbox, ncl + "NatclinnControlledOriginTypeAbox");
+            mergeOntology(om, modelTemp, inputFileNOVAmarkersAbox, ncl + "NatclinnNOVAmarkers");
+            mergeOntology(om, modelTemp, inputFileNatclinnOFFTaxonomy, ncl + "OFFTaxonomy");
         } catch (IOException e) {
             System.err.println("Erreur lors de la fusion des fichiers : " + e.getMessage());
         }
@@ -146,15 +157,28 @@ public class CreateNatclinnOntology {
         // Exportation des résultats                  //
         ////////////////////////////////////////////////
 
-        try (FileOutputStream outXML = new FileOutputStream(folderForOntologies + "/NatclinnOntology.owl");
-             FileOutputStream outJSON = new FileOutputStream(folderForOntologies + "/NatclinnOntology.jsonld")) {
-
-            om.write(outXML, "RDF/XML");
-            om.write(outJSON, "JSON-LD");
-
-            System.out.println("Ontologie Natcl'inn exportée avec succès :");
+        try {
+            System.out.println("Modèle fusionné (" + om.size() + " triplets)");
+            
+            // Export RDF/XML avec buffer
+            System.out.println("Écriture RDF/XML avec buffer...");
+            FileOutputStream fosXML = new FileOutputStream(folderForOntologies + "/NatclinnOntology.owl");
+            BufferedOutputStream bosXML = new BufferedOutputStream(fosXML, 8192 * 4); // 32KB buffer
+            RDFDataMgr.write(bosXML, om, RDFFormat.RDFXML_PLAIN);
+            bosXML.flush();
+            bosXML.close();
             System.out.println(" - RDF/XML : " + folderForOntologies + "/NatclinnOntology.owl");
+            
+            // Export JSON-LD avec buffer
+            System.out.println("Écriture JSON-LD avec buffer...");
+            FileOutputStream fosJSON = new FileOutputStream(folderForOntologies + "/NatclinnOntology.jsonld");
+            BufferedOutputStream bosJSON = new BufferedOutputStream(fosJSON, 8192 * 4); // 32KB buffer
+            RDFDataMgr.write(bosJSON, om, RDFFormat.JSONLD11);
+            bosJSON.flush();
+            bosJSON.close();
             System.out.println(" - JSON-LD : " + folderForOntologies + "/NatclinnOntology.jsonld");
+            
+            System.out.println("Ontologie Natcl'inn exportée avec succès !");
 
         } catch (FileNotFoundException e) {
             System.err.println("Erreur : fichier introuvable - " + e.getMessage());

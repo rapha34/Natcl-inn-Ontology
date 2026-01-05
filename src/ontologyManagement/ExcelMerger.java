@@ -100,19 +100,50 @@ public class ExcelMerger {
                             dstCell.setCellStyle(coloredStyle);
                         }
                     }
+                    
+                    // Pour la feuille Product, colorer aussi les colonnes F à J (indices 5 à 9)
+                    if (sheetName.equals("Products")) {
+                        CellStyle greenStyle = destWorkbook.createCellStyle();
+                        if (destWorkbook instanceof XSSFWorkbook) {
+                            XSSFColor paleGreen = new XSSFColor(new Color(220, 255, 220), null);
+                            ((XSSFCellStyle) greenStyle).setFillForegroundColor(paleGreen);
+                            greenStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+                        }
+                        
+                        for (int c = 5; c <= 7; c++) { // Colonnes F à H (indices 5 à 7)
+                            Cell dstCell = dstRow.getCell(c);
+                            if (dstCell == null) {
+                                dstCell = dstRow.createCell(c);
+                            }
+                            dstCell.setCellStyle(greenStyle);
+                        }
+                    }
                 }
             }
 
             // Écriture finale
             
-            // Recalcule toutes les formules via Apache POI
+            // Recalcule uniquement les formules des feuilles traitées (exclut Feuilles, Racines, Liste)
             FormulaEvaluator evaluator = destWorkbook.getCreationHelper().createFormulaEvaluator();
-            evaluator.evaluateAll();
-
-            // Ou bien demander à Excel de recalculer à l'ouverture
-            // if (destWorkbook instanceof XSSFWorkbook) {
-            //     ((XSSFWorkbook) destWorkbook).setForceFormulaRecalculation(true);
-            // }
+            for (int i = 0; i < destWorkbook.getNumberOfSheets(); i++) {
+                Sheet sheet = destWorkbook.getSheetAt(i);
+                String sheetName = sheet.getSheetName();
+                
+                // Ignorer les feuilles Feuilles, Racines et Liste pour le recalcul
+                if (sheetName.equals("Feuilles") || sheetName.equals("Racines") || sheetName.equals("Liste")) {
+                    System.out.println("Recalcul ignoré pour la feuille: " + sheetName);
+                    continue;
+                }
+                
+                System.out.println("Recalcul des formules pour la feuille: " + sheetName);
+                for (Row row : sheet) {
+                    for (Cell cell : row) {
+                        if (cell != null && cell.getCellType() == CellType.FORMULA) {
+                            evaluator.evaluateFormulaCell(cell);
+                        }
+                    }
+                }
+            }
 
             for (int i = 0; i < destWorkbook.getNumberOfSheets(); i++) {
                 Sheet sourceSheet = destWorkbook.getSheetAt(i);

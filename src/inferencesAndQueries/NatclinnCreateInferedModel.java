@@ -226,7 +226,6 @@ public class NatclinnCreateInferedModel {
         if (!pass3Rules.isEmpty()) {
             System.out.println("=== Passe 3 démarrage ===");
             new NatclinnConf();
-            String ncl = NatclinnConf.ncl;
             
             // Base = modèle Pass2 matérialisé
             Model basePass3 = ModelFactory.createDefaultModel().add(infModelPass2);

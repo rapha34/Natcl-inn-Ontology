@@ -29,8 +29,14 @@ public class ExcelMergerConfirmation {
 
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
-                if (sheet.getSheetName().equals("Categories")) {
-                    continue; // Ignore la feuille cachée Categories
+                if (sheet.getSheetName().equals("Feuilles")) {
+                    continue; // Ignore la feuille cachée 
+                }
+                if (sheet.getSheetName().equals("Racines")) {
+                    continue; // Ignore la feuille cachée 
+                }
+                if (sheet.getSheetName().equals("Liste")) {
+                    continue; // Ignore la feuille cachée 
                 }
                 removeGreenFromSheet(sheet, paleGreen);
             }
