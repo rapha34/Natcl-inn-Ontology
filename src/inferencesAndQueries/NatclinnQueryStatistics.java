@@ -508,75 +508,75 @@ public class NatclinnQueryStatistics {
 // listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 // idQuery++;
 
-	// --- Contrôle détaillé NOVA : Calculé vs OFF pour tous les produits ---
-	titleQuery = "Contrôle NOVA détaillé : Calculé vs OFF (Tous les produits)";
-	commentQuery = "Compare les groupes NOVA calculés avec ceux natifs d'Open Food Facts pour tous les produits";
-	typeQuery = "SELECT";
-	stringQuery = prefix +
-		"SELECT ?product ?Nom_Produit ?NOVA_calculé ?NOVA_OFF " +
-		"       (COALESCE(?g1_calc, \"-\") AS ?Groupe1_calculé) " +
-		"       (COALESCE(?g2_calc, \"-\") AS ?Groupe2_calculé) " +
-		"       (COALESCE(?g3_calc, \"-\") AS ?Groupe3_calculé) " +
-		"       (COALESCE(?g4_calc, \"-\") AS ?Groupe4_calculé) " +
-		"       (COALESCE(?g1_off, \"-\") AS ?Groupe1_OFF) " +
-		"       (COALESCE(?g2_off, \"-\") AS ?Groupe2_OFF) " +
-		"       (COALESCE(?g3_off, \"-\") AS ?Groupe3_OFF) " +
-		"       (COALESCE(?g4_off, \"-\") AS ?Groupe4_OFF) " +
-		"WHERE { " +
-		"  ?product rdf:type ncl:Product . " +
-		"  ?product ncl:isProductIAA 'true'^^xsd:boolean." +
-		"  OPTIONAL { ?product skos:prefLabel ?Nom_Produit } . " +
-		"  OPTIONAL { ?product ncl:hasCalculatedNOVAgroup ?NOVA_calculé } " +
-		"  OPTIONAL { ?product ncl:hasNOVAgroup ?NOVA_OFF } " +
-		"  OPTIONAL { " +
-		"    ?product ncl:hasCalculatedNOVAgroupDetails ?details . " +
-		"    OPTIONAL { ?details ncl:groupe1 ?g1_calc } " +
-		"    OPTIONAL { ?details ncl:groupe2 ?g2_calc } " +
-		"    OPTIONAL { ?details ncl:groupe3 ?g3_calc } " +
-		"    OPTIONAL { ?details ncl:groupe4 ?g4_calc } " +
-		"  } " +
-		"  OPTIONAL { " +
-		"    ?product ncl:hasNOVAgroupDetails ?detailsOFF . " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe1 ?g1_off } " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe2 ?g2_off } " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe3 ?g3_off } " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe4 ?g4_off } " +
-		"  } " +
-		"} ORDER BY ?product";
-	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-	idQuery++;
+	// // --- Contrôle détaillé NOVA : Calculé vs OFF pour tous les produits ---
+	// titleQuery = "Contrôle NOVA détaillé : Calculé vs OFF (Tous les produits)";
+	// commentQuery = "Compare les groupes NOVA calculés avec ceux natifs d'Open Food Facts pour tous les produits";
+	// typeQuery = "SELECT";
+	// stringQuery = prefix +
+	// 	"SELECT ?product ?Nom_Produit ?NOVA_calculé ?NOVA_OFF " +
+	// 	"       (COALESCE(?g1_calc, \"-\") AS ?Groupe1_calculé) " +
+	// 	"       (COALESCE(?g2_calc, \"-\") AS ?Groupe2_calculé) " +
+	// 	"       (COALESCE(?g3_calc, \"-\") AS ?Groupe3_calculé) " +
+	// 	"       (COALESCE(?g4_calc, \"-\") AS ?Groupe4_calculé) " +
+	// 	"       (COALESCE(?g1_off, \"-\") AS ?Groupe1_OFF) " +
+	// 	"       (COALESCE(?g2_off, \"-\") AS ?Groupe2_OFF) " +
+	// 	"       (COALESCE(?g3_off, \"-\") AS ?Groupe3_OFF) " +
+	// 	"       (COALESCE(?g4_off, \"-\") AS ?Groupe4_OFF) " +
+	// 	"WHERE { " +
+	// 	"  ?product rdf:type ncl:Product . " +
+	// 	"  ?product ncl:isProductIAA 'true'^^xsd:boolean." +
+	// 	"  OPTIONAL { ?product skos:prefLabel ?Nom_Produit } . " +
+	// 	"  OPTIONAL { ?product ncl:hasCalculatedNOVAgroup ?NOVA_calculé } " +
+	// 	"  OPTIONAL { ?product ncl:hasNOVAgroup ?NOVA_OFF } " +
+	// 	"  OPTIONAL { " +
+	// 	"    ?product ncl:hasCalculatedNOVAgroupDetails ?details . " +
+	// 	"    OPTIONAL { ?details ncl:groupe1 ?g1_calc } " +
+	// 	"    OPTIONAL { ?details ncl:groupe2 ?g2_calc } " +
+	// 	"    OPTIONAL { ?details ncl:groupe3 ?g3_calc } " +
+	// 	"    OPTIONAL { ?details ncl:groupe4 ?g4_calc } " +
+	// 	"  } " +
+	// 	"  OPTIONAL { " +
+	// 	"    ?product ncl:hasNOVAgroupDetails ?detailsOFF . " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe1 ?g1_off } " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe2 ?g2_off } " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe3 ?g3_off } " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe4 ?g4_off } " +
+	// 	"  } " +
+	// 	"} ORDER BY ?product";
+	// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	// idQuery++;
 
-	// --- Audit détaillé : Différences NOVA Calculé vs OFF par marqueur ---
-	titleQuery = "Audit NOVA : Différences marqueurs par produit";
-	commentQuery = "Détail des marqueurs (ingrédients/additifs) présents en calculé vs OFF";
-	typeQuery = "SELECT";
-	stringQuery = prefix +
-		"SELECT ?product ?Nom_Produit ?NOVA_calc ?NOVA_off " +
-		"       ?groupe1_calc ?groupe2_calc ?groupe3_calc ?groupe4_calc " +
-		"       ?groupe1_off ?groupe2_off ?groupe3_off ?groupe4_off " +
-		"WHERE { " +
-		"  ?product rdf:type ncl:Product . " +
-		"  ?product ncl:isProductIAA 'true'^^xsd:boolean. " +
-		"  OPTIONAL { ?product skos:prefLabel ?Nom_Produit } " +
-		"  OPTIONAL { ?product ncl:hasCalculatedNOVAgroup ?NOVA_calc } " +
-		"  OPTIONAL { ?product ncl:hasNOVAgroup ?NOVA_off } " +
-		"  OPTIONAL { " +
-		"    ?product ncl:hasCalculatedNOVAgroupDetails ?detailsCalc . " +
-		"    OPTIONAL { ?detailsCalc ncl:groupe1 ?groupe1_calc } " +
-		"    OPTIONAL { ?detailsCalc ncl:groupe2 ?groupe2_calc } " +
-		"    OPTIONAL { ?detailsCalc ncl:groupe3 ?groupe3_calc } " +
-		"    OPTIONAL { ?detailsCalc ncl:groupe4 ?groupe4_calc } " +
-		"  } " +
-		"  OPTIONAL { " +
-		"    ?product ncl:hasNOVAgroupDetails ?detailsOFF . " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe1 ?groupe1_off } " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe2 ?groupe2_off } " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe3 ?groupe3_off } " +
-		"    OPTIONAL { ?detailsOFF ncl:groupe4 ?groupe4_off } " +
-		"  } " +
-		"} ORDER BY ?product";
-	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-	idQuery++;
+	// // --- Audit détaillé : Différences NOVA Calculé vs OFF par marqueur ---
+	// titleQuery = "Audit NOVA : Différences marqueurs par produit";
+	// commentQuery = "Détail des marqueurs (ingrédients/additifs) présents en calculé vs OFF";
+	// typeQuery = "SELECT";
+	// stringQuery = prefix +
+	// 	"SELECT ?product ?Nom_Produit ?NOVA_calc ?NOVA_off " +
+	// 	"       ?groupe1_calc ?groupe2_calc ?groupe3_calc ?groupe4_calc " +
+	// 	"       ?groupe1_off ?groupe2_off ?groupe3_off ?groupe4_off " +
+	// 	"WHERE { " +
+	// 	"  ?product rdf:type ncl:Product . " +
+	// 	"  ?product ncl:isProductIAA 'true'^^xsd:boolean. " +
+	// 	"  OPTIONAL { ?product skos:prefLabel ?Nom_Produit } " +
+	// 	"  OPTIONAL { ?product ncl:hasCalculatedNOVAgroup ?NOVA_calc } " +
+	// 	"  OPTIONAL { ?product ncl:hasNOVAgroup ?NOVA_off } " +
+	// 	"  OPTIONAL { " +
+	// 	"    ?product ncl:hasCalculatedNOVAgroupDetails ?detailsCalc . " +
+	// 	"    OPTIONAL { ?detailsCalc ncl:groupe1 ?groupe1_calc } " +
+	// 	"    OPTIONAL { ?detailsCalc ncl:groupe2 ?groupe2_calc } " +
+	// 	"    OPTIONAL { ?detailsCalc ncl:groupe3 ?groupe3_calc } " +
+	// 	"    OPTIONAL { ?detailsCalc ncl:groupe4 ?groupe4_calc } " +
+	// 	"  } " +
+	// 	"  OPTIONAL { " +
+	// 	"    ?product ncl:hasNOVAgroupDetails ?detailsOFF . " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe1 ?groupe1_off } " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe2 ?groupe2_off } " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe3 ?groupe3_off } " +
+	// 	"    OPTIONAL { ?detailsOFF ncl:groupe4 ?groupe4_off } " +
+	// 	"  } " +
+	// 	"} ORDER BY ?product";
+	// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	// idQuery++;
 
 // titleQuery = "Diagnostic: détails NOVA présents ?";
 // typeQuery = "SELECT";
@@ -946,36 +946,36 @@ public class NatclinnQueryStatistics {
 		// idQuery++;
 
 		// Diagnostic: marqueurs NOVA des ingrédients
-		titleQuery = "Diagnostic - Marqueurs NOVA ingrédients (P-3564700423196)";
-		commentQuery = "Vérifie les marqueurs NOVA attachés aux ingrédients de la Moussaka";
-		typeQuery = "SELECT";
-		stringQuery = prefix +
-			"SELECT ?ingredient ?ingredientLabel ?novaInfo " +
-			"WHERE { " +
-			"  <https://w3id.org/NCL/ontology/P-3564700423196> ncl:hasIngredientR ?ingredient . " +
-			"  ?ingredient skos:prefLabel ?ingredientLabel . " +
-			"  OPTIONAL { ?ingredient ncl:hasNOVAmarkerInfo ?novaInfo } " +
-			"} ORDER BY ?ingredient";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-		idQuery++;
+		// titleQuery = "Diagnostic - Marqueurs NOVA ingrédients (P-3564700423196)";
+		// commentQuery = "Vérifie les marqueurs NOVA attachés aux ingrédients de la Moussaka";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix +
+		// 	"SELECT ?ingredient ?ingredientLabel ?novaInfo " +
+		// 	"WHERE { " +
+		// 	"  <https://w3id.org/NCL/ontology/P-3564700423196> ncl:hasIngredientR ?ingredient . " +
+		// 	"  ?ingredient skos:prefLabel ?ingredientLabel . " +
+		// 	"  OPTIONAL { ?ingredient ncl:hasNOVAmarkerInfo ?novaInfo } " +
+		// 	"} ORDER BY ?ingredient";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		// idQuery++;
 
-		// Contrôle: Ingrédients sans code OFF
-		titleQuery = "Contrôle - Ingrédients sans code OFF";
-		commentQuery = "Liste les ingrédients qui n'ont pas de relation hasIdIngredientOFF";
-		typeQuery = "SELECT";
-		stringQuery = prefix +
-			"SELECT ?ingredient ?ingredientLabel ?product ?productLabel " +
-			"WHERE { " +
-			"  ?ingredient rdf:type ncl:Ingredient . " +
-			"  OPTIONAL { ?ingredient skos:prefLabel ?ingredientLabel } " +
-			"  OPTIONAL { " +
-			"    ?product ncl:hasIngredientR ?ingredient . " +
-			"    OPTIONAL { ?product rdfs:label ?productLabel } " +
-			"  } " +
-			"  FILTER NOT EXISTS { ?ingredient ncl:hasIdIngredientOFF ?offId } " +
-			"} ORDER BY ?ingredientLabel";
-		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-		idQuery++;
+		// // Contrôle: Ingrédients sans code OFF
+		// titleQuery = "Contrôle - Ingrédients sans code OFF";
+		// commentQuery = "Liste les ingrédients qui n'ont pas de relation hasIdIngredientOFF";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix +
+		// 	"SELECT ?ingredient ?ingredientLabel ?product ?productLabel " +
+		// 	"WHERE { " +
+		// 	"  ?ingredient rdf:type ncl:Ingredient . " +
+		// 	"  OPTIONAL { ?ingredient skos:prefLabel ?ingredientLabel } " +
+		// 	"  OPTIONAL { " +
+		// 	"    ?product ncl:hasIngredientR ?ingredient . " +
+		// 	"    OPTIONAL { ?product rdfs:label ?productLabel } " +
+		// 	"  } " +
+		// 	"  FILTER NOT EXISTS { ?ingredient ncl:hasIdIngredientOFF ?offId } " +
+		// 	"} ORDER BY ?ingredientLabel";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		// idQuery++;
 
 		// // Test: Fuzzy matching des ingrédients sans code OFF
 		// // NOTE: Le fuzzy matching fonctionne maintenant via la règle Pass2_MapMissingOFFIngredient_Fuzzy
@@ -1062,6 +1062,113 @@ public class NatclinnQueryStatistics {
 		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		// idQuery++;
 		
+
+		// // ===================================================================
+		// // Contrôle : Processing
+		// // ===================================================================
+		// titleQuery = "Contrôle - Processing par produit";
+		// commentQuery = "Vérifie .";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix +
+		// 	"SELECT ?productName ?CalculatedNOVAgroup ?processingName " +
+		// 	"WHERE { " +
+		// 	"  ?product rdf:type ncl:Product . " +
+		// 	"  ?product skos:prefLabel ?productName . " +
+		// 	"  ?product ncl:hasCalculatedNOVAgroup ?CalculatedNOVAgroup . " +
+		// 	"  ?product ncl:hasProcessing ?processing . " +
+		// 	"  ?processing skos:prefLabel ?processingName . " +
+		// 	"} " +
+		// 	"LIMIT 20";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		// idQuery++;
+
+
+		// ===================================================================
+		// Contrôle : Propriétés d'emballage par produit IAA
+		// ===================================================================
+		titleQuery = "Contrôle - Propriétés d'emballage par produit IAA";
+		commentQuery = "Affiche pour chaque produit IAA les valeurs de hasTypePackaging et hasPackagingCheck";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT ?productName ?packagingType ?packagingCheck " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product skos:prefLabel ?productName . " +
+			"  ?product ncl:isProductIAA 'true'^^xsd:boolean." +
+			"  OPTIONAL { " +
+			"    ?product ncl:hasTypePackaging ?packagingTypeUri . " +
+			"    ?packagingTypeUri skos:prefLabel ?packagingType . " +
+			"  } " +
+			"  OPTIONAL { " +
+			"    ?product ncl:hasPackagingCheck ?packagingCheckUri . " +
+			"    ?packagingCheckUri skos:prefLabel ?packagingCheck . " +
+			"  } " +
+			"} " +
+			"ORDER BY ?productName";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+
+		// ===================================================================
+		// Contrôle : Bindings pour emballage_plastique
+		// ===================================================================
+		titleQuery = "Contrôle - Bindings pour emballage_plastique";
+		commentQuery = "Affiche tous les PackagingTypeArgumentBinding liés à emballage_plastique";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT ?binding ?nameProperty ?keywords ?required " +
+			"WHERE { " +
+			"  ?binding rdf:type ncl:PackagingTypeArgumentBinding . " +
+			"  ?binding ncl:aboutPackagingType ncl:emballage_plastique . " +
+			"  OPTIONAL { ?binding ncl:bindingAgentNameProperty ?nameProperty } " +
+			"  OPTIONAL { ?binding ncl:bindingAgentKeywords ?keywords } " +
+			"  OPTIONAL { ?binding ncl:packagingTypeRequired ?required } " +
+			"} " +
+			"ORDER BY ?binding";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+
+		// ===================================================================
+		// Contrôle : Bindings pour emballage_sans_plastique
+		// ===================================================================
+		titleQuery = "Contrôle - Bindings pour emballage_sans_plastique";
+		commentQuery = "Affiche tous les PackagingTypeArgumentBinding liés à emballage_sans_plastique";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT ?binding ?nameProperty ?keywords ?required " +
+			"WHERE { " +
+			"  ?binding rdf:type ncl:PackagingTypeArgumentBinding . " +
+			"  ?binding ncl:aboutPackagingType ncl:emballage_sans_plastique . " +
+			"  OPTIONAL { ?binding ncl:bindingAgentNameProperty ?nameProperty } " +
+			"  OPTIONAL { ?binding ncl:bindingAgentKeywords ?keywords } " +
+			"  OPTIONAL { ?binding ncl:packagingTypeRequired ?required } " +
+			"} " +
+			"ORDER BY ?binding";
+		// ===================================================================
+		// Contrôle : Arguments liés aux madeleines
+		// ===================================================================
+		titleQuery = "Contrôle - Arguments liés aux madeleines";
+		commentQuery = "Affiche les arguments liés aux produits madeleines via LinkToArgument";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT ?productName ?argumentName ?argumentValue ?linkName ?initiator " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product skos:prefLabel ?productName . " +
+			"  FILTER(CONTAINS(?productName, \"Madeleine\")) . " +
+			"  ?product ncl:hasLinkToArgument ?link . " +
+			"  ?link ncl:hasReferenceProductArgument ?argument . " +
+			"  ?argument ncl:nameProperty ?argumentName . " +
+			"  OPTIONAL { ?argument ncl:valueProperty ?argumentValue } . " +
+			"  ?link ncl:LinkNameProperty ?linkName . " +
+			"  ?link ncl:initiator ?initiator . " +
+			"} " +
+			"ORDER BY ?productName ?argumentName";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+
 		/////////////////////////////////////////////////////
 		// FIN DES QUERIES                                 //
 		/////////////////////////////////////////////////////
@@ -1086,6 +1193,7 @@ public class NatclinnQueryStatistics {
 		listPrimitives.add("CompareRoleProperty");
 		listPrimitives.add("GetPackagingType");
 		listPrimitives.add("ComparePackagingTypeProperty");
+		listPrimitives.add("CompareProcessingTypeProperty");
 		listPrimitives.add("GetControlledOriginType");
 		listPrimitives.add("CompareControlledOriginTypeProperty");
 		listPrimitives.add("GetNOVAgroup");

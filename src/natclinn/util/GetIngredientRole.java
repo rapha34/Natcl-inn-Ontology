@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Primitive pour identifier la rôle d'un ingrédient via Open Food Facts
+ * Primitive pour identifier le rôle d'un ingrédient via Open Food Facts
  * Usage: getIngredientRole(?ingredientLabel, ?role)
  * Retourne: une ressource URI ncl:<rôle> (ex: ncl:conservateur, ncl:emulsifiant_stabilisant)
  */

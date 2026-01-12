@@ -43,6 +43,7 @@ public class CreateNatclinnOntology {
         String inputFileControlledOriginTypeAbox = folderForOntologies + "/NatclinnControlledOriginTypeAbox.xml";
         String inputFileNOVAmarkersAbox = folderForOntologies + "/NatclinnNOVAmarkers.xml";
         String inputFileNatclinnOFFTaxonomy = folderForOntologies + "/NatclinnOFFTaxonomy.xml";
+        String inputFileNatclinnProcessing = folderForOntologies + "/NatclinnProcessing.xml";
 
 
 
@@ -149,6 +150,7 @@ public class CreateNatclinnOntology {
             mergeOntology(om, modelTemp, inputFileControlledOriginTypeAbox, ncl + "NatclinnControlledOriginTypeAbox");
             mergeOntology(om, modelTemp, inputFileNOVAmarkersAbox, ncl + "NatclinnNOVAmarkers");
             mergeOntology(om, modelTemp, inputFileNatclinnOFFTaxonomy, ncl + "OFFTaxonomy");
+            mergeOntology(om, modelTemp, inputFileNatclinnProcessing, ncl + "NatclinnProcessing");
         } catch (IOException e) {
             System.err.println("Erreur lors de la fusion des fichiers : " + e.getMessage());
         }

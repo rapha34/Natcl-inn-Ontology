@@ -27,7 +27,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import natclinn.util.NatclinnConf;
-import natclinn.util.NatclinnUtil;
 
 /**
  * Programme de création de l'ABox des origines d'ingrédients à partir
@@ -86,14 +85,9 @@ public class CreateNatclinnControlledOriginTypeOntology {
         // Classes
         OntClass ControlledOriginType = om.createClass(ncl + "ControlledOriginType");
         OntClass ControlledOriginTypeArgumentBinding = om.createClass(ncl + "ControlledOriginTypeArgumentBinding");
-        OntClass Attribute = om.createClass(ncl + "Attribute");
 
         ControlledOriginType.addSuperClass(NCLCOT);
         ControlledOriginTypeArgumentBinding.addSuperClass(NCLCOT);
-        Attribute.addSuperClass(NCLCOT);
-
-
-
 
         /////////////////////////////
 	    // Inclusion de concepts   //
@@ -101,19 +95,21 @@ public class CreateNatclinnControlledOriginTypeOntology {
 	
 	    // Note: Les relations de subsomption de classes ne sont plus créées avec Model
 
+        // adaptation du code pour la nouvelle structure du fichier Excel ControlledOriginTypeAbox.xlsx : IDOrigine	Nom Origine	Origine Requise	Mots-clés	RègleFiltrage	LabelsSynonymes	RègleSelection	PropriétésAntinomie
+
+
         // Properties
-        ObjectProperty hasAttribute = om.createObjectProperty(ncl + "hasBindingAgentAttribute");
         ObjectProperty aboutOrigin = om.createObjectProperty(ncl + "aboutOrigin"); // lien OriginArgumentBinding -> ControlledOriginLabel
         DatatypeProperty originRequired = om.createDatatypeProperty(ncl + "originRequired");
-        DatatypeProperty descriptionProp = om.createDatatypeProperty(ncl + "bindingAgentDescription");
-        DatatypeProperty polarity = om.createDatatypeProperty(ncl + "bindingAgentPolarity");
-        DatatypeProperty nameCriterion = om.createDatatypeProperty(ncl + "bindingAgentNameCriterion");
-        DatatypeProperty nameProperty = om.createDatatypeProperty(ncl + "bindingAgentNameProperty");
-        DatatypeProperty valueProperty = om.createDatatypeProperty(ncl + "bindingAgentValueProperty");
+         DatatypeProperty keywordsProperty = om.createDatatypeProperty(ncl + "bindingAgentKeywords");
+        // Nouvelles propriétés pour la configuration des règles de filtrage et sélection
+        DatatypeProperty filteringRule = om.createDatatypeProperty(ncl + "originFilteringRule");
+        DatatypeProperty synonymLabels = om.createDatatypeProperty(ncl + "originSynonymLabels");
+        DatatypeProperty selectionRule = om.createDatatypeProperty(ncl + "originSelectionRule");
+        DatatypeProperty antinomyProperties = om.createDatatypeProperty(ncl + "originAntinomyProperties");
         AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
 
         Map<String, Individual> originMap = new HashMap<>();
-        Map<String, Individual> attributeMap = new HashMap<>();
         Map<String, Integer> argCountersByLabel = new HashMap<>();
 
         try (FileInputStream fis = new FileInputStream(excelFile)) {
@@ -142,21 +138,20 @@ public class CreateNatclinnControlledOriginTypeOntology {
                     for (Row row : critSheet) {
                         if (row.getRowNum() == 0) continue; // header
                         String idOrigin = getCellValue(row.getCell(0));
-                        // Ignorer la colonne B (Nom Origine) pour cet onglet
                         String originRequis = getCellValue(row.getCell(2));
-                        String attribut = getCellValue(row.getCell(3));
-                        String description = getCellValue(row.getCell(4));
-                        String polarite = getCellValue(row.getCell(5));
-                        String nomCritere = getCellValue(row.getCell(6));
-                        String propriete = getCellValue(row.getCell(7));
-                        String valeurPropriete = getCellValue(row.getCell(8));
+                        String motsCles = getCellValue(row.getCell(3));
+                        // Nouvelles colonnes pour la configuration
+                        String regleFiltrage = getCellValue(row.getCell(4));
+                        String labelsSynonymes = getCellValue(row.getCell(5));
+                        String regleSelection = getCellValue(row.getCell(6));
+                        String proprietesAntinomie = getCellValue(row.getCell(7));
 
                         // Ne créer un OriginArgumentBinding que si IDOrigin est non vide
                         if (idOrigin != null && !idOrigin.isEmpty()) {
                             // Et s'il y a au moins une info utile
-                            if ((propriete != null && !propriete.isEmpty()) || (description != null && !description.isEmpty())
-                                    || (originRequis != null && !originRequis.isEmpty()) || (attribut != null && !attribut.isEmpty())
-                                    || (nomCritere != null && !nomCritere.isEmpty()) || (valeurPropriete != null && !valeurPropriete.isEmpty())) {
+                            if ((motsCles != null && !motsCles.isEmpty()) || (regleFiltrage != null && !regleFiltrage.isEmpty())
+                                    || (labelsSynonymes != null && !labelsSynonymes.isEmpty()) || (regleSelection != null && !regleSelection.isEmpty())
+                                    || (proprietesAntinomie != null && !proprietesAntinomie.isEmpty())) {
                                 String originLabel = null;
                                 if (originMap.containsKey(idOrigin)) {
                                     try {
@@ -169,36 +164,26 @@ public class CreateNatclinnControlledOriginTypeOntology {
                                         .replaceAll("\\s+", "-")
                                         .replaceAll("[^A-Za-z0-9_-]", "");
                                 int nextIndex = argCountersByLabel.getOrDefault(safeLabel, 0) + 1;
-                                // Identifiant de l'individu OriginArgumentBinding (préfixe OrigBind-)
-                                String argId = "OrigBind-" + safeLabel + "-" + nextIndex;
+                                // Identifiant de l'individu OriginArgumentBinding (préfixe PkgBind-)
+                                String argId = "PkgBind-" + safeLabel + "-" + nextIndex;
                                 // Sécurité: éviter collision si précédemment créé
                                 while (om.containsResource(om.createResource(ncl + argId))) {
                                     nextIndex++;
-                                    // Re-génération de l'identifiant avec le préfixe OrigBind-
-                                    argId = "OrigBind-" + safeLabel + "-" + nextIndex;
+                                    // Re-génération de l'identifiant avec le préfixe PkgBind-
+                                    argId = "PkgBind-" + safeLabel + "-" + nextIndex;
                                 }
                                 argCountersByLabel.put(safeLabel, nextIndex);
                                 Individual arg = om.createIndividual(ncl + argId, ControlledOriginTypeArgumentBinding);
 
-                                if (description != null && !description.isEmpty()) arg.addProperty(descriptionProp, description);;
-                                if (polarite != null && !polarite.isEmpty()) arg.addProperty(polarity, polarite);
-                                if (nomCritere != null && !nomCritere.isEmpty()) arg.addProperty(nameCriterion, nomCritere);
-                                if (propriete != null && !propriete.isEmpty()) arg.addProperty(nameProperty, propriete);
-                                if (valeurPropriete != null && !valeurPropriete.isEmpty()) arg.addProperty(valueProperty, valeurPropriete);
+                                if (motsCles != null && !motsCles.isEmpty()) arg.addProperty(keywordsProperty, motsCles);
+                                // Nouvelles propriétés de configuration
+                                if (regleFiltrage != null && !regleFiltrage.isEmpty()) arg.addProperty(filteringRule, regleFiltrage);
+                                if (labelsSynonymes != null && !labelsSynonymes.isEmpty()) arg.addProperty(synonymLabels, labelsSynonymes);
+                                if (regleSelection != null && !regleSelection.isEmpty()) arg.addProperty(selectionRule, regleSelection);
+                                if (proprietesAntinomie != null && !proprietesAntinomie.isEmpty()) arg.addProperty(antinomyProperties, proprietesAntinomie);
                                 if (originRequis != null && !originRequis.isEmpty()) arg.addProperty(originRequired, originRequis);
 
-                                // Attribut (création si nécessaire)
-                                if (attribut != null && !attribut.isEmpty()) {
-                                    if (!attributeMap.containsKey(attribut)) {
-                                        String uriAtt = NatclinnUtil.makeURI(ncl + "Attribute-", attribut.replaceAll("\\s+", "-"));
-                                        Individual att = om.createIndividual(uriAtt, Attribute);
-                                        att.addProperty(prefLabel, attribut);
-                                        attributeMap.put(attribut, att);
-                                    }
-                                    arg.addProperty(hasAttribute, attributeMap.get(attribut));
-                                }
-
-                                // Lien vers l'origine (IDOrigin est non vide et attendu existant)
+                                // Lien vers le type d'emballage (idOrigin est non vide et attendu existant)
                                 if (originMap.containsKey(idOrigin)) {
                                     arg.addProperty(aboutOrigin, originMap.get(idOrigin));
                                 }

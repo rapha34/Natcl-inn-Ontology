@@ -27,14 +27,13 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import natclinn.util.NatclinnConf;
-import natclinn.util.NatclinnUtil;
 
 /**
  * Programme de création de l'ABox des types d'emballage à partir
  * du fichier Excel PackagingTypeAbox.xlsx.
  *
  * Onglet "PackagingType" : IDPackagingType | Nom PackagingType
- * Onglet "CritéreEtPropriété" : IDPackagingType | Nom PackagingType | PackagingType Requise | Attribut | Description | Polarité | Nom critère | Propriété | Valeur propriété
+ * Onglet "CritéreEtPropriété" : IDPackagingType | Nom PackagingType | PackagingType Requise | Attribut | Description | Polarité | Nom critère | Propriété | Valeur propriété | Mots-clés
  *
  * Pour chaque type d'emballage on crée un individu de classe PackagingType.
  * Pour chaque ligne critère/propriété associée à un type d'emballage on crée un individu Argument
@@ -77,7 +76,7 @@ public class CreateNatclinnPackagingTypeOntology {
 	    NCL.addComment("NCL is the set of product and arguments.", "en");
 		NCL.addComment("NCL est l'ensemble des produits et des arguments.", "fr");
 
-		// NCLCOT est un ensemble d'atributs de classification
+		// NCL est un ensemble d'atributs de classification
 	    OntClass NCLPT = om.createClass(ncl + "NCLPT");
 		NCLPT.addComment("NCLPT is the set of classification attributes.", "en");
 		NCLPT.addComment("NCLPT est l'ensemble des attributs de classification.", "fr");
@@ -86,11 +85,9 @@ public class CreateNatclinnPackagingTypeOntology {
         // Classes
         OntClass PackagingType = om.createClass(ncl + "PackagingType");
         OntClass PackagingTypeArgumentBinding = om.createClass(ncl + "PackagingTypeArgumentBinding");
-        OntClass Attribute = om.createClass(ncl + "Attribute");
-
+    
         PackagingType.addSuperClass(NCLPT);
         PackagingTypeArgumentBinding.addSuperClass(NCLPT);
-        Attribute.addSuperClass(NCLPT);
 
         /////////////////////////////
 	    // Inclusion de concepts   //
@@ -99,19 +96,17 @@ public class CreateNatclinnPackagingTypeOntology {
 	    // Note: Les relations de subsomption de classes ne sont plus créées avec Model
 
         // Properties
-        Property rdfType = om.createProperty(rdf, "type");
-        ObjectProperty hasAttribute = om.createObjectProperty(ncl + "hasBindingAgentAttribute");
         ObjectProperty aboutPackagingType = om.createObjectProperty(ncl + "aboutPackagingType"); // lien PackagingTypeArgumentBinding -> PackagingType
         DatatypeProperty packagingTypeRequired = om.createDatatypeProperty(ncl + "packagingTypeRequired");
-        DatatypeProperty descriptionProp = om.createDatatypeProperty(ncl + "bindingAgentDescription");
-        DatatypeProperty polarity = om.createDatatypeProperty(ncl + "bindingAgentPolarity");
-        DatatypeProperty nameCriterion = om.createDatatypeProperty(ncl + "bindingAgentNameCriterion");
-        DatatypeProperty nameProperty = om.createDatatypeProperty(ncl + "bindingAgentNameProperty");
-        DatatypeProperty valueProperty = om.createDatatypeProperty(ncl + "bindingAgentValueProperty");
+        DatatypeProperty keywordsProperty = om.createDatatypeProperty(ncl + "bindingAgentKeywords");
+        // Nouvelles propriétés pour la configuration des règles de filtrage et sélection
+        DatatypeProperty filteringRule = om.createDatatypeProperty(ncl + "packagingTypeFilteringRule");
+        DatatypeProperty synonymLabels = om.createDatatypeProperty(ncl + "packagingTypeSynonymLabels");
+        DatatypeProperty selectionRule = om.createDatatypeProperty(ncl + "packagingTypeSelectionRule");
+        DatatypeProperty antinomyProperties = om.createDatatypeProperty(ncl + "packagingTypeAntinomyProperties");
         AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
 
         Map<String, Individual> packagingTypeMap = new HashMap<>();
-        Map<String, Individual> attributeMap = new HashMap<>();
         Map<String, Integer> argCountersByLabel = new HashMap<>();
 
         try (FileInputStream fis = new FileInputStream(excelFile)) {
@@ -140,21 +135,20 @@ public class CreateNatclinnPackagingTypeOntology {
                     for (Row row : critSheet) {
                         if (row.getRowNum() == 0) continue; // header
                         String idPackagingType = getCellValue(row.getCell(0));
-                        // Ignorer la colonne B (Nom PackagingType) pour cet onglet
                         String packagingTypeRequis = getCellValue(row.getCell(2));
-                        String attribut = getCellValue(row.getCell(3));
-                        String description = getCellValue(row.getCell(4));
-                        String polarite = getCellValue(row.getCell(5));
-                        String nomCritere = getCellValue(row.getCell(6));
-                        String propriete = getCellValue(row.getCell(7));
-                        String valeurPropriete = getCellValue(row.getCell(8));
+                        String motsCles = getCellValue(row.getCell(3));
+                        // Nouvelles colonnes pour la configuration
+                        String regleFiltrage = getCellValue(row.getCell(4));
+                        String labelsSynonymes = getCellValue(row.getCell(5));
+                        String regleSelection = getCellValue(row.getCell(6));
+                        String proprietesAntinomie = getCellValue(row.getCell(7));
 
-                        // Ne créer un PackagingTypeArgumentBinding que si IDPackagingType est non vide
+                            // Ne créer un PackagingTypeArgumentBinding que si IDPackagingType est non vide
                         if (idPackagingType != null && !idPackagingType.isEmpty()) {
                             // Et s'il y a au moins une info utile
-                            if ((propriete != null && !propriete.isEmpty()) || (description != null && !description.isEmpty())
-                                    || (packagingTypeRequis != null && !packagingTypeRequis.isEmpty()) || (attribut != null && !attribut.isEmpty())
-                                    || (nomCritere != null && !nomCritere.isEmpty()) || (valeurPropriete != null && !valeurPropriete.isEmpty())) {
+                            if ((motsCles != null && !motsCles.isEmpty()) || (regleFiltrage != null && !regleFiltrage.isEmpty())
+                                    || (labelsSynonymes != null && !labelsSynonymes.isEmpty()) || (regleSelection != null && !regleSelection.isEmpty())
+                                    || (proprietesAntinomie != null && !proprietesAntinomie.isEmpty())) {
                                 String packagingTypeLabel = null;
                                 if (packagingTypeMap.containsKey(idPackagingType)) {
                                     try {
@@ -178,23 +172,13 @@ public class CreateNatclinnPackagingTypeOntology {
                                 argCountersByLabel.put(safeLabel, nextIndex);
                                 Individual arg = om.createIndividual(ncl + argId, PackagingTypeArgumentBinding);
 
-                                if (description != null && !description.isEmpty()) arg.addProperty(descriptionProp, description);;
-                                if (polarite != null && !polarite.isEmpty()) arg.addProperty(polarity, polarite);
-                                if (nomCritere != null && !nomCritere.isEmpty()) arg.addProperty(nameCriterion, nomCritere);
-                                if (propriete != null && !propriete.isEmpty()) arg.addProperty(nameProperty, propriete);
-                                if (valeurPropriete != null && !valeurPropriete.isEmpty()) arg.addProperty(valueProperty, valeurPropriete);
+                                if (motsCles != null && !motsCles.isEmpty()) arg.addProperty(keywordsProperty, motsCles);
+                                // Nouvelles propriétés de configuration
+                                if (regleFiltrage != null && !regleFiltrage.isEmpty()) arg.addProperty(filteringRule, regleFiltrage);
+                                if (labelsSynonymes != null && !labelsSynonymes.isEmpty()) arg.addProperty(synonymLabels, labelsSynonymes);
+                                if (regleSelection != null && !regleSelection.isEmpty()) arg.addProperty(selectionRule, regleSelection);
+                                if (proprietesAntinomie != null && !proprietesAntinomie.isEmpty()) arg.addProperty(antinomyProperties, proprietesAntinomie);
                                 if (packagingTypeRequis != null && !packagingTypeRequis.isEmpty()) arg.addProperty(packagingTypeRequired, packagingTypeRequis);
-
-                                // Attribut (création si nécessaire)
-                                if (attribut != null && !attribut.isEmpty()) {
-                                    if (!attributeMap.containsKey(attribut)) {
-                                        String uriAtt = NatclinnUtil.makeURI(ncl + "Attribute-", attribut.replaceAll("\\s+", "-"));
-                                        Individual att = om.createIndividual(uriAtt, Attribute);
-                                        att.addProperty(prefLabel, attribut);
-                                        attributeMap.put(attribut, att);
-                                    }
-                                    arg.addProperty(hasAttribute, attributeMap.get(attribut));
-                                }
 
                                 // Lien vers le type d'emballage (IDPackagingType est non vide et attendu existant)
                                 if (packagingTypeMap.containsKey(idPackagingType)) {
