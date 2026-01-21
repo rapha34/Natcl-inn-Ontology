@@ -22,7 +22,7 @@ import natclinn.util.NatclinnUtil;
  * 
  * Ce programme :
  * 1. Charge le modèle inféré avec les règles product-argument
- * 2. Récupère les produits et leurs arguments liés (via ncl:hasProductArgument)
+ * 2. Récupère les produits et leurs arguments liés (via ncl:hasLinkToArgument)
  * 3. Crée un projet MyChoice (mch:Project) pour chaque groupe de produits
  * 4. Convertit chaque produit en alternative (mch:Alternative)
  * 5. Associe les arguments Natclinn aux alternatives MyChoice
@@ -206,11 +206,11 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             "Projet MyChoice créé automatiquement à partir des produits Natclinn et leurs arguments inférés");
         
     // Définition des classes et propriétés MyChoice
-        Resource Alternative = mychoiceModel.createResource(mch + "Alternative");
-        Resource Argument = mychoiceModel.createResource(mch + "Argument");
-        Resource Source = mychoiceModel.createResource(mch + "Source");
-        Resource TypeSource = mychoiceModel.createResource(mch + "TypeSource");
-        Resource Stakeholder = mychoiceModel.createResource(mch + "Stakeholder");
+        OntClass Alternative = mychoiceModel.createClass(mch + "Alternative");
+        OntClass Argument = mychoiceModel.createClass(mch + "Argument");
+        OntClass Source = mychoiceModel.createClass(mch + "Source");
+        OntClass TypeSource = mychoiceModel.createClass(mch + "TypeSource");
+        OntClass Stakeholder = mychoiceModel.createClass(mch + "Stakeholder");
         
         DatatypeProperty projectName = mychoiceModel.createDatatypeProperty(mch + "projectName");
         DatatypeProperty projectDescription = mychoiceModel.createDatatypeProperty(mch + "projectDescription");
@@ -230,6 +230,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
         DatatypeProperty relatedToNatclinnProductArgument = mychoiceModel.createDatatypeProperty(mch + "relatedToNatclinnProductArgument");
         ObjectProperty hasSource = mychoiceModel.createObjectProperty(mch + "hasSource"); // Argument -> Source
         ObjectProperty hasTypeSource = mychoiceModel.createObjectProperty(mch + "hasTypeSource"); // Source -> TypeSource
+        DatatypeProperty dateSource = mychoiceModel.createDatatypeProperty(mch + "date"); // Source -> date
         ObjectProperty hasStakeholder = mychoiceModel.createObjectProperty(mch + "hasStakeholder"); // Argument -> Stakeholder
         
         // Vérification si le projet existe déjà (créé par les INSERT queries)
@@ -286,39 +287,43 @@ public class CreateMychoiceProjectFromPreliminaryProject {
         // Filtrée pour ce projet spécifique - récupère TOUTES les propriétés de ncl:ProductArgument
         // Mise à jour pour l'architecture V5 avec LinkToArgument
         String queryString = prefix +
-            "SELECT ?product ?productLabel ?productDesc ?argument ?argLabel \n" +
+            "SELECT ?product ?productLabel ?productDesc ?tag ?tagLabel ?argument ?argLabel \n" +
             "  ?assertion ?polarity ?nameCriterion ?aim ?nameProperty ?valueProperty \n" +
             "  ?condition ?infValue ?supValue ?unit ?verbatimText \n" +
-            "  ?source ?sourceLabel ?typeSource ?typeSourceLabel ?typeFiability \n" +
+            "  ?source ?sourceLabel ?dateSource ?typeSource ?typeSourceLabel ?typeFiability \n" +
             "  ?stakeholder ?stakeholderLabel \n" +
             "WHERE { \n" +
             // Récupérer les alternatives du projet
             "  ?alternative mch:hasProject <" + projectUri + "> . \n" +
             "  ?alternative mch:relatedToProduct ?product . \n" +
-            // Récupérer les arguments inférés du produit via LinkToArgument (architecture V5)
+            // Récupérer les arguments inférés du produit via LinkToArgument
             "  ?product rdf:type ncl:Product . \n" +
             "  ?product skos:prefLabel ?productLabel . \n" +
             "  OPTIONAL { ?product ncl:description ?productDesc } \n" +
             "  ?product ncl:hasLinkToArgument ?link . \n" +
             "  ?link ncl:hasReferenceProductArgument ?argument . \n" +
             "  ?argument rdf:type ncl:ProductArgument . \n" +
+            "  ?link ncl:hasTagInitiator ?tag . " +
+            "  ?tag skos:prefLabel ?tagLabel . " +
+            "  ?tagArgumentBinding ncl:aboutTag ?tag . " +
+            // Toutes les propriétés de ncl:tagArgumentBinding
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagAssertion ?assertion } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagPolarity ?polarity } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagNameCriterion ?nameCriterion } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagAim ?aim } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagNameProperty ?nameProperty } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagValueProperty ?valueProperty } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagCondition ?condition } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagInfValue ?infValue } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagSupValue ?supValue } \n" +
+            "  OPTIONAL { ?tagArgumentBinding ncl:tagUnit ?unit } \n" +
             // Toutes les propriétés de ncl:ProductArgument
             "  OPTIONAL { ?argument skos:prefLabel ?argLabel } \n" +
-            "  OPTIONAL { ?argument ncl:assertion ?assertion } \n" +
-            "  OPTIONAL { ?argument ncl:polarity ?polarity } \n" +
-            "  OPTIONAL { ?argument ncl:nameCriterion ?nameCriterion } \n" +
-            "  OPTIONAL { ?argument ncl:aim ?aim } \n" +
-            "  OPTIONAL { ?argument ncl:nameProperty ?nameProperty } \n" +
-            "  OPTIONAL { ?argument ncl:valueProperty ?valueProperty } \n" +
-            "  OPTIONAL { ?argument ncl:condition ?condition } \n" +
-            "  OPTIONAL { ?argument ncl:infValue ?infValue } \n" +
-            "  OPTIONAL { ?argument ncl:supValue ?supValue } \n" +
-            "  OPTIONAL { ?argument ncl:unit ?unit } \n" +
-            // V5: Verbatim devient une dataProperty sur ProductArgument
             "  OPTIONAL { ?argument ncl:verbatim ?verbatimText } \n" +
             // Source avec TypeSource et fiability
             "  OPTIONAL { ?argument ncl:hasSource ?source . \n" +
             "             OPTIONAL { ?source skos:prefLabel ?sourceLabel } \n" +
+            "             OPTIONAL { ?source ncl:date ?dateSource } \n" +
             "             OPTIONAL { ?source ncl:hasTypeSource ?typeSource . \n" +
             "                        OPTIONAL { ?typeSource skos:prefLabel ?typeSourceLabel } \n" +
             "                        OPTIONAL { ?typeSource ncl:fiability ?typeFiability } \n" +
@@ -334,6 +339,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
         // Exécution de la requête
         QueryExecution qexec = QueryExecutionFactory.create(queryString, infModel);
         ResultSet results = qexec.execSelect();
+        //System.out.println("   - Nombre de produits/arguments récupérés : " + ResultSetFormatter.toList(results).size());
         
         // Maps pour gérer les alternatives et arguments déjà créés
         Map<String, Individual> productToAlternative = new HashMap<>();
@@ -414,7 +420,8 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             String productUriStr = productResource.getURI();
             Literal productLabel = solution.getLiteral("productLabel");
             Literal productDesc = solution.getLiteral("productDesc");
-            
+            Resource tagResource = solution.getResource("tag");
+            Literal tagLabel = solution.getLiteral("tagLabel");
             Resource argumentResource = solution.getResource("argument");
             String argumentUri = argumentResource.getURI();
             Literal argLabel = solution.getLiteral("argLabel");
@@ -436,6 +443,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             Literal sourceLabelLit = solution.getLiteral("sourceLabel");
             Resource typeSourceResource = solution.getResource("typeSource");
             Literal typeSourceLabelLit = solution.getLiteral("typeSourceLabel");
+            Literal dateSourceLit = solution.getLiteral("dateSource");
             Literal typeFiabilityLit = solution.getLiteral("typeFiability");
             // Stakeholder Natclinn
             Resource stakeholderResource = solution.getResource("stakeholder");
@@ -495,8 +503,12 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             }
             
             // Création de l'argument MyChoice si il n'existe pas encore
-            if (!argumentToMychArgument.containsKey(argumentUri)) {
-                String mychArgumentUri = mch + "Argument-" + argumentUri.substring(argumentUri.lastIndexOf("/") + 1);
+            // Clé = mychArgumentUri (URI complète incluant le tag) pour permettre plusieurs arguments
+            // MyChoice différents basés sur le même ProductArgument mais avec des tags différents
+            String mychArgumentUri = mch + "Argument-" + tagLabel + "_" + argumentUri.substring(argumentUri.lastIndexOf("/") + 1);
+            if (!argumentToMychArgument.containsKey(mychArgumentUri)) {
+                System.out.println("   - Création de l'argument MyChoice : " + mychArgumentUri);
+                System.out.println("   - avec tag : " + tagResource.toString());
                 Individual mychArgument = mychoiceModel.createIndividual(mychArgumentUri, Argument);
                 
                 // Copier TOUTES les propriétés de ncl:ProductArgument vers mch:Argument
@@ -519,7 +531,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                     mychArgument.addProperty(explanationProp, "Argument inféré automatiquement");
                 }
                 
-                // Autres propriétés de ncl:ProductArgument -> mch:Argument
+                // Autres propriétés de ncl:TagArgumentBinding -> mch:Argument
                 DatatypeProperty polarityProp = mychoiceModel.createDatatypeProperty(mch + "polarity");
                 DatatypeProperty nameCriterionProp = mychoiceModel.createDatatypeProperty(mch + "nameCriterion");
                 DatatypeProperty aimProp = mychoiceModel.createDatatypeProperty(mch + "aim");
@@ -554,13 +566,17 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                         mychSource = mychoiceModel.createIndividual(mychSourceUri, Source);
                         
                         // Propriétés de la source
-                        DatatypeProperty nameSourceProp = mychoiceModel.createDatatypeProperty(mch + "nameSource");
-                        DatatypeProperty nameTypeSourceProp = mychoiceModel.createDatatypeProperty(mch + "nameTypeSource");
-                        DatatypeProperty fiabilityProp = mychoiceModel.createDatatypeProperty(mch + "fiability");
+                        DatatypeProperty sourceNameProp = mychoiceModel.createDatatypeProperty(mch + "sourceName");
+                        DatatypeProperty dateSourceProp = mychoiceModel.createDatatypeProperty(mch + "date");
+                        DatatypeProperty typeSourceNameProp = mychoiceModel.createDatatypeProperty(mch + "typeSourceName");
+                        DatatypeProperty typeSourceFiabilityProp = mychoiceModel.createDatatypeProperty(mch + "typeSourceFiability");
                         
                         // Transfert des propriétés
                         if (sourceLabelLit != null) {
-                            mychSource.addProperty(nameSourceProp, sourceLabelLit.getString());
+                            mychSource.addProperty(sourceNameProp, sourceLabelLit.getString());
+                        }
+                        if (dateSourceLit != null) {
+                            mychSource.addProperty(dateSourceProp, dateSourceLit.getString());
                         }
                         // Création/Lien du TypeSource si présent
                         // System.out.println("typeSourceResource : " + typeSourceResource);
@@ -574,11 +590,11 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                                 mychTypeSource = mychoiceModel.createIndividual(mychTypeSourceUri, TypeSource);
                                 
                                 if (typeSourceLabelLit != null) {
-                                    mychTypeSource.addProperty(nameTypeSourceProp, typeSourceLabelLit.getString());
+                                    mychTypeSource.addProperty(typeSourceNameProp, typeSourceLabelLit.getString());
                                 }
                                 
                                 if (typeFiabilityLit != null) {
-                                    mychTypeSource.addProperty(fiabilityProp, typeFiabilityLit.getString());
+                                    mychTypeSource.addProperty(typeSourceFiabilityProp, typeFiabilityLit.getString());
                                 }
                                 typeSourceToMychTypeSource.put(tsUri, mychTypeSource);
                             // Lier la source au type de source
@@ -607,11 +623,11 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                         mychStakeholder = mychoiceModel.createIndividual(mychStakeholderUri, Stakeholder);
                         
                         // Propriété stakeholderName sur le Stakeholder
-                        DatatypeProperty nameStakeholderProp = mychoiceModel.createDatatypeProperty(mch + "nameStakeholder");
+                        DatatypeProperty stakeholderNameProp = mychoiceModel.createDatatypeProperty(mch + "stakeholderName");
                         
                         // Transfert du label
                         if (stakeholderLabelLit != null) {
-                            mychStakeholder.addProperty(nameStakeholderProp, stakeholderLabelLit.getString());
+                            mychStakeholder.addProperty(stakeholderNameProp, stakeholderLabelLit.getString());
                         }
                         
                         stakeholderToMychStakeholder.put(stakeholderUri, mychStakeholder);
@@ -624,11 +640,13 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                 // Lien vers l'argument Natclinn original (URI stockée comme string)
                 mychArgument.addProperty(relatedToNatclinnProductArgument, argumentResource.getURI());
                 
-                argumentToMychArgument.put(argumentUri, mychArgument);
+                // Stocker avec mychArgumentUri (incluant le tag) pour déduplication correcte
+                argumentToMychArgument.put(mychArgumentUri, mychArgument);
                 argumentCount++;
             }
             
-            Individual mychArgument = argumentToMychArgument.get(argumentUri);
+            // Récupération de l'argument MyChoice avec la clé complète (incluant le tag)
+            Individual mychArgument = argumentToMychArgument.get(mychArgumentUri);
             
             // Lien alternative -> argument
             alternative.addProperty(hasArgument, mychArgument);

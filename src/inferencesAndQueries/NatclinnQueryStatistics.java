@@ -178,6 +178,19 @@ public class NatclinnQueryStatistics {
 	idQuery++;
 
 
+	// titleQuery = "Résumé des liens ";
+	// commentQuery = "Afficher les valeurs de la propriété LinkToArgument par produits";
+	// typeQuery = "SELECT";
+	// stringQuery = prefix +
+	// 	"SELECT ?product ?link " +
+	// 	"WHERE { " +
+	// 	"  ?product ncl:hasLinkToArgument ?link . " +
+	// 	"} ORDER BY ?product";
+	// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	// idQuery++;
+	
+
+
 	// // Vérifications pour le projet Moussakas
 		// 		titleQuery = "Vérif: produits Moussakas par codes EAN13";
 		// 		commentQuery = "Confirme l'existence des produits ciblés (ncl:hasEAN13)";
@@ -276,6 +289,33 @@ public class NatclinnQueryStatistics {
 		"}";
 	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 	idQuery++;
+
+	titleQuery = "Tous les ingrédients d'un produit donné P-3178530410105";
+	commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
+	typeQuery = "SELECT";
+	stringQuery = prefix + 
+		"SELECT DISTINCT ?ingredientLabel " +
+		"(GROUP_CONCAT(DISTINCT ?tagLabel; separator=\", \") AS ?tags) " +
+		"WHERE { " +
+		"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3178530410105> } " +
+		"    " +
+		// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
+		// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
+			"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
+		"    " +
+		// S'assurer que c'est bien un ingrédient et récupérer son label
+		"    ?ingredient a ncl:Ingredient ; " +
+		"                skos:prefLabel ?ingredientLabel . " +
+		"    " +
+		// Optionnel : récupérer les rôles des ingrédients
+		"    OPTIONAL { ?ingredient ncl:hasRole ?tag . ?tag skos:prefLabel ?tagLabel . } " +
+		"} " +
+		"GROUP BY ?ingredient ?ingredientLabel " +
+		"ORDER BY ?ingredient";
+		// System.out.println(stringQuery);
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
+	
 
 	// titleQuery = "Vérification détail NOVA calculé";
 	// 	typeQuery = "SELECT";
@@ -1083,28 +1123,76 @@ public class NatclinnQueryStatistics {
 		// idQuery++;
 
 
+		
+
+		// // ===================================================================
+		// // Contrôle : Propriétés d'emballage par produit IAA
+		// // ===================================================================
+		// titleQuery = "Contrôle - Propriétés d'emballage par produit IAA";
+		// commentQuery = "Affiche pour chaque produit IAA les valeurs de hasTag et hasTagCheck";
+		// typeQuery = "SELECT";
+		// stringQuery = prefix +
+		// 	"SELECT DISTINCT ?productName ?tagUri ?tagCheckUri " +
+		// 	"WHERE { " +
+		// 	"  ?product rdf:type ncl:Product . " +
+		// 	"  ?product ncl:hasEAN13 ?ean13 . " +
+		// 	"  VALUES ?ean13 { \"3178530410105\"  } " +
+		// 	"  ?product skos:prefLabel ?productName . " +
+		// 	"  ?product ncl:isProductIAA 'true'^^xsd:boolean." +
+		// 	"  OPTIONAL { " +
+		// 	"    ?product ncl:hasTag ?tagUri . " +
+		// 	"  } " +
+		// 	"  OPTIONAL { " +
+		// 	"    ?product ncl:hasTagCheck ?tagCheckUri . " +
+		// 	"  } " +
+		// 	"} " +
+		// 	"ORDER BY ?productName";
+		// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		// idQuery++;
+
+
+
+			// // ===================================================================
+			// // Contrôle : Propriétés d'emballage par produit IAA
+			// // ===================================================================
+			// titleQuery = "Contrôle - Propriétés d'emballage par produit IAA";
+			// commentQuery = "Affiche pour chaque produit IAA les valeurs de hasTag et hasTagCheck";
+			// typeQuery = "SELECT";
+			// stringQuery = prefix +
+			// 	"SELECT ?productName ?tag ?tagCheck " +
+			// 	"WHERE { " +
+			// 	"  ?product rdf:type ncl:Product . " +
+			// 	"  ?product skos:prefLabel ?productName . " +
+			// 	"  ?product ncl:isProductIAA 'true'^^xsd:boolean." +
+			// 	"  OPTIONAL { " +
+			// 	"    ?product ncl:hasTag ?tagUri . " +
+			// 	"    ?tagUri skos:prefLabel ?tag . " +
+			// 	"  } " +
+			// 	"  OPTIONAL { " +
+			// 	"    ?product ncl:hasTagCheck ?tagCheckUri . " +
+			// 	"    ?tagCheckUri skos:prefLabel ?tagCheck . " +
+			// 	"  } " +
+			// 	"} " +
+			// 	"ORDER BY ?productName";
+			// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+			// idQuery++;
+
+
 		// ===================================================================
-		// Contrôle : Propriétés d'emballage par produit IAA
+		// Contrôle : Tags
 		// ===================================================================
-		titleQuery = "Contrôle - Propriétés d'emballage par produit IAA";
-		commentQuery = "Affiche pour chaque produit IAA les valeurs de hasTypePackaging et hasPackagingCheck";
+		titleQuery = "Contrôle - Tags";
+		commentQuery = "Affiche les tags Pour le type Packaging";
 		typeQuery = "SELECT";
 		stringQuery = prefix +
-			"SELECT ?productName ?packagingType ?packagingCheck " +
+			"SELECT DISTINCT ?tag ?tagType ?tagLabel " +
 			"WHERE { " +
-			"  ?product rdf:type ncl:Product . " +
-			"  ?product skos:prefLabel ?productName . " +
-			"  ?product ncl:isProductIAA 'true'^^xsd:boolean." +
-			"  OPTIONAL { " +
-			"    ?product ncl:hasTypePackaging ?packagingTypeUri . " +
-			"    ?packagingTypeUri skos:prefLabel ?packagingType . " +
-			"  } " +
-			"  OPTIONAL { " +
-			"    ?product ncl:hasPackagingCheck ?packagingCheckUri . " +
-			"    ?packagingCheckUri skos:prefLabel ?packagingCheck . " +
-			"  } " +
+			"  ?tag rdf:type ncl:Tag . " +
+			"  OPTIONAL { ?tag skos:prefLabel ?tagLabel . } " +
+			"  OPTIONAL { ?tag ncl:tagType ?tagType . } " +
+			"  FILTER (!bound(?tagType) || ?tagType = \"Packaging\") " +
 			"} " +
-			"ORDER BY ?productName";
+			"ORDER BY ?tagType ?tagLabel";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 		idQuery++;
 
@@ -1116,13 +1204,12 @@ public class NatclinnQueryStatistics {
 		commentQuery = "Affiche tous les PackagingTypeArgumentBinding liés à emballage_plastique";
 		typeQuery = "SELECT";
 		stringQuery = prefix +
-			"SELECT ?binding ?nameProperty ?keywords ?required " +
+			"SELECT ?binding ?nameProperty ?keywords " +
 			"WHERE { " +
-			"  ?binding rdf:type ncl:PackagingTypeArgumentBinding . " +
-			"  ?binding ncl:aboutPackagingType ncl:emballage_plastique . " +
-			"  OPTIONAL { ?binding ncl:bindingAgentNameProperty ?nameProperty } " +
-			"  OPTIONAL { ?binding ncl:bindingAgentKeywords ?keywords } " +
-			"  OPTIONAL { ?binding ncl:packagingTypeRequired ?required } " +
+			"  ?binding rdf:type ncl:TagArgumentBinding . " +
+			"  ?binding ncl:aboutTag ncl:emballage_plastique . " +
+			"  OPTIONAL { ?binding ncl:tagNameProperty ?nameProperty } " +
+			"  OPTIONAL { ?binding ncl:tagBindingKeywords ?keywords } " +
 			"} " +
 			"ORDER BY ?binding";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
@@ -1136,13 +1223,12 @@ public class NatclinnQueryStatistics {
 		commentQuery = "Affiche tous les PackagingTypeArgumentBinding liés à emballage_sans_plastique";
 		typeQuery = "SELECT";
 		stringQuery = prefix +
-			"SELECT ?binding ?nameProperty ?keywords ?required " +
+			"SELECT ?binding ?nameProperty ?keywords " +
 			"WHERE { " +
 			"  ?binding rdf:type ncl:PackagingTypeArgumentBinding . " +
-			"  ?binding ncl:aboutPackagingType ncl:emballage_sans_plastique . " +
+			"  ?binding ncl:aboutTag ncl:emballage_sans_plastique . " +
 			"  OPTIONAL { ?binding ncl:bindingAgentNameProperty ?nameProperty } " +
 			"  OPTIONAL { ?binding ncl:bindingAgentKeywords ?keywords } " +
-			"  OPTIONAL { ?binding ncl:packagingTypeRequired ?required } " +
 			"} " +
 			"ORDER BY ?binding";
 		// ===================================================================
@@ -1152,17 +1238,16 @@ public class NatclinnQueryStatistics {
 		commentQuery = "Affiche les arguments liés aux produits madeleines via LinkToArgument";
 		typeQuery = "SELECT";
 		stringQuery = prefix +
-			"SELECT ?productName ?argumentName ?argumentValue ?linkName ?initiator " +
+			"SELECT ?productName ?argumentName ?initiator " +
 			"WHERE { " +
 			"  ?product rdf:type ncl:Product . " +
 			"  ?product skos:prefLabel ?productName . " +
 			"  FILTER(CONTAINS(?productName, \"Madeleine\")) . " +
 			"  ?product ncl:hasLinkToArgument ?link . " +
 			"  ?link ncl:hasReferenceProductArgument ?argument . " +
-			"  ?argument ncl:nameProperty ?argumentName . " +
-			"  OPTIONAL { ?argument ncl:valueProperty ?argumentValue } . " +
-			"  ?link ncl:LinkNameProperty ?linkName . " +
-			"  ?link ncl:initiator ?initiator . " +
+			"  ?link ncl:hasTagInitiator ?tag . " +
+			"  OPTIONAL { ?tag skos:prefLabel ?initiator } " +
+			"  ?argument skos:prefLabel ?argumentName . " +
 			"} " +
 			"ORDER BY ?productName ?argumentName";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
@@ -1186,23 +1271,24 @@ public class NatclinnQueryStatistics {
 		listRulesFileName.add("Natclinn_processing.rules");
 		listRulesFileName.add("Natclinn_controlled_origin.rules");
 		listRulesFileName.add("Natclinn_categories.rules");
+		listRulesFileName.add("Natclinn_link_Product_To_Argument.rules");
 		listPrimitives.add("CalcNumberOfTriples");
 		listPrimitives.add("GetOFFProperty");
 		listPrimitives.add("GetCiqualProperty");
 		listPrimitives.add("GetIngredientRole");
-		listPrimitives.add("CompareRoleProperty");
 		listPrimitives.add("GetPackagingType");
-		listPrimitives.add("ComparePackagingTypeProperty");
-		listPrimitives.add("CompareProcessingTypeProperty");
+		//listPrimitives.add("ComparePackagingTypeProperty");
+		//listPrimitives.add("CompareAdditiveRoleProperty");
+		// listPrimitives.add("CompareProcessingDegreeProperty");
+		// listPrimitives.add("CompareControlledOriginTypeProperty");
 		listPrimitives.add("GetControlledOriginType");
-		listPrimitives.add("CompareControlledOriginTypeProperty");
 		listPrimitives.add("GetNOVAgroup");
 		listPrimitives.add("GetNOVAgroupInfoToProduct");
 		listPrimitives.add("GetCategoriesToProduct");
 		listPrimitives.add("GetNOVAgroupToProduct");
 		// Primitive rules Builtin to map missing OFF codes by fuzzy matching
 		listPrimitives.add("FindIngredientOFFByLabel");
-
+		listPrimitives.add("CreateLinkProductToArgument");
 		topSpatial = "false";
 		
 		// Récupération du nom du fichier contenant la liste des ontologies à traiter.

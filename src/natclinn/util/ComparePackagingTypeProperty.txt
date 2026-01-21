@@ -1,0 +1,920 @@
+package natclinn.util;
+
+import org.apache.jena.base.Sys;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.util.iterator.ExtendedIterator;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Primitive pour lier les produits aux arguments consommateurs via les métadonnées de types d'emballage.
+ * Crée des instances LinkToArgument pour établir la relation Product -> LinkToArgument -> ProductArgument.
+ * 
+ * Architecture:
+ * - Product → hasTypePackaging → PackagingType (présence de types d'emballage)
+ * - Product → hasPackagingCheck → sans_plastique / sans_emballage / etc. (absence/vérifications)
+ * - PackagingTypeArgumentBinding → aboutPackagingType → PackagingType (métadonnées: bindingAgentNameProperty, bindingAgentKeywords, etc.)
+ * - ProductArgument (données enquêtes consommateurs: nameProperty, aim, assertion, verbatim, valueProperty, etc.)
+ * 
+ * Signature: comparePackagingTypeProperty(?product)
+ * - ?product : ressource Product avec types d'emballage et/ou vérifications d'absence
+ * 
+ * La primitive récupère automatiquement tous les ProductArgument
+ * et teste le matching pour chacun d'eux.
+ * 
+ * Retourne true si les types d'emballage du produit (présence ou absence) matchent
+ * avec les propriétés du ProductArgument via les métadonnées PackagingTypeArgumentBinding.
+ * Utilise des heuristiques avancées : correspondance exacte, normalisée, par tokens (Jaccard), containment.
+ * Compare aussi les mots-clés (bindingAgentKeywords) avec toutes les propriétés de l'argument.
+ * Crée alors un LinkToArgument pour établir le lien.
+ */
+public class ComparePackagingTypeProperty extends BaseBuiltin {
+
+    private static final String ncl;
+    private static final String rdf;
+    private static final Node HAS_RDF_TYPE;
+    private static final Node HAS_TYPE_PACKAGING;
+    private static final Node HAS_PACKAGING_CHECK;
+    // Propriété sur ProductArgument (données consommateurs)
+    private static final Node PRODUCT_ARG_NAME_PROPERTY;
+    private static final Node PRODUCT_ARG_AIM;
+    private static final Node PRODUCT_ARG_ASSERTION;
+    private static final Node PRODUCT_ARG_VERBATIM;
+    private static final Node PRODUCT_ARG_VALUE_PROPERTY;
+    // Propriété sur PackagingTypeArgumentBinding (métadonnées type d'emballage)
+    private static final Node BINDING_AGENT_KEYWORDS;
+    private static final Node PACKAGING_TYPE_REQUIRED;
+    private static final Node ABOUT_PACKAGING_TYPE;
+    private static final Node HAS_LINK_TO_ARGUMENT;
+    private static final Node HAS_REFERENCE_PRODUCT_ARGUMENT;
+    private static final Node INITIATOR;
+    private static final Node LINK_NAME_PROPERTY;
+    private static final Node LINK_VALUE_PROPERTY;
+    // Nouvelles propriétés pour la configuration depuis l'ontologie pivot
+    private static final Node PACKAGING_TYPE_FILTERING_RULE;
+    private static final Node PACKAGING_TYPE_SYNONYM_LABELS;
+    private static final Node PACKAGING_TYPE_SELECTION_RULE;
+    private static final Node PACKAGING_TYPE_ANTINOMY_PROPERTIES;
+    private static final Set<String> STOPWORDS = new HashSet<>(java.util.Arrays.asList(
+        "le", "la", "les", "un", "une", "des", "de", "du", "que", "qui", "quoi",
+        "et", "ou", "mais", "donc", "car", "ni", "or",
+        "ce", "cet", "cette", "ces", "se", "sa", "son", "ses",
+        "me", "te", "nous", "vous", "lui", "leur",
+        "pas", "plus", "non", "oui", "si", "bien",
+        "tout", "tous", "toute", "toutes",
+        "mon", "ton", "ma", "ta", "mes", "tes",
+        "au", "aux", "en", "dans", "sur", "sous", "pour", "par", "avec", "sans",
+        "je", "tu", "il", "elle", "on", "ils", "elles",
+        "avoir", "être", "fait", "faire", "être", "ai", "as", "est", "sont", "été"
+    ));
+
+    static {
+        // Initialisation de la configuration
+        new NatclinnConf();
+        ncl = NatclinnConf.ncl;
+        rdf = NatclinnConf.rdf;
+        HAS_RDF_TYPE = NodeFactory.createURI(rdf + "type");
+        HAS_TYPE_PACKAGING = NodeFactory.createURI(ncl + "hasTypePackaging");
+        HAS_PACKAGING_CHECK = NodeFactory.createURI(ncl + "hasPackagingCheck");
+        PRODUCT_ARG_NAME_PROPERTY = NodeFactory.createURI(ncl + "nameProperty");
+        PRODUCT_ARG_AIM = NodeFactory.createURI(ncl + "aim");
+        PRODUCT_ARG_ASSERTION = NodeFactory.createURI(ncl + "assertion");
+        PRODUCT_ARG_VERBATIM = NodeFactory.createURI(ncl + "verbatim");
+        PRODUCT_ARG_VALUE_PROPERTY = NodeFactory.createURI(ncl + "valueProperty");
+        BINDING_AGENT_KEYWORDS = NodeFactory.createURI(ncl + "bindingAgentKeywords");
+        PACKAGING_TYPE_REQUIRED = NodeFactory.createURI(ncl + "packagingTypeRequired");
+        ABOUT_PACKAGING_TYPE = NodeFactory.createURI(ncl + "aboutPackagingType");
+        HAS_LINK_TO_ARGUMENT = NodeFactory.createURI(ncl + "hasLinkToArgument");
+        HAS_REFERENCE_PRODUCT_ARGUMENT = NodeFactory.createURI(ncl + "hasReferenceProductArgument");
+        INITIATOR = NodeFactory.createURI(ncl + "initiator");
+        LINK_NAME_PROPERTY = NodeFactory.createURI(ncl + "LinkNameProperty");
+        LINK_VALUE_PROPERTY = NodeFactory.createURI(ncl + "LinkValueProperty");
+        // Nouvelles propriétés de configuration
+        PACKAGING_TYPE_FILTERING_RULE = NodeFactory.createURI(ncl + "packagingTypeFilteringRule");
+        PACKAGING_TYPE_SYNONYM_LABELS = NodeFactory.createURI(ncl + "packagingTypeSynonymLabels");
+        PACKAGING_TYPE_SELECTION_RULE = NodeFactory.createURI(ncl + "packagingTypeSelectionRule");
+        PACKAGING_TYPE_ANTINOMY_PROPERTIES = NodeFactory.createURI(ncl + "packagingTypeAntinomyProperties");
+    }
+
+    @Override
+    public String getName() {
+        return "comparePackagingTypeProperty";
+    }
+
+    @Override
+    public int getArgLength() {
+        return 1; // product only (arguments retrieved internally)
+    }
+
+    @Override
+    public boolean bodyCall(Node[] args, int length, RuleContext context) {
+        checkArgs(length, context);
+
+        Node productNode = getArg(0, args, context);
+
+        if (!productNode.isURI() && !productNode.isBlank()) return false;
+
+        System.out.println("Comparing packaging types for product: " + productNode.toString());
+
+        Graph g = context.getGraph();
+
+        // 1) Récupérer tous les types d'emballage du produit.
+        //    On collecte les noms locaux des types (e.g., "emballage_plastique", "emballage_verre")
+        //    depuis les ressources ncl:hasTypePackaging attachées au produit.
+        Set<String> packagingTypes = new HashSet<>();
+
+        ExtendedIterator<Triple> itType = g.find(productNode, HAS_TYPE_PACKAGING, Node.ANY);
+        while (itType.hasNext()) {
+            Node val = itType.next().getObject();
+            if (val.isURI()) {
+                String uri = val.getURI();
+                String typeName = uri.substring(uri.lastIndexOf('/') + 1);
+                packagingTypes.add(typeName.toLowerCase().trim());
+            }
+        }
+        itType.close();
+
+        // 1b) Récupérer les vérifications d'emballage via ncl:hasPackagingCheck.
+        //     Ces vérifications indiquent l'ABSENCE ou des caractéristiques particulières
+        //     (e.g., "sans_plastique", "sans_emballage", "emballage_naturel", "emballage_biodegradable").
+        ExtendedIterator<Triple> itCheck = g.find(productNode, HAS_PACKAGING_CHECK, Node.ANY);
+        while (itCheck.hasNext()) {
+            Node val = itCheck.next().getObject();
+            if (val.isURI()) {
+                String uri = val.getURI();
+                String checkName = uri.substring(uri.lastIndexOf('/') + 1);
+                packagingTypes.add(checkName.toLowerCase().trim());
+            }
+        }
+        itCheck.close();
+
+        // 1b) Normaliser les types d'emballage en utilisant les synonymes depuis l'ontologie
+        Set<String> normalizedPackagingTypes = new HashSet<>();
+        for (String type : packagingTypes) {
+            normalizedPackagingTypes.addAll(normalizePackagingTypeLabels(g, type));
+        }
+        packagingTypes = normalizedPackagingTypes;
+
+        // Si aucun type d'emballage détecté, le produit ne peut être lié à aucun argument.
+        if (packagingTypes.isEmpty()) return false;
+
+        // 2) Récupérer TOUS les ProductArgument
+        List<Node> packagingArguments = new ArrayList<>();
+        ExtendedIterator<Triple> itArgs = g.find(Node.ANY, HAS_RDF_TYPE, NodeFactory.createURI(ncl + "ProductArgument"));
+        while (itArgs.hasNext()) {
+            Node argNode = itArgs.next().getSubject();
+            if (argNode.isURI() || argNode.isBlank()) {
+                packagingArguments.add(argNode);
+            }
+        }
+        itArgs.close();
+
+        // 3) Pour chaque type d'emballage du produit, traiter les arguments pertinents
+        for (String typeLocal : packagingTypes) {
+            Node packagingTypeUri = NodeFactory.createURI(ncl + typeLocal);
+            
+            // Récupérer tous les arguments pertinents pour ce type d'emballage
+            List<Node> relevantArguments = getRelevantArgumentsForPackagingType(g, packagingArguments, typeLocal);
+            
+            // Appliquer le filtrage des antinomies pour les arguments "Présence de plastique"
+            List<Node> filteredArguments = filterAntinomicArguments(g, relevantArguments, typeLocal);
+            // Traiter chaque argument filtré
+            for (Node argumentNode : filteredArguments) {
+                // Récupérer les propriétés de l'argument (maintenant qu'on sait qu'il est pertinent)
+                Set<String> argProperties = collectArgumentProperties(g, argumentNode, typeLocal);
+
+                // Rechercher tous les PackagingTypeArgumentBinding ayant ncl:aboutPackagingType pointant vers packagingTypeUri
+                ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PACKAGING_TYPE, packagingTypeUri);
+                while (itBinding.hasNext()) {
+                    Node bindingNode = itBinding.next().getSubject();
+
+                    // Extraire les bindingAgentKeywords de ce PackagingTypeArgumentBinding
+                    ExtendedIterator<Triple> itKeywords = g.find(bindingNode, BINDING_AGENT_KEYWORDS, Node.ANY);
+                    while (itKeywords.hasNext()) {
+                        Node val = itKeywords.next().getObject();
+                        if (!val.isLiteral()) continue;
+                        String keywordsStr = val.getLiteralLexicalForm();
+                        if (keywordsStr == null) continue;
+
+                        // Splitter les mots-clés par virgule et traiter chacun
+                        String[] keywords = keywordsStr.split(",");
+                        for (String keyword : keywords) {
+                            keyword = keyword.trim();
+                            if (keyword.isEmpty()) continue;
+                            System.out.println("  Comparing with keyword: " + keyword);
+                            // Comparer chaque mot-clé avec les propriétés du ProductArgument
+                            if (matchesAnyArgumentProperty(keyword, argProperties)) {
+                                System.out.println("   Keyword matched: " + keyword);
+                                System.out.println("   ArgProperties: " + argProperties);
+                                // Si correspondance trouvée, vérifier packagingTypeRequired
+                                boolean required = isPackagingTypeRequired(g, bindingNode);
+                                // Si packagingTypeRequired="oui" (ou variantes) → lien accepté
+                                if (required) {
+                                    // Créer un LinkToArgument instance
+                                    createLinkToArgument(g, productNode, argumentNode, packagingTypeUri, keyword, context);
+                                    itKeywords.close();
+                                    itBinding.close();
+                                    // Continuer avec les autres arguments
+                                }
+                            }
+                        }
+                    }
+                    itKeywords.close();
+                }
+                itBinding.close();
+            }
+        }
+
+        return true; // La primitive retourne true si le traitement s'est bien déroulé
+    }
+
+    /**
+     * Collecte toutes les propriétés pertinentes d'un ProductArgument pour un type d'emballage spécifique.
+     * Inclut : nameProperty, aim, assertion, verbatim, valueProperty
+     * PRIORITÉ : valueProperty en premier, puis nameProperty, puis les autres
+     * FILTRE PAR TYPE : Ne collecte que si l'argument est pertinent pour le type d'emballage
+     * @param g le graphe
+     * @param argumentNode le noeud ProductArgument
+     * @param packagingType le type d'emballage (e.g., "emballage_plastique")
+     * @return ensemble des valeurs de propriétés (vide si non pertinent)
+     */
+    private Set<String> collectArgumentProperties(Graph g, Node argumentNode, String packagingType) {
+        // Vérifier si l'argument est pertinent pour ce type d'emballage
+        if (!isArgumentRelevantForPackagingType(g, argumentNode, packagingType)) {
+            return new HashSet<>(); // Retourner ensemble vide pour ignorer cet argument
+        }
+
+        Set<String> properties = new HashSet<>();
+
+        // 1. PRIORITÉ : Collecter valueProperty en premier
+        ExtendedIterator<Triple> itValue = g.find(argumentNode, PRODUCT_ARG_VALUE_PROPERTY, Node.ANY);
+        while (itValue.hasNext()) {
+            Node val = itValue.next().getObject();
+            if (val.isLiteral()) {
+                String txt = val.getLiteralLexicalForm().trim();
+                if (!txt.isEmpty()) {
+                    properties.add(txt);
+                    // Ajouter aussi les tokens individuels
+                    String[] tokens = txt.split("[\\s,;:]+");
+                    for (String token : tokens) {
+                        token = token.trim().toLowerCase();
+                        if (!token.isEmpty() && token.length() > 3 && !STOPWORDS.contains(token)) {
+                            properties.add(token);
+                        }
+                    }
+                }
+            }
+        }
+        itValue.close();
+
+        // 2. Ensuite nameProperty
+        ExtendedIterator<Triple> itName = g.find(argumentNode, PRODUCT_ARG_NAME_PROPERTY, Node.ANY);
+        while (itName.hasNext()) {
+            Node val = itName.next().getObject();
+            if (val.isLiteral()) {
+                String txt = val.getLiteralLexicalForm().trim();
+                if (!txt.isEmpty()) {
+                    properties.add(txt);
+                    // Ajouter aussi les tokens individuels
+                    String[] tokens = txt.split("[\\s,;:]+");
+                    for (String token : tokens) {
+                        token = token.trim().toLowerCase();
+                        if (!token.isEmpty() && token.length() > 3 && !STOPWORDS.contains(token)) {
+                            properties.add(token);
+                        }
+                    }
+                }
+            }
+        }
+        itName.close();
+
+        // 3. Enfin les autres propriétés (aim, assertion, verbatim)
+        Node[] otherPropertyNodes = {PRODUCT_ARG_AIM, PRODUCT_ARG_ASSERTION, PRODUCT_ARG_VERBATIM};
+        for (Node propNode : otherPropertyNodes) {
+            ExtendedIterator<Triple> it = g.find(argumentNode, propNode, Node.ANY);
+            while (it.hasNext()) {
+                Node val = it.next().getObject();
+                if (val.isLiteral()) {
+                    String txt = val.getLiteralLexicalForm().trim();
+                    if (!txt.isEmpty()) {
+                        properties.add(txt);
+                        // Ajouter aussi les tokens individuels
+                        String[] tokens = txt.split("[\\s,;:]+");
+                        for (String token : tokens) {
+                            token = token.trim().toLowerCase();
+                            if (!token.isEmpty() && token.length() > 3 && !STOPWORDS.contains(token)) {
+                                properties.add(token);
+                            }
+                        }
+                    }
+                }
+            }
+            it.close();
+        }
+
+        return properties;
+    }
+
+    /**
+     * Vérifie si un ProductArgument est pertinent pour un type d'emballage spécifique.
+     * Utilise le mot-clé de filtrage configuré dans l'ontologie.
+     * Si aucune règle de filtrage n'est configurée, accepte tous les arguments (pas de pré-filtre).
+     * @param g le graphe
+     * @param argumentNode le noeud ProductArgument
+     * @param packagingType le type d'emballage (e.g., "emballage_plastique")
+     * @return true si l'argument est pertinent pour ce type
+     */
+    private boolean isArgumentRelevantForPackagingType(Graph g, Node argumentNode, String packagingType) {
+        // Récupérer la règle de filtrage pour ce type d'emballage
+        String filteringRule = getPackagingTypeFilteringRule(g, packagingType);
+        if (filteringRule == null || filteringRule.isEmpty()) {
+            return true; // Pas de règle configurée → accepter tous les arguments (pas de pré-filtre)
+        }
+        
+        // Appliquer la règle de filtrage
+        return applyFilteringRule(g, argumentNode, filteringRule);
+    }
+    
+    /**
+     * Récupère tous les arguments pertinents pour un type d'emballage spécifique.
+     * @param g le graphe
+     * @param allArguments la liste de tous les arguments d'emballage
+     * @param packagingType le type d'emballage
+     * @return liste des arguments pertinents
+     */
+    private List<Node> getRelevantArgumentsForPackagingType(Graph g, List<Node> allArguments, String packagingType) {
+        List<Node> relevant = new ArrayList<>();
+        for (Node argumentNode : allArguments) {
+            if (isArgumentRelevantForPackagingType(g, argumentNode, packagingType)) {
+                relevant.add(argumentNode);
+            }
+        }
+        System.out.println("Relevant arguments for packaging type " + packagingType + ": " + relevant.size());
+        return relevant;
+    }
+    
+    /**
+     * Filtre les arguments antinomiques en gardant seulement le meilleur score pour chaque propriété.
+     * Utilise les propriétés d'antinomie configurées dans l'ontologie.
+     * Si aucune propriété d'antinomie n'est configurée, retourne tous les arguments sans filtrage.
+     * @param g le graphe
+     * @param arguments les arguments pertinents
+     * @param packagingType le type d'emballage
+     * @return liste filtrée des arguments
+     */
+    private List<Node> filterAntinomicArguments(Graph g, List<Node> arguments, String packagingType) {
+        // Récupérer les propriétés qui nécessitent un filtrage d'antinomie
+        Set<String> antinomyProperties = getPackagingTypeAntinomyProperties(g, packagingType);
+        
+        // Si aucune propriété d'antinomie configurée, retourner tous les arguments (pas de filtrage)
+        if (antinomyProperties.isEmpty()) {
+            return arguments;
+        }
+        
+        // Grouper les arguments par propriété
+        Map<String, List<Node>> argumentsByProperty = new HashMap<>();
+        
+        for (Node argumentNode : arguments) {
+            String nameProperty = getArgumentProperty(g, argumentNode, PRODUCT_ARG_NAME_PROPERTY);
+            if (nameProperty != null) {
+                argumentsByProperty.computeIfAbsent(nameProperty, k -> new ArrayList<>()).add(argumentNode);
+            }
+        }
+        
+        List<Node> filtered = new ArrayList<>();
+        
+        // Pour chaque groupe de propriétés
+        for (Map.Entry<String, List<Node>> entry : argumentsByProperty.entrySet()) {
+            String propertyName = entry.getKey();
+            List<Node> groupArguments = entry.getValue();
+            
+            if (antinomyProperties.contains(propertyName) && groupArguments.size() > 1) {
+                // Pour les propriétés configurées comme antinomiques, garder seulement l'argument avec le meilleur score
+                Node bestArgument = selectBestArgumentForAntinomy(g, groupArguments, packagingType);
+                if (bestArgument != null) {
+                    filtered.add(bestArgument);
+                }
+            } else {
+                // Pour les autres propriétés, garder tous les arguments
+                filtered.addAll(groupArguments);
+            }
+        }
+        
+        return filtered;
+    }
+    
+    /**
+     * Récupère les propriétés qui nécessitent un filtrage d'antinomie pour un type d'emballage
+     * @param g le graphe
+     * @param packagingType le type d'emballage
+     * @return ensemble des propriétés antinomiques
+     */
+    private Set<String> getPackagingTypeAntinomyProperties(Graph g, String packagingType) {
+        Set<String> antinomyProperties = new HashSet<>();
+        Node packagingTypeUri = NodeFactory.createURI(ncl + packagingType);
+        
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PACKAGING_TYPE, packagingTypeUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            
+            ExtendedIterator<Triple> itProps = g.find(bindingNode, PACKAGING_TYPE_ANTINOMY_PROPERTIES, Node.ANY);
+            while (itProps.hasNext()) {
+                Node val = itProps.next().getObject();
+                if (val.isLiteral()) {
+                    String propsStr = val.getLiteralLexicalForm();
+                    if (propsStr != null) {
+                        String[] props = propsStr.split(",");
+                        for (String prop : props) {
+                            String trimmed = prop.trim();
+                            if (!trimmed.isEmpty()) {
+                                antinomyProperties.add(trimmed);
+                            }
+                        }
+                    }
+                }
+            }
+            itProps.close();
+        }
+        itBinding.close();
+        
+        return antinomyProperties;
+    }
+
+    /**
+     * Récupère la règle de sélection pour un type d'emballage depuis l'ontologie
+     * @param g le graphe
+     * @param packagingType le type d'emballage
+     * @return la règle de sélection ou null
+     */
+    private String getPackagingTypeSelectionRule(Graph g, String packagingType) {
+        Node packagingTypeUri = NodeFactory.createURI(ncl + packagingType);
+        
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PACKAGING_TYPE, packagingTypeUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            
+            ExtendedIterator<Triple> itRule = g.find(bindingNode, PACKAGING_TYPE_SELECTION_RULE, Node.ANY);
+            while (itRule.hasNext()) {
+                Node val = itRule.next().getObject();
+                if (val.isLiteral()) {
+                    String rule = val.getLiteralLexicalForm();
+                    if (rule != null) {
+                        itRule.close();
+                        itBinding.close();
+                        return rule.trim();
+                    }
+                }
+            }
+            itRule.close();
+        }
+        itBinding.close();
+        
+        return null;
+    }
+
+    /**
+     * Sélectionne l'argument avec le meilleur score selon la règle configurée
+     * @param g le graphe
+     * @param antinomicArguments les arguments antinomiques
+     * @param packagingType le type d'emballage
+     * @return l'argument avec le meilleur score
+     */
+    private Node selectBestArgumentForAntinomy(Graph g, List<Node> antinomicArguments, String packagingType) {
+        // Récupérer la règle de sélection
+        String selectionRule = getPackagingTypeSelectionRule(g, packagingType);
+        
+        if (selectionRule != null && !selectionRule.isEmpty()) {
+            // La règle de sélection est directement le littéral à chercher (ex: "avec")
+            String literalToFind = selectionRule.toLowerCase();
+            
+            // Priorité : sélectionner l'argument qui mentionne explicitement le littéral
+            for (Node argumentNode : antinomicArguments) {
+                Set<String> argProperties = collectArgumentProperties(g, argumentNode, packagingType);
+                for (String property : argProperties) {
+                    if (property.toLowerCase().contains(literalToFind)) {
+                        return argumentNode;
+                    }
+                }
+            }
+        }
+        
+        // Fallback : utiliser le scoring comme avant
+        Node bestArgument = null;
+        double bestScore = -1;
+        
+        // Récupérer les mots-clés du binding pour ce type d'emballage
+        Set<String> bindingKeywords = getBindingKeywordsForPackagingType(g, packagingType);
+        
+        for (Node argumentNode : antinomicArguments) {
+            Set<String> argProperties = collectArgumentProperties(g, argumentNode, packagingType);
+            double score = calculateMatchingScore(argProperties, bindingKeywords, packagingType);
+            
+            if (score > bestScore) {
+                bestScore = score;
+                bestArgument = argumentNode;
+            }
+        }
+        
+        return bestArgument;
+    }
+    
+    /**
+     * Récupère les mots-clés du binding associé à un type d'emballage
+     * @param g le graphe
+     * @param packagingType le type d'emballage
+     * @return ensemble des mots-clés
+     */
+    private Set<String> getBindingKeywordsForPackagingType(Graph g, String packagingType) {
+        Set<String> keywords = new HashSet<>();
+        Node packagingTypeUri = NodeFactory.createURI(ncl + packagingType);
+        
+        // Trouver le binding pour ce type
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PACKAGING_TYPE, packagingTypeUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            
+            // Récupérer les mots-clés
+            ExtendedIterator<Triple> itKeywords = g.find(bindingNode, BINDING_AGENT_KEYWORDS, Node.ANY);
+            while (itKeywords.hasNext()) {
+                Node val = itKeywords.next().getObject();
+                if (val.isLiteral()) {
+                    String keywordsStr = val.getLiteralLexicalForm();
+                    if (keywordsStr != null) {
+                        String[] keywordArray = keywordsStr.split(",");
+                        for (String keyword : keywordArray) {
+                            keywords.add(keyword.trim().toLowerCase());
+                        }
+                    }
+                }
+            }
+            itKeywords.close();
+        }
+        itBinding.close();
+        
+        return keywords;
+    }
+    
+    /**
+     * Calcule un score de matching entre les propriétés d'un argument et les mots-clés
+     * Version améliorée qui privilégie les arguments négatifs pour les produits problématiques
+     * @param argProperties propriétés de l'argument
+     * @param keywords mots-clés du binding
+     * @param packagingType le type d'emballage pour contextualiser
+     * @return score de matching (0.0 à 1.0)
+     */
+    private double calculateMatchingScore(Set<String> argProperties, Set<String> keywords, String packagingType) {
+        if (argProperties.isEmpty() || keywords.isEmpty()) return 0.0;
+
+        double totalScore = 0.0;
+
+        for (String keyword : keywords) {
+            boolean keywordMatched = false;
+            
+            for (String argProp : argProperties) {
+                if (argProp.toLowerCase().contains(keyword.toLowerCase()) ||
+                    keyword.toLowerCase().contains(argProp.toLowerCase())) {
+                    
+                    keywordMatched = true;
+                    double points = 1.0;
+                    
+                    // Bonus pour les matches exacts ou très proches
+                    if (argProp.equalsIgnoreCase(keyword)) {
+                        points = 1.5; // Match exact = 1.5 points
+                    } else if (normalizeString(argProp).equals(normalizeString(keyword))) {
+                        points = 1.2; // Match normalisé = 1.2 points
+                    } else {
+                        points = 1.0; // Match partiel = 1.0 point
+                    }
+                    
+                    totalScore += points;
+                    break; // Un mot-clé matché compte une fois
+                }
+            }
+            
+            if (!keywordMatched) {
+                totalScore += 0.1; // Petit bonus pour les mots-clés présents même sans match parfait
+            }
+        }
+
+        double finalScore = totalScore / keywords.size(); // Normaliser par nombre de mots-clés
+        
+        return finalScore;
+    }
+
+    /**
+     * Normalise un label de type d'emballage en utilisant les synonymes depuis l'ontologie
+     * @param g le graphe
+     * @param originalLabel le label original
+     * @return ensemble des labels normalisés (incluant l'original si pas de synonymes)
+     */
+    private Set<String> normalizePackagingTypeLabels(Graph g, String originalLabel) {
+        Set<String> normalizedLabels = new HashSet<>();
+        normalizedLabels.add(originalLabel); // Toujours inclure l'original
+        
+        // Chercher tous les bindings qui ont ce type comme aboutPackagingType
+        Node packagingTypeUri = NodeFactory.createURI(ncl + originalLabel);
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PACKAGING_TYPE, packagingTypeUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            
+            // Récupérer les synonymes
+            ExtendedIterator<Triple> itSynonyms = g.find(bindingNode, PACKAGING_TYPE_SYNONYM_LABELS, Node.ANY);
+            while (itSynonyms.hasNext()) {
+                Node val = itSynonyms.next().getObject();
+                if (val.isLiteral()) {
+                    String synonymsStr = val.getLiteralLexicalForm();
+                    if (synonymsStr != null) {
+                        String[] synonyms = synonymsStr.split(",");
+                        for (String synonym : synonyms) {
+                            String normalized = synonym.trim();
+                            if (!normalized.isEmpty()) {
+                                normalizedLabels.add(normalized);
+                            }
+                        }
+                    }
+                }
+            }
+            itSynonyms.close();
+        }
+        itBinding.close();
+        
+        return normalizedLabels;
+    }
+
+    /**
+     * Récupère le mot-clé de filtrage pour un type d'emballage depuis l'ontologie
+     * @param g le graphe
+     * @param packagingType le type d'emballage
+     * @return le mot-clé de filtrage ou null
+     */
+    private String getPackagingTypeFilteringRule(Graph g, String packagingType) {
+        Node packagingTypeUri = NodeFactory.createURI(ncl + packagingType);
+        
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PACKAGING_TYPE, packagingTypeUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            
+            ExtendedIterator<Triple> itRule = g.find(bindingNode, PACKAGING_TYPE_FILTERING_RULE, Node.ANY);
+            while (itRule.hasNext()) {
+                Node val = itRule.next().getObject();
+                if (val.isLiteral()) {
+                    String rule = val.getLiteralLexicalForm();
+                    if (rule != null) {
+                        itRule.close();
+                        itBinding.close();
+                        return rule.trim();
+                    }
+                }
+            }
+            itRule.close();
+        }
+        itBinding.close();
+        
+        return null;
+    }
+
+    /**
+     * Applique une règle de filtrage à un argument en vérifiant la présence du mot-clé
+     * @param g le graphe
+     * @param argumentNode le noeud argument
+     * @param filteringKeyword le mot-clé de filtrage (ex: "plastique", "verre", "sans plastique")
+     * @return true si l'argument contient le mot-clé dans ses propriétés
+     */
+    private boolean applyFilteringRule(Graph g, Node argumentNode, String filteringKeyword) {
+        // Récupérer les propriétés de l'argument
+        Set<String> argProperties = new HashSet<>();
+        
+        // valueProperty
+        ExtendedIterator<Triple> itValue = g.find(argumentNode, PRODUCT_ARG_VALUE_PROPERTY, Node.ANY);
+        while (itValue.hasNext()) {
+            Node val = itValue.next().getObject();
+            if (val.isLiteral()) {
+                String prop = val.getLiteralLexicalForm().toLowerCase().trim();
+                if (!prop.isEmpty()) {
+                    argProperties.add(prop);
+                }
+            }
+        }
+        itValue.close();
+        
+        // nameProperty
+        ExtendedIterator<Triple> itName = g.find(argumentNode, PRODUCT_ARG_NAME_PROPERTY, Node.ANY);
+        while (itName.hasNext()) {
+            Node val = itName.next().getObject();
+            if (val.isLiteral()) {
+                String prop = val.getLiteralLexicalForm().toLowerCase().trim();
+                if (!prop.isEmpty()) {
+                    argProperties.add(prop);
+                }
+            }
+        }
+        itName.close();
+        
+        // Vérifier si le mot-clé est présent dans les propriétés de l'argument
+        String keyword = filteringKeyword.toLowerCase();
+        return argProperties.stream().anyMatch(prop -> prop.contains(keyword));
+    }
+
+    private void createLinkToArgument(Graph g, Node productNode, Node argumentNode, Node packagingTypeNode, String propertyName, RuleContext context) {
+        // Créer un nouvel identifiant unique pour le LinkToArgument
+        String linkId = "LinkToArgument_" + propertyName + "_" + Math.abs((productNode.toString() + argumentNode.toString()).hashCode());
+        Node linkNode = NodeFactory.createURI(ncl + linkId);
+
+        // Créer les triples pour le LinkToArgument en utilisant RuleContext pour éviter ConcurrentModificationException
+        // Product -> hasLinkToArgument -> LinkToArgument
+        Triple t1 = Triple.create(productNode, HAS_LINK_TO_ARGUMENT, linkNode);
+        context.add(t1);
+        // LinkToArgument -> hasReferenceProductArgument -> ProductArgument
+        Triple t2 = Triple.create(linkNode, HAS_REFERENCE_PRODUCT_ARGUMENT, argumentNode);
+        context.add(t2);
+
+        // LinkToArgument -> initiator -> "PackagingType"
+        Node initiatorValue = NodeFactory.createLiteralString("PackagingType");
+        Triple t3 = Triple.create(linkNode, INITIATOR, initiatorValue);
+        context.add(t3);
+
+        // LinkToArgument -> LinkNameProperty -> propertyName
+        Node nameValue = NodeFactory.createLiteralString(propertyName);
+        Triple t5 = Triple.create(linkNode, LINK_NAME_PROPERTY, nameValue);
+        context.add(t5);
+
+        // LinkToArgument -> LinkValueProperty -> packaging type URI
+        String packagingUri = packagingTypeNode.isURI() ? packagingTypeNode.getURI() : packagingTypeNode.toString();
+        Node valueNode = NodeFactory.createLiteralString(packagingUri);
+        Triple t6 = Triple.create(linkNode, LINK_VALUE_PROPERTY, valueNode);
+        context.add(t6);
+        System.out.println(" Created LinkToArgument: " + linkNode.toString() + " between Product: " + productNode.toString() + " and Argument: " + argumentNode.toString());
+    }
+
+    /**
+     * Vérifie si une propriété de métadonnées match avec n'importe quelle propriété d'argument
+     * Utilise des heuristiques avancées : exact, normalisé, Jaccard, token overlap
+     * @param metadataProp la propriété des métadonnées (bindingAgentNameProperty ou mot-clé)
+     * @param argProperties l'ensemble des propriétés de l'argument
+     * @return true si correspondance trouvée
+     */
+    private boolean matchesAnyArgumentProperty(String metadataProp, Set<String> argProperties) {
+        for (String argProp : argProperties) {
+            // 1. Comparaison exacte (insensible à la casse)
+            if (argProp.equalsIgnoreCase(metadataProp)) {
+                System.out.println("    Exact match found: " + argProp + " vs " + metadataProp);
+                return true;
+            }
+            
+            // 2. Comparaison normalisée (suppression accents et caractères spéciaux)
+            if (normalizeString(argProp).equals(normalizeString(metadataProp))) {
+                System.out.println("    Normalized match found: " + argProp + " vs " + metadataProp);
+                return true;
+            }
+            
+            // 3. Comparaison par tokens (Jaccard-like)
+            if (tokenOverlap(metadataProp, argProp) >= 0.5) { // Au moins 50% de tokens en commun
+                System.out.println("    Token overlap match found: " + argProp + " vs " + metadataProp);
+                return true;
+            }
+            
+            // 4. Containment (un contient l'autre après normalisation)
+            String normMeta = normalizeString(metadataProp);
+            String normArg = normalizeString(argProp);
+            if (!normMeta.isEmpty() && !normArg.isEmpty() && (normMeta.contains(normArg) || normArg.contains(normMeta))) {
+                System.out.println("    Containment match found: " + normArg + " vs " + normMeta);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Calcule le taux de chevauchement des tokens entre deux chaînes
+     * @param s1 première chaîne
+     * @param s2 deuxième chaîne
+     * @return taux de chevauchement (0.0 à 1.0)
+     */
+    private double tokenOverlap(String s1, String s2) {
+        Set<String> tokens1 = tokenize(normalizeString(s1));
+        Set<String> tokens2 = tokenize(normalizeString(s2));
+        
+        if (tokens1.isEmpty() && tokens2.isEmpty()) return 1.0;
+        if (tokens1.isEmpty() || tokens2.isEmpty()) return 0.0;
+        
+        Set<String> intersection = new HashSet<>(tokens1);
+        intersection.retainAll(tokens2);
+        
+        Set<String> union = new HashSet<>(tokens1);
+        union.addAll(tokens2);
+        
+        return (double) intersection.size() / union.size();
+    }
+
+    /**
+     * Tokenize une chaîne normalisée
+     * @param str la chaîne à tokenizer
+     * @return ensemble des tokens
+     */
+    private Set<String> tokenize(String str) {
+        Set<String> tokens = new HashSet<>();
+        String[] parts = str.split("\\s+");
+        for (String part : parts) {
+            part = part.trim();
+            if (!part.isEmpty() && part.length() > 1) { // Ignorer les tokens trop courts
+                tokens.add(part);
+            }
+        }
+        return tokens;
+    }
+
+    /**
+     * Vérifie si la propriété packagingTypeRequired d'un PackagingTypeArgumentBinding
+     * indique que le type d'emballage est obligatoire (valeurs: Oui, OUI, oui, Yes, yes, OK, ok, Ok).
+     * 
+     * Logique de matching :
+     * 1. Vérifier d'abord la correspondance nameProperty (bindingAgentNameProperty vs nameProperty)
+     * 2. Si pas de correspondance → rejet (return false)
+     * 3. Si correspondance ET packagingTypeRequired="oui" → lien créé (return true)
+     * 4. Si correspondance ET packagingTypeRequired≠"oui" → rejet (return false)
+     * 
+     * Le flag packagingTypeRequired filtre donc les liens : seuls les bindings avec packagingTypeRequired="oui"
+     * ET une correspondance nameProperty créent effectivement un lien Product-ProductArgument.
+     * 
+     * @param g Le graphe RDF contenant les données.
+     * @param bindingNode Le nœud PackagingTypeArgumentBinding à vérifier.
+     * @return true si packagingTypeRequired indique "oui", false sinon.
+     */
+    private boolean isPackagingTypeRequired(Graph g, Node bindingNode) {
+        ExtendedIterator<Triple> itRequired = g.find(bindingNode, PACKAGING_TYPE_REQUIRED, Node.ANY);
+        while (itRequired.hasNext()) {
+            Node val = itRequired.next().getObject();
+            if (val.isLiteral()) {
+                String required = val.getLiteralLexicalForm();
+                if (required != null) {
+                    String req = required.trim().toLowerCase();
+                    if (req.equals("oui") || req.equals("yes") || req.equals("ok")) {
+                        itRequired.close();
+                        return true;
+                    }
+                }
+            }
+        }
+        itRequired.close();
+        return false;
+    }
+
+    /**
+     * Récupère la valeur d'une propriété d'argument
+     * @param g le graphe
+     * @param argumentNode le noeud argument
+     * @param property la propriété à récupérer
+     * @return la valeur de la propriété ou null
+     */
+    private String getArgumentProperty(Graph g, Node argumentNode, Node property) {
+        ExtendedIterator<Triple> it = g.find(argumentNode, property, Node.ANY);
+        while (it.hasNext()) {
+            Node val = it.next().getObject();
+            if (val.isLiteral()) {
+                String result = val.getLiteralLexicalForm();
+                it.close();
+                return result;
+            }
+        }
+        it.close();
+        return null;
+    }
+
+    /**
+     * Normalise une chaîne de caractères en :
+     * - Convertissant en minuscules.
+     * - Remplaçant les caractères accentués par leur équivalent non accentué.
+     * - Supprimant tous les caractères qui ne sont ni alphanumériques ni tirets/underscores.
+     * 
+     * Cette normalisation permet une comparaison insensible aux accents et à la ponctuation
+     * pour détecter des correspondances sémantiques entre:
+     * - ProductArgument.nameProperty (données consommateurs)
+     * - PackagingTypeArgumentBinding.bindingAgentNameProperty (métadonnées types d'emballage)
+     * 
+     * @param str La chaîne à normaliser.
+     * @return La chaîne normalisée.
+     */
+    private String normalizeString(String str) {
+        if (str == null) return "";
+        return str.toLowerCase()
+                .replaceAll("[àáâãäå]", "a")
+                .replaceAll("[èéêë]", "e")
+                .replaceAll("[ìíîï]", "i")
+                .replaceAll("[òóôõö]", "o")
+                .replaceAll("[ùúûü]", "u")
+                .replaceAll("[ýÿ]", "y")
+                .replaceAll("[ç]", "c")
+                .replaceAll("[^a-z0-9]", "")
+                .trim();
+    }
+}

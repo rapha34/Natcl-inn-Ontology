@@ -1,7 +1,0 @@
-IDPackagingType,Nom PackagingType,PackagingType Requis,Mots-clés,RègleFiltrage,LabelsSynonymes,RègleSelection,PropriétésAntinomie
-PT-0000002,emballage_verre,Oui,"verre, sain, recyclable, santé, écologie, naturel, durable",,,,
-,emballage_verre,Non,"plastique, nocif, peu recyclable, polluant, artificiel, chimique",,,,
-PT-0000012,emballage_sans_plastique,Non,"sans plastique, zéro plastique, naturel, sans transfert, sain, écologique","sans plastique",,,
-PT-0000001,emballage_plastique,Oui,"plastique, transfert, nocif, chimique, polluant, artificiel","plastique","emballage_plastique,Présence de plastique","PrioritéAvec","Présence de plastique"
-,emballage_plastique,,,"naturel, brut, authentique, beige, vert, bio, nature, ciel bleu, rizières, papier brut",,,,
-,emballage_plastique,,,"artificiel, vif, industriel, couleurs vives, design moderne, urbain, technologique",,,,

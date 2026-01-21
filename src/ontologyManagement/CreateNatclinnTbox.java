@@ -631,6 +631,13 @@ public class CreateNatclinnTbox {
 	hasLinkToArgument.addComment("Links a food industry product to a LinkToArgument that connects to a ProductArgument.", "en");
 	hasLinkToArgument.addComment("Relie un produit de l'industrie agro-alimentaire à un LinkToArgument qui se connecte à un ProductArgument.", "fr");
 
+	// LinkToArgument properties
+	ObjectProperty hasTagInitiator = om.createObjectProperty(ncl + "hasTagInitiator");
+	hasTagInitiator.addDomain(LinkToArgument);
+	hasTagInitiator.addRange(om.createResource(XSD.xstring.getURI()));
+	hasTagInitiator.addComment("Tag identifying who initiated the link to the argument.", "en");
+	hasTagInitiator.addComment("Tag identifiant qui a initié le lien vers l'argument.", "fr");	
+
 	ObjectProperty hasReferenceProductArgument = om.createObjectProperty(ncl + "hasReferenceProductArgument");
 	hasReferenceProductArgument.addDomain(LinkToArgument);
 	hasReferenceProductArgument.addRange(ProductArgument);
@@ -775,31 +782,7 @@ public class CreateNatclinnTbox {
 		supportType.addRange(om.createResource(XSD.xstring.getURI()));
 		supportType.addComment("Type of argument (positive or negative) in relation to its target.", "en");
 		supportType.addComment("Type de l'argument (positif ou négatif) vis à vis de sa cible.", "fr");
-
-		// LinkToArgument properties
-		DatatypeProperty initiator = om.createDatatypeProperty(ncl + "initiator");
-		initiator.addDomain(LinkToArgument);
-		initiator.addRange(om.createResource(XSD.xstring.getURI()));
-		initiator.addComment("The initiator element that triggered the link (Ingredient, Product, Packaging, ControlledOriginLabel, CleanLabel, ManufacturingProcess, NutriScore).", "en");
-		initiator.addComment("L'élément initiateur qui a déclenché le lien (Ingredient, Product, Packaging, ControlledOriginLabel, CleanLabel, ManufacturingProcess, NutriScore).", "fr");
-
-		DatatypeProperty linkSupportType = om.createDatatypeProperty(ncl + "linkSupportType");
-		linkSupportType.addDomain(LinkToArgument);
-		linkSupportType.addRange(om.createResource(XSD.xstring.getURI()));
-		linkSupportType.addComment("Type of support for the link (For or Against).", "en");
-		linkSupportType.addComment("Type de support pour le lien (For ou Against).", "fr");
-
-		DatatypeProperty LinkNameProperty = om.createDatatypeProperty(ncl + "LinkNameProperty");
-		LinkNameProperty.addDomain(LinkToArgument);
-		LinkNameProperty.addRange(om.createResource(XSD.xstring.getURI()));
-		LinkNameProperty.addComment("Name property of the link providing additional context.", "en");
-		LinkNameProperty.addComment("Propriété de nom du lien fournissant un contexte supplémentaire.", "fr");
-
-		DatatypeProperty LinkValueProperty = om.createDatatypeProperty(ncl + "LinkValueProperty");
-		LinkValueProperty.addDomain(LinkToArgument);
-		LinkValueProperty.addRange(om.createResource(XSD.xstring.getURI()));
-		LinkValueProperty.addComment("Value property of the link providing additional context.", "en");
-		LinkValueProperty.addComment("Propriété de valeur du lien fournissant un contexte supplémentaire.", "fr");
+		
 
 		DatatypeProperty fiability = om.createDatatypeProperty(ncl + "fiability");
 		fiability.addDomain(TypeSource);

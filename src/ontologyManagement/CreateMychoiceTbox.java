@@ -194,13 +194,6 @@ public class CreateMychoiceTbox {
         IncompatibleValues.addLabel("Incompatible Values", "en");
         IncompatibleValues.addComment("Ensemble de valeurs mutuellement incompatibles.", "fr");
         IncompatibleValues.addComment("Set of mutually incompatible values.", "en");
-        
-        // Classe HasExpertise
-        OntClass HasExpertise = om.createClass(mch + "HasExpertise");
-        HasExpertise.addLabel("Expertise", "fr");
-        HasExpertise.addLabel("Expertise", "en");
-        HasExpertise.addComment("Relation d'expertise entre une partie prenante et un domaine.", "fr");
-        HasExpertise.addComment("Expertise relationship between a stakeholder and a domain.", "en");
 		
 		
 	    ////////////////////////////////////////////
@@ -220,8 +213,7 @@ public class CreateMychoiceTbox {
 			QualValue,
 			Source,
 			TypeSource,
-			IncompatibleValues,
-			HasExpertise
+			IncompatibleValues
 			
 		);
 
@@ -314,12 +306,12 @@ public class CreateMychoiceTbox {
         hasIncompatibleValues.addDomain(QualValue);
         hasIncompatibleValues.addRange(IncompatibleValues);
         
-        // expertiseIn
-        ObjectProperty expertiseIn = om.createObjectProperty(mch + "expertiseIn");
-        expertiseIn.addLabel("expertise dans", "fr");
-        expertiseIn.addLabel("expertise in", "en");
-        expertiseIn.addDomain(Stakeholder);
-        expertiseIn.addRange(HasExpertise);
+        // hasExpertise
+        ObjectProperty hasExpertise = om.createObjectProperty(mch + "hasExpertise");
+        hasExpertise.addLabel("a pour expertise", "fr");
+        hasExpertise.addLabel("has expertise", "en");
+        hasExpertise.addDomain(Stakeholder);
+        hasExpertise.addRange(Criterion);
 
 	    
 	    //////////////////////////////////////////////////////////
@@ -418,7 +410,7 @@ public class CreateMychoiceTbox {
         hasCoverage.addLabel("a une couverture", "fr");
         hasCoverage.addLabel("has coverage", "en");
         hasCoverage.addDomain(Alternative);
-        hasCoverage.addRange(XSD.xint);
+        hasCoverage.addRange(XSD.integer);
         
         DatatypeProperty confidenceLevel = om.createDatatypeProperty(mch + "confidenceLevel");
         confidenceLevel.addLabel("niveau de confiance", "fr");
@@ -478,11 +470,6 @@ public class CreateMychoiceTbox {
         sourceDate.addDomain(Source);
         sourceDate.addRange(XSD.gYear);
         
-        DatatypeProperty fiability = om.createDatatypeProperty(mch + "fiability");
-        fiability.addLabel("fiabilité", "fr");
-        fiability.addLabel("reliability", "en");
-        fiability.addDomain(Source);
-        fiability.addRange(XSD.xboolean);
         
         // Propriétés pour TypeSource
         DatatypeProperty typeSourceName = om.createDatatypeProperty(mch + "typeSourceName");
@@ -491,43 +478,30 @@ public class CreateMychoiceTbox {
         typeSourceName.addDomain(TypeSource);
         typeSourceName.addRange(XSD.xstring);
         
-        DatatypeProperty typeFiability = om.createDatatypeProperty(mch + "typeFiability");
-        typeFiability.addLabel("fiabilité du type", "fr");
-        typeFiability.addLabel("type reliability", "en");
-        typeFiability.addDomain(TypeSource);
-        typeFiability.addRange(XSD.xboolean);
+        DatatypeProperty typeSourceFiability = om.createDatatypeProperty(mch + "typeSourceFiability");
+        typeSourceFiability.addLabel("fiabilité du type", "fr");
+        typeSourceFiability.addLabel("type reliability", "en");
+        typeSourceFiability.addDomain(TypeSource);
+        typeSourceFiability.addRange(XSD.integer);
         
         // Propriétés pour IncompatibleValues
         DatatypeProperty incompatibleValue1 = om.createDatatypeProperty(mch + "incompatibleValue1");
         incompatibleValue1.addLabel("valeur incompatible 1", "fr");
         incompatibleValue1.addLabel("incompatible value 1", "en");
         incompatibleValue1.addDomain(IncompatibleValues);
-        incompatibleValue1.addRange(XSD.xint);
+        incompatibleValue1.addRange(XSD.integer);
         
         DatatypeProperty incompatibleValue2 = om.createDatatypeProperty(mch + "incompatibleValue2");
         incompatibleValue2.addLabel("valeur incompatible 2", "fr");
         incompatibleValue2.addLabel("incompatible value 2", "en");
         incompatibleValue2.addDomain(IncompatibleValues);
-        incompatibleValue2.addRange(XSD.xint);
-        
-        // Propriétés pour HasExpertise
-        DatatypeProperty stakeholderNumber = om.createDatatypeProperty(mch + "stakeholderNumber");
-        stakeholderNumber.addLabel("numéro de partie prenante", "fr");
-        stakeholderNumber.addLabel("stakeholder number", "en");
-        stakeholderNumber.addDomain(HasExpertise);
-        stakeholderNumber.addRange(XSD.xint);
-        
-        DatatypeProperty criterionNumber = om.createDatatypeProperty(mch + "criterionNumber");
-        criterionNumber.addLabel("numéro de critère", "fr");
-        criterionNumber.addLabel("criterion number", "en");
-        criterionNumber.addDomain(HasExpertise);
-        criterionNumber.addRange(XSD.xint);
+        incompatibleValue2.addRange(XSD.integer);
         
         DatatypeProperty projectNumber = om.createDatatypeProperty(mch + "projectNumber");
         projectNumber.addLabel("numéro de projet", "fr");
         projectNumber.addLabel("project number", "en");
-        projectNumber.addDomain(HasExpertise);
-        projectNumber.addRange(XSD.xint);
+        projectNumber.addDomain(Project);
+        projectNumber.addRange(XSD.integer);
 
 	
 		//////////////////////////////////////////////////////////
@@ -560,7 +534,6 @@ public class CreateMychoiceTbox {
 		MCH.addSubClass(Source);
 		MCH.addSubClass(TypeSource);
 		MCH.addSubClass(IncompatibleValues);
-		MCH.addSubClass(HasExpertise);
 
 		// Alternative doit avoir au moins un projet
         Alternative.addSuperClass(om.createMinCardinalityRestriction(null, belongsToProject, 1));

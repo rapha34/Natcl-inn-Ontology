@@ -1,0 +1,612 @@
+package natclinn.util;
+
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.reasoner.rulesys.RuleContext;
+import org.apache.jena.reasoner.rulesys.builtins.BaseBuiltin;
+import org.apache.jena.util.iterator.ExtendedIterator;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Primitive pour lier les produits aux arguments via la propriété de transformation `hasProcessing`.
+ * Fonctionne de manière analogue à ComparePackagingTypeProperty mais utilise les métadonnées
+ * définies par CreateNatclinnProcessingOntology : aboutProcessing, processingNameProperty, processingRequired.
+ *
+ * Signature: compareProcessingTypeProperty(?product, ?processingArgument)
+ */
+public class CompareProcessingDegreeProperty extends BaseBuiltin {
+
+    private static final String ncl;
+    private static final String rdf;
+    private static final Node HAS_RDF_TYPE;
+    private static final Node HAS_PROCESSING;
+    // Propriétés ProductArgument
+    private static final Node PRODUCT_ARG_NAME_PROPERTY;
+    private static final Node PRODUCT_ARG_AIM;
+    private static final Node PRODUCT_ARG_ASSERTION;
+    private static final Node PRODUCT_ARG_VERBATIM;
+    private static final Node PRODUCT_ARG_VALUE_PROPERTY;
+    // Propriétés ProcessingArgumentBinding
+    private static final Node BINDING_AGENT_KEYWORDS;
+    private static final Node PROCESSING_REQUIRED;
+    private static final Node ABOUT_PROCESSING;
+    private static final Node PROCESSING_FILTERING_RULE;
+    private static final Node PROCESSING_SYNONYM_LABELS;
+    private static final Node PROCESSING_SELECTION_RULE;
+    private static final Node PROCESSING_ANTINOMY_PROPERTIES;
+    private static final Set<String> STOPWORDS = new HashSet<>(java.util.Arrays.asList(
+        "le", "la", "les", "un", "une", "des", "de", "du", "que", "qui", "quoi",
+        "et", "ou", "mais", "donc", "car", "ni", "or",
+        "ce", "cet", "cette", "ces", "se", "sa", "son", "ses",
+        "me", "te", "nous", "vous", "lui", "leur",
+        "pas", "plus", "non", "oui", "si", "bien",
+        "tout", "tous", "toute", "toutes",
+        "mon", "ton", "ma", "ta", "mes", "tes",
+        "au", "aux", "en", "dans", "sur", "sous", "pour", "par", "avec", "sans",
+        "je", "tu", "il", "elle", "on", "ils", "elles",
+        "avoir", "être", "fait", "faire", "être", "ai", "as", "est", "sont", "été"
+    ));
+    private static final Node HAS_LINK_TO_ARGUMENT;
+    private static final Node HAS_REFERENCE_PRODUCT_ARGUMENT;
+    private static final Node INITIATOR;
+    private static final Node LINK_NAME_PROPERTY;
+    private static final Node LINK_VALUE_PROPERTY;
+
+    static {
+        new NatclinnConf();
+        ncl = NatclinnConf.ncl;
+        rdf = NatclinnConf.rdf;
+        HAS_RDF_TYPE = NodeFactory.createURI(rdf + "type");
+        HAS_PROCESSING = NodeFactory.createURI(ncl + "hasProcessing");
+        PRODUCT_ARG_NAME_PROPERTY = NodeFactory.createURI(ncl + "nameProperty");
+        PRODUCT_ARG_AIM = NodeFactory.createURI(ncl + "aim");
+        PRODUCT_ARG_ASSERTION = NodeFactory.createURI(ncl + "assertion");
+        PRODUCT_ARG_VERBATIM = NodeFactory.createURI(ncl + "verbatim");
+        PRODUCT_ARG_VALUE_PROPERTY = NodeFactory.createURI(ncl + "valueProperty");
+        BINDING_AGENT_KEYWORDS = NodeFactory.createURI(ncl + "bindingAgentKeywords");
+        PROCESSING_REQUIRED = NodeFactory.createURI(ncl + "processingRequired");
+        ABOUT_PROCESSING = NodeFactory.createURI(ncl + "aboutProcessing");
+        PROCESSING_FILTERING_RULE = NodeFactory.createURI(ncl + "processingFilteringRule");
+        PROCESSING_SYNONYM_LABELS = NodeFactory.createURI(ncl + "processingSynonymLabels");
+        PROCESSING_SELECTION_RULE = NodeFactory.createURI(ncl + "processingSelectionRule");
+        PROCESSING_ANTINOMY_PROPERTIES = NodeFactory.createURI(ncl + "processingAntinomyProperties");
+        HAS_LINK_TO_ARGUMENT = NodeFactory.createURI(ncl + "hasLinkToArgument");
+        HAS_REFERENCE_PRODUCT_ARGUMENT = NodeFactory.createURI(ncl + "hasReferenceProductArgument");
+        INITIATOR = NodeFactory.createURI(ncl + "initiator");
+        LINK_NAME_PROPERTY = NodeFactory.createURI(ncl + "LinkNameProperty");
+        LINK_VALUE_PROPERTY = NodeFactory.createURI(ncl + "LinkValueProperty");
+    }
+
+    @Override
+    public String getName() {
+        return "compareProcessingTypeProperty";
+    }
+
+    @Override
+    public int getArgLength() {
+        return 1; // product only (arguments récupérés automatiquement)
+    }
+
+    @Override
+    public boolean bodyCall(Node[] args, int length, RuleContext context) {
+        checkArgs(length, context);
+
+        Node productNode = getArg(0, args, context);
+        if (!productNode.isURI() && !productNode.isBlank()) return false;
+
+        Graph g = context.getGraph();
+
+        // 1) Récupérer tous les types de transformation du produit
+        Set<String> processingTypes = new HashSet<>();
+        ExtendedIterator<Triple> itProc = g.find(productNode, HAS_PROCESSING, Node.ANY);
+        while (itProc.hasNext()) {
+            Node val = itProc.next().getObject();
+            if (val.isURI()) {
+                String uri = val.getURI();
+                String typeName = uri.substring(uri.lastIndexOf('/') + 1);
+                processingTypes.add(typeName.toLowerCase().trim());
+            }
+        }
+        itProc.close();
+
+        // 1b) Normaliser via synonymes ontologie
+        Set<String> normalizedProcessing = new HashSet<>();
+        for (String type : processingTypes) {
+            normalizedProcessing.addAll(normalizeProcessingLabels(g, type));
+        }
+        processingTypes = normalizedProcessing;
+
+        if (processingTypes.isEmpty()) return false;
+
+        // 2) Récupérer tous les ProductArgument
+        List<Node> processingArguments = new ArrayList<>();
+        ExtendedIterator<Triple> itArgs = g.find(Node.ANY, HAS_RDF_TYPE, NodeFactory.createURI(ncl + "ProductArgument"));
+        while (itArgs.hasNext()) {
+            Node argNode = itArgs.next().getSubject();
+            if (argNode.isURI() || argNode.isBlank()) {
+                processingArguments.add(argNode);
+            }
+        }
+        itArgs.close();
+
+        // 3) Pour chaque type de processing, traiter les arguments pertinents
+        for (String procLocal : processingTypes) {
+            Node processingUri = NodeFactory.createURI(ncl + procLocal);
+
+            List<Node> relevantArguments = getRelevantArgumentsForProcessing(g, processingArguments, procLocal);
+
+            List<Node> filteredArguments = filterAntinomicArguments(g, relevantArguments, procLocal);
+
+            for (Node argumentNode : filteredArguments) {
+                Set<String> argProperties = collectArgumentProperties(g, argumentNode, procLocal);
+
+                ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PROCESSING, processingUri);
+                while (itBinding.hasNext()) {
+                    Node bindingNode = itBinding.next().getSubject();
+
+                    Set<String> bindingKeywords = getBindingKeywordsForProcessing(g, bindingNode);
+
+                    for (String keyword : bindingKeywords) {
+                        if (keyword.isEmpty()) continue;
+                        if (matchesAnyArgumentProperty(keyword, argProperties)) {
+                            boolean required = isProcessingRequired(g, bindingNode);
+                            if (required) {
+                                createLinkToArgument(g, productNode, argumentNode, processingUri, keyword, context);
+                                itBinding.close();
+                                break;
+                            }
+                        }
+                    }
+                }
+                itBinding.close();
+            }
+        }
+
+        return true; // La primitive retourne true si le traitement s'est bien déroulé
+    }
+
+    private Set<String> collectArgumentProperties(Graph g, Node argumentNode, String processingType) {
+        if (!isArgumentRelevantForProcessing(g, argumentNode, processingType)) {
+            return new HashSet<>();
+        }
+
+        Set<String> properties = new HashSet<>();
+
+        ExtendedIterator<Triple> itValue = g.find(argumentNode, PRODUCT_ARG_VALUE_PROPERTY, Node.ANY);
+        while (itValue.hasNext()) {
+            Node val = itValue.next().getObject();
+            if (val.isLiteral()) {
+                String txt = val.getLiteralLexicalForm().trim();
+                if (!txt.isEmpty()) {
+                    properties.add(txt);
+                    addTokens(properties, txt);
+                }
+            }
+        }
+        itValue.close();
+
+        ExtendedIterator<Triple> itName = g.find(argumentNode, PRODUCT_ARG_NAME_PROPERTY, Node.ANY);
+        while (itName.hasNext()) {
+            Node val = itName.next().getObject();
+            if (val.isLiteral()) {
+                String txt = val.getLiteralLexicalForm().trim();
+                if (!txt.isEmpty()) {
+                    properties.add(txt);
+                    addTokens(properties, txt);
+                }
+            }
+        }
+        itName.close();
+
+        Node[] otherProps = {PRODUCT_ARG_AIM, PRODUCT_ARG_ASSERTION, PRODUCT_ARG_VERBATIM};
+        for (Node propNode : otherProps) {
+            ExtendedIterator<Triple> it = g.find(argumentNode, propNode, Node.ANY);
+            while (it.hasNext()) {
+                Node val = it.next().getObject();
+                if (val.isLiteral()) {
+                    String txt = val.getLiteralLexicalForm().trim();
+                    if (!txt.isEmpty()) {
+                        properties.add(txt);
+                        addTokens(properties, txt);
+                    }
+                }
+            }
+            it.close();
+        }
+
+        return properties;
+    }
+
+    private void addTokens(Set<String> properties, String txt) {
+        String[] tokens = txt.split("[\\s,;:]+");
+        for (String token : tokens) {
+            token = token.trim().toLowerCase();
+            if (!token.isEmpty() && token.length() > 3 && !STOPWORDS.contains(token)) {
+                properties.add(token);
+            }
+        }
+    }
+
+    private boolean isArgumentRelevantForProcessing(Graph g, Node argumentNode, String processingType) {
+        String filteringRule = getProcessingFilteringRule(g, processingType);
+        if (filteringRule == null || filteringRule.isEmpty()) {
+            return true;
+        }
+        return applyFilteringRule(g, argumentNode, filteringRule);
+    }
+
+    private List<Node> getRelevantArgumentsForProcessing(Graph g, List<Node> allArguments, String processingType) {
+        List<Node> relevant = new ArrayList<>();
+        for (Node argumentNode : allArguments) {
+            if (isArgumentRelevantForProcessing(g, argumentNode, processingType)) {
+                relevant.add(argumentNode);
+            }
+        }
+        return relevant;
+    }
+
+    private List<Node> filterAntinomicArguments(Graph g, List<Node> arguments, String processingType) {
+        Set<String> antinomyProperties = getProcessingAntinomyProperties(g, processingType);
+        if (antinomyProperties.isEmpty()) return arguments;
+
+        Map<String, List<Node>> byProperty = new HashMap<>();
+        for (Node argumentNode : arguments) {
+            String nameProperty = getArgumentProperty(g, argumentNode, PRODUCT_ARG_NAME_PROPERTY);
+            if (nameProperty != null) {
+                byProperty.computeIfAbsent(nameProperty, k -> new ArrayList<>()).add(argumentNode);
+            }
+        }
+
+        List<Node> filtered = new ArrayList<>();
+        for (Map.Entry<String, List<Node>> entry : byProperty.entrySet()) {
+            String propertyName = entry.getKey();
+            List<Node> group = entry.getValue();
+
+            if (antinomyProperties.contains(propertyName) && group.size() > 1) {
+                Node best = selectBestArgumentForAntinomy(g, group, processingType);
+                if (best != null) filtered.add(best);
+            } else {
+                filtered.addAll(group);
+            }
+        }
+
+        return filtered;
+    }
+
+    private Set<String> getProcessingAntinomyProperties(Graph g, String processingType) {
+        Set<String> antinomyProperties = new HashSet<>();
+        Node procUri = NodeFactory.createURI(ncl + processingType);
+
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PROCESSING, procUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+
+            ExtendedIterator<Triple> itProps = g.find(bindingNode, PROCESSING_ANTINOMY_PROPERTIES, Node.ANY);
+            while (itProps.hasNext()) {
+                Node val = itProps.next().getObject();
+                if (val.isLiteral()) {
+                    String propsStr = val.getLiteralLexicalForm();
+                    if (propsStr != null) {
+                        String[] props = propsStr.split(",");
+                        for (String prop : props) {
+                            String trimmed = prop.trim();
+                            if (!trimmed.isEmpty()) antinomyProperties.add(trimmed);
+                        }
+                    }
+                }
+            }
+            itProps.close();
+        }
+        itBinding.close();
+
+        return antinomyProperties;
+    }
+
+    private String getProcessingSelectionRule(Graph g, String processingType) {
+        Node procUri = NodeFactory.createURI(ncl + processingType);
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PROCESSING, procUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            ExtendedIterator<Triple> itRule = g.find(bindingNode, PROCESSING_SELECTION_RULE, Node.ANY);
+            while (itRule.hasNext()) {
+                Node val = itRule.next().getObject();
+                if (val.isLiteral()) {
+                    String rule = val.getLiteralLexicalForm();
+                    if (rule != null) {
+                        itRule.close();
+                        itBinding.close();
+                        return rule.trim();
+                    }
+                }
+            }
+            itRule.close();
+        }
+        itBinding.close();
+        return null;
+    }
+
+    private Node selectBestArgumentForAntinomy(Graph g, List<Node> antinomicArguments, String processingType) {
+        String selectionRule = getProcessingSelectionRule(g, processingType);
+        if (selectionRule != null && !selectionRule.isEmpty()) {
+            String literalToFind = selectionRule.toLowerCase();
+            for (Node argumentNode : antinomicArguments) {
+                Set<String> argProps = collectArgumentProperties(g, argumentNode, processingType);
+                for (String prop : argProps) {
+                    if (prop.toLowerCase().contains(literalToFind)) {
+                        return argumentNode;
+                    }
+                }
+            }
+        }
+
+        Set<String> bindingKeywords = getBindingKeywordsForProcessingType(g, processingType);
+        Node best = null;
+        double bestScore = -1;
+        for (Node argumentNode : antinomicArguments) {
+            Set<String> argProps = collectArgumentProperties(g, argumentNode, processingType);
+            double score = calculateMatchingScore(argProps, bindingKeywords, processingType);
+            if (score > bestScore) {
+                bestScore = score;
+                best = argumentNode;
+            }
+        }
+        return best;
+    }
+
+    private Set<String> getBindingKeywordsForProcessing(Graph g, Node bindingNode) {
+        Set<String> keywords = new HashSet<>();
+
+        ExtendedIterator<Triple> itKeywords = g.find(bindingNode, BINDING_AGENT_KEYWORDS, Node.ANY);
+        while (itKeywords.hasNext()) {
+            Node val = itKeywords.next().getObject();
+            if (val.isLiteral()) {
+                String keywordsStr = val.getLiteralLexicalForm();
+                if (keywordsStr != null) {
+                    String[] keywordArray = keywordsStr.split(",");
+                    for (String keyword : keywordArray) {
+                        keywords.add(keyword.trim().toLowerCase());
+                    }
+                }
+            }
+        }
+        itKeywords.close();
+
+        if (keywords.isEmpty()) {
+            ExtendedIterator<Triple> itName = g.find(bindingNode, NodeFactory.createURI(ncl + "bindingAgentNameProperty"), Node.ANY);
+            while (itName.hasNext()) {
+                Node val = itName.next().getObject();
+                if (val.isLiteral()) {
+                    String kw = val.getLiteralLexicalForm();
+                    if (kw != null && !kw.trim().isEmpty()) {
+                        keywords.add(kw.trim().toLowerCase());
+                    }
+                }
+            }
+            itName.close();
+        }
+
+        return keywords;
+    }
+
+    private Set<String> getBindingKeywordsForProcessingType(Graph g, String processingType) {
+        Set<String> keywords = new HashSet<>();
+        Node procUri = NodeFactory.createURI(ncl + processingType);
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PROCESSING, procUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            keywords.addAll(getBindingKeywordsForProcessing(g, bindingNode));
+        }
+        itBinding.close();
+        return keywords;
+    }
+
+    private double calculateMatchingScore(Set<String> argProperties, Set<String> keywords, String processingType) {
+        if (argProperties.isEmpty() || keywords.isEmpty()) return 0.0;
+
+        double totalScore = 0.0;
+        for (String keyword : keywords) {
+            boolean matched = false;
+            for (String argProp : argProperties) {
+                if (argProp.toLowerCase().contains(keyword.toLowerCase()) || keyword.toLowerCase().contains(argProp.toLowerCase())) {
+                    matched = true;
+                    double points = 1.0;
+                    if (argProp.equalsIgnoreCase(keyword)) {
+                        points = 1.5;
+                    } else if (normalizeString(argProp).equals(normalizeString(keyword))) {
+                        points = 1.2;
+                    }
+                    totalScore += points;
+                    break;
+                }
+            }
+            if (!matched) totalScore += 0.1;
+        }
+        return totalScore / keywords.size();
+    }
+
+    private Set<String> normalizeProcessingLabels(Graph g, String originalLabel) {
+        Set<String> normalized = new HashSet<>();
+        normalized.add(originalLabel);
+
+        Node procUri = NodeFactory.createURI(ncl + originalLabel);
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PROCESSING, procUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            ExtendedIterator<Triple> itSyn = g.find(bindingNode, PROCESSING_SYNONYM_LABELS, Node.ANY);
+            while (itSyn.hasNext()) {
+                Node val = itSyn.next().getObject();
+                if (val.isLiteral()) {
+                    String synStr = val.getLiteralLexicalForm();
+                    if (synStr != null) {
+                        String[] syns = synStr.split(",");
+                        for (String syn : syns) {
+                            String norm = syn.trim();
+                            if (!norm.isEmpty()) normalized.add(norm);
+                        }
+                    }
+                }
+            }
+            itSyn.close();
+        }
+        itBinding.close();
+
+        return normalized;
+    }
+
+    private String getProcessingFilteringRule(Graph g, String processingType) {
+        Node procUri = NodeFactory.createURI(ncl + processingType);
+        ExtendedIterator<Triple> itBinding = g.find(Node.ANY, ABOUT_PROCESSING, procUri);
+        while (itBinding.hasNext()) {
+            Node bindingNode = itBinding.next().getSubject();
+            ExtendedIterator<Triple> itRule = g.find(bindingNode, PROCESSING_FILTERING_RULE, Node.ANY);
+            while (itRule.hasNext()) {
+                Node val = itRule.next().getObject();
+                if (val.isLiteral()) {
+                    String rule = val.getLiteralLexicalForm();
+                    if (rule != null) {
+                        itRule.close();
+                        itBinding.close();
+                        return rule.trim();
+                    }
+                }
+            }
+            itRule.close();
+        }
+        itBinding.close();
+        return null;
+    }
+
+    private boolean applyFilteringRule(Graph g, Node argumentNode, String filteringKeyword) {
+        Set<String> props = new HashSet<>();
+
+        ExtendedIterator<Triple> itValue = g.find(argumentNode, PRODUCT_ARG_VALUE_PROPERTY, Node.ANY);
+        while (itValue.hasNext()) {
+            Node val = itValue.next().getObject();
+            if (val.isLiteral()) {
+                String prop = val.getLiteralLexicalForm().toLowerCase().trim();
+                if (!prop.isEmpty()) props.add(prop);
+            }
+        }
+        itValue.close();
+
+        ExtendedIterator<Triple> itName = g.find(argumentNode, PRODUCT_ARG_NAME_PROPERTY, Node.ANY);
+        while (itName.hasNext()) {
+            Node val = itName.next().getObject();
+            if (val.isLiteral()) {
+                String prop = val.getLiteralLexicalForm().toLowerCase().trim();
+                if (!prop.isEmpty()) props.add(prop);
+            }
+        }
+        itName.close();
+
+        String keyword = filteringKeyword.toLowerCase();
+        return props.stream().anyMatch(p -> p.contains(keyword));
+    }
+
+    private void createLinkToArgument(Graph g, Node productNode, Node argumentNode, Node processingNode, String propertyName, RuleContext context) {
+        String linkId = "LinkToArgument_" + System.currentTimeMillis() + "_" + Math.abs((productNode.toString() + argumentNode.toString()).hashCode());
+        Node linkNode = NodeFactory.createURI(ncl + linkId);
+
+        context.add(Triple.create(productNode, HAS_LINK_TO_ARGUMENT, linkNode));
+        context.add(Triple.create(linkNode, HAS_REFERENCE_PRODUCT_ARGUMENT, argumentNode));
+
+        Node initiatorValue = NodeFactory.createLiteralString("ProcessingType");
+        context.add(Triple.create(linkNode, INITIATOR, initiatorValue));
+
+        Node nameValue = NodeFactory.createLiteralString(propertyName);
+        context.add(Triple.create(linkNode, LINK_NAME_PROPERTY, nameValue));
+
+        String procUri = processingNode.isURI() ? processingNode.getURI() : processingNode.toString();
+        Node valueNode = NodeFactory.createLiteralString(procUri);
+        context.add(Triple.create(linkNode, LINK_VALUE_PROPERTY, valueNode));
+    }
+
+    private boolean isProcessingRequired(Graph g, Node bindingNode) {
+        ExtendedIterator<Triple> itRequired = g.find(bindingNode, PROCESSING_REQUIRED, Node.ANY);
+        while (itRequired.hasNext()) {
+            Node val = itRequired.next().getObject();
+            if (val.isLiteral()) {
+                String required = val.getLiteralLexicalForm();
+                if (required != null) {
+                    String req = required.trim().toLowerCase();
+                    if (req.equals("oui") || req.equals("yes") || req.equals("ok")) {
+                        itRequired.close();
+                        return true;
+                    }
+                }
+            }
+        }
+        itRequired.close();
+        return false;
+    }
+
+    private String getArgumentProperty(Graph g, Node argumentNode, Node property) {
+        ExtendedIterator<Triple> it = g.find(argumentNode, property, Node.ANY);
+        while (it.hasNext()) {
+            Node val = it.next().getObject();
+            if (val.isLiteral()) {
+                String result = val.getLiteralLexicalForm();
+                it.close();
+                return result;
+            }
+        }
+        it.close();
+        return null;
+    }
+
+    private boolean matchesAnyArgumentProperty(String metadataProp, Set<String> argProperties) {
+        for (String argProp : argProperties) {
+            if (argProp.equalsIgnoreCase(metadataProp)) return true;
+            if (normalizeString(argProp).equals(normalizeString(metadataProp))) return true;
+            if (tokenOverlap(metadataProp, argProp) >= 0.5) return true;
+            String normMeta = normalizeString(metadataProp);
+            String normArg = normalizeString(argProp);
+            if (!normMeta.isEmpty() && !normArg.isEmpty() && (normMeta.contains(normArg) || normArg.contains(normMeta))) return true;
+        }
+        return false;
+    }
+
+    private double tokenOverlap(String s1, String s2) {
+        Set<String> tokens1 = tokenize(normalizeString(s1));
+        Set<String> tokens2 = tokenize(normalizeString(s2));
+        if (tokens1.isEmpty() && tokens2.isEmpty()) return 1.0;
+        if (tokens1.isEmpty() || tokens2.isEmpty()) return 0.0;
+        Set<String> intersection = new HashSet<>(tokens1);
+        intersection.retainAll(tokens2);
+        Set<String> union = new HashSet<>(tokens1);
+        union.addAll(tokens2);
+        return (double) intersection.size() / union.size();
+    }
+
+    private Set<String> tokenize(String str) {
+        Set<String> tokens = new HashSet<>();
+        String[] parts = str.split("\\s+");
+        for (String part : parts) {
+            part = part.trim();
+            if (!part.isEmpty() && part.length() > 1) tokens.add(part);
+        }
+        return tokens;
+    }
+
+    private String normalizeString(String str) {
+        if (str == null) return "";
+        return str.toLowerCase()
+                .replaceAll("[àáâãäå]", "a")
+                .replaceAll("[èéêë]", "e")
+                .replaceAll("[ìíîï]", "i")
+                .replaceAll("[òóôõö]", "o")
+                .replaceAll("[ùúûü]", "u")
+                .replaceAll("[ýÿ]", "y")
+                .replaceAll("[ç]", "c")
+                .replaceAll("[^a-z0-9]", "")
+                .trim();
+    }
+}

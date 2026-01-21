@@ -7,10 +7,10 @@ C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\inferencesAndQuer
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CalcGiveLabelOfRessource.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CalcNumberOfTriples.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CalcPercent.java
+C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CompareAdditiveRoleProperty.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CompareControlledOriginTypeProperty.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\ComparePackagingTypeProperty.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CompareProcessingDegreeProperty.java
-C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CompareRoleProperty.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\CreateEUadditivesTable.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\FileName.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\natclinn\util\FindIngredientOFFByLabel.java
@@ -33,6 +33,7 @@ C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagemen
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateMychoiceAbox.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateMychoiceProjectFromPreliminaryProject.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateMychoiceTbox.java
+C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnAdditiveRoleOntology.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnArgumentsAbox.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnClassificationAttributeOntology.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnControlledOriginTypeOntology.java
@@ -40,7 +41,6 @@ C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagemen
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnPackagingTypeOntology.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnProcessingOntology.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnProductsAbox.java
-C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnRoleOntology.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNatclinnTbox.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateNOVAmarkersOntology.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\ontologyManagement\CreateOFFCategoriesOntology.java
@@ -85,6 +85,7 @@ C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\test\OFF\GetCateg
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\test\OFF\GetCategoryHierarchy.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\test\OFF\IngredientCategoryCooccurrence.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\test\TestPrimitive.java
+C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\test\testUserGit.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\webService\FileUploadService.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\webService\NatclinnService.java
 C:\Users\conde-salazar\Documents\GitHub\Natcl-inn-Ontology\src\webService\Product.java

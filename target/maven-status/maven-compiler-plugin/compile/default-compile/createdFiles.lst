@@ -11,13 +11,17 @@ test\OFF\AnalyzeMilkInGroup4$ProductWithMilk.class
 ontologyManagement\ExtractMychoiceProjectToExcel$CriterionData.class
 test\OFF\AnalyzeSaltInGroup3.class
 natclinn\util\ComparePackagingTypeProperty.class
+natclinn\util\CompareProcessingDegreeProperty.class
 ontologyManagement\CreateNatclinnControlledOriginTypeOntology.class
 test\OFF\AnalyzeCerealInGroup1.class
+test\TestPrimitive.class
+ontologyManagement\CreateNatclinnAdditiveRoleOntology.class
 ontologyManagement\OntologyChecker.class
 ontologyManagement\ExtractNOVAmarkersFromOFF.class
 queriesForWebService\NatclinnQueryInfModel.class
 natclinn\util\NatclinnQueryOutputObject.class
 test\OFF\AnalyzeOliveOilInGroup4.class
+ontologyManagement\CreateNatclinnAdditiveRoleOntology$1.class
 ontologyManagement\ExcelMergerConfirmation.class
 queriesForWebService\NatclinnSingletonInfModel.class
 ontologyManagement\ExtractMychoiceProjectToExcel$PropertyData.class
@@ -30,6 +34,7 @@ webService\FileUploadService.class
 webServiceListener\AppContextListener.class
 ontologyManagement\ExtractOFFTaxonomy.class
 ontologyManagement\CreateNOVAmarkersOntology$1.class
+test\java\natclinn\util\TestPackagingFilter.class
 ontologyManagement\CreateMychoiceTbox.class
 test\OFF\AnalyzeEggYolkInGroup4$ProductWithEggYolk.class
 queriesForWebService\NatclinnQueryInitInfModel.class
@@ -49,13 +54,13 @@ ontologyManagement\CreateNatclinnClassificationAttributeOntology.class
 natclinn\util\CalcNumberOfTriples.class
 ontologyManagement\CreateMychoiceProjectFromPreliminaryProject.class
 ontologyManagement\ExtractMychoiceProjectToExcel$TypeSourceData.class
+natclinn\util\GetNOVAgroup$NOVAMatch.class
 natclinn\util\RUtil.class
 test\OFF\ExportLeafDropdownWorkbook$1.class
 natclinn\util\NatclinnUtil$IngredientMatch.class
 test\OFF\GetCategoryHierarchy.class
 ontologyManagement\CreateNatclinnPackagingTypeOntology$1.class
 ontologyManagement\ExcelMergerBack$1.class
-natclinn\util\CompareRoleProperty.class
 ontologyManagement\CreateNatclinnClassificationAttributeOntology$1.class
 test\OFF\AnalyzePotatoStarchInGroup4.class
 ontologyManagement\CreateNatclinnArgumentsAbox.class
@@ -66,9 +71,10 @@ ontologyManagement\CreateMychoiceAbox.class
 queriesForWebService\NatclinnQueryProducts.class
 natclinn\util\GetPackagingType.class
 natclinn\util\NatclinnUtil.class
-ontologyManagement\CreateNatclinnRoleOntology.class
 natclinn\util\GetControlledOriginType.class
 inferencesAndQueries\NatclinnQueryStatistics.class
+test\testUserGit.class
+natclinn\util\CompareAdditiveRoleProperty.class
 test\OFF\AnalyzeBeefInGroup4.class
 ontologyManagement\ExtractOFFTaxonomy$TaxonomyElement.class
 natclinn\util\CreateEUadditivesTable.class
@@ -139,4 +145,3 @@ ontologyManagement\CreateNatclinnArgumentsAbox$1.class
 ontologyManagement\CreateNatclinnProductsAbox$1.class
 ontologyManagement\CreateNatclinnProductsAbox.class
 test\OFF\IngredientCategoryCooccurrence$PairCount.class
-ontologyManagement\CreateNatclinnRoleOntology$1.class

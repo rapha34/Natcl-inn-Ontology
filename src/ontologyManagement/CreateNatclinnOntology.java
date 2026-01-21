@@ -38,12 +38,14 @@ public class CreateNatclinnOntology {
         String inputFileProductsAbox = folderForOntologies + "/NatclinnProductsAbox.xml";
         String inputFileArgumentsAbox = folderForOntologies + "/NatclinnArgumentsAbox.xml";
         String inputFileClassificationAttribute = folderForOntologies + "/NatclinnClassificationAttribute.xml";
-        String inputFileRoleAbox = folderForOntologies + "/NatclinnRoleAbox.xml";
-        String inputFilePackagingTypeAbox = folderForOntologies + "/NatclinnPackagingTypeAbox.xml";
-        String inputFileControlledOriginTypeAbox = folderForOntologies + "/NatclinnControlledOriginTypeAbox.xml";
+        // String inputFileRoleAbox = folderForOntologies + "/NatclinnAdditiveRoleAbox.xml";
+        // String inputFilePackagingTypeAbox = folderForOntologies + "/NatclinnPackagingTypeAbox.xml";
+        // String inputFileControlledOriginTypeAbox = folderForOntologies + "/NatclinnControlledOriginTypeAbox.xml";
+        // String inputFileNatclinnProcessing = folderForOntologies + "/NatclinnProcessing.xml";
         String inputFileNOVAmarkersAbox = folderForOntologies + "/NatclinnNOVAmarkers.xml";
-        String inputFileNatclinnOFFTaxonomy = folderForOntologies + "/NatclinnOFFTaxonomy.xml";
-        String inputFileNatclinnProcessing = folderForOntologies + "/NatclinnProcessing.xml";
+        String inputFileNatclinnOFFTaxonomy = folderForOntologies + "/NatclinnOFFTaxonomy.xml";    
+        String inputFileNatclinnTagAbox = folderForOntologies + "/NatclinnTagAbox.xml";
+
 
 
 
@@ -145,12 +147,14 @@ public class CreateNatclinnOntology {
             mergeOntology(om, modelTemp, inputFileProductsAbox, ncl + "NatclinnProductAbox");
             mergeOntology(om, modelTemp, inputFileArgumentsAbox, ncl + "NatclinnArgumentAbox");
             mergeOntology(om, modelTemp, inputFileClassificationAttribute, ncl + "ClassificationAttribute");
-            mergeOntology(om, modelTemp, inputFileRoleAbox, ncl + "NatclinnRoleAbox");
-            mergeOntology(om, modelTemp, inputFilePackagingTypeAbox, ncl + "NatclinnPackagingTypeAbox");
-            mergeOntology(om, modelTemp, inputFileControlledOriginTypeAbox, ncl + "NatclinnControlledOriginTypeAbox");
+            // mergeOntology(om, modelTemp, inputFileRoleAbox, ncl + "NatclinnAdditiveRoleAbox");
+            // mergeOntology(om, modelTemp, inputFilePackagingTypeAbox, ncl + "NatclinnPackagingTypeAbox");
+            // mergeOntology(om, modelTemp, inputFileControlledOriginTypeAbox, ncl + "NatclinnControlledOriginTypeAbox");
+            // mergeOntology(om, modelTemp, inputFileNatclinnProcessing, ncl + "NatclinnProcessing");
             mergeOntology(om, modelTemp, inputFileNOVAmarkersAbox, ncl + "NatclinnNOVAmarkers");
             mergeOntology(om, modelTemp, inputFileNatclinnOFFTaxonomy, ncl + "OFFTaxonomy");
-            mergeOntology(om, modelTemp, inputFileNatclinnProcessing, ncl + "NatclinnProcessing");
+            mergeOntology(om, modelTemp, inputFileNatclinnTagAbox, ncl + "NatclinnTagAbox");
+            
         } catch (IOException e) {
             System.err.println("Erreur lors de la fusion des fichiers : " + e.getMessage());
         }

@@ -100,6 +100,7 @@ public class CreateNatclinnArgumentsAbox {
 		/////////////////////////////////////
 		Resource ProductArgument = om.createResource(ncl + "ProductArgument");
 		Resource Attribute = om.createResource(ncl + "Attribute");
+		// V5: Suppression de la classe Verbatim (remplacée par la dataProperty ncl:verbatim)
 		Resource Source = om.createResource(ncl + "Source");
 		Resource TypeSource = om.createResource(ncl + "TypeSource");
 		Resource Stakeholder = om.createResource(ncl + "Stakeholder");
@@ -113,6 +114,7 @@ public class CreateNatclinnArgumentsAbox {
 		// Propriétés de données pour les arguments
 		AnnotationProperty prefLabel = om.createAnnotationProperty(skos + "prefLabel");
 		Property rdfType = om.createProperty(rdf, "type");
+		// V5: Suppression de l'objectProperty ncl:hasVerbatim; on conserve hasVerbatimKeyWord pour les contextes
 		Property hasVerbatimKeyWord = om.createProperty(ncl, "hasVerbatimKeyWord");
 		
 		ObjectProperty hasStakeholder = om.createObjectProperty(ncl + "hasStakeholder");
@@ -149,12 +151,25 @@ public class CreateNatclinnArgumentsAbox {
 		Property hasCategoryOFF = om.createProperty(ncl, "hasCategoryOFF");
 		Property hasSubCategoryOFF = om.createProperty(ncl, "hasSubCategoryOFF");
 		Property hasLabelsAndCertifications = om.createProperty(ncl, "hasLabelsAndCertifications");
+		
+		// Propriétés de données pour Argument
+		DatatypeProperty assertion = om.createDatatypeProperty(ncl + "assertion");
+		DatatypeProperty polarity = om.createDatatypeProperty(ncl + "polarity");
+		DatatypeProperty nameCriterion = om.createDatatypeProperty(ncl + "nameCriterion");
+		DatatypeProperty aim = om.createDatatypeProperty(ncl + "aim");
+		DatatypeProperty nameProperty = om.createDatatypeProperty(ncl + "nameProperty");
+		DatatypeProperty valueProperty = om.createDatatypeProperty(ncl + "valueProperty");
+		DatatypeProperty condition = om.createDatatypeProperty(ncl + "condition");
+		DatatypeProperty infValue = om.createDatatypeProperty(ncl + "infValue");
+		DatatypeProperty supValue = om.createDatatypeProperty(ncl + "supValue");
+		DatatypeProperty unit = om.createDatatypeProperty(ncl + "unit");
+		
+		// V5: Nouvelle dataProperty directement sur ProductArgument
 		DatatypeProperty verbatim = om.createDatatypeProperty(ncl + "verbatim");
 		
 	// Propriété pour TypeSource (nouvelle TBox)
 	DatatypeProperty fiability = om.createDatatypeProperty(ncl + "fiability");
-	DatatypeProperty date = om.createDatatypeProperty(ncl + "date");
-	AnnotationProperty comment = om.createAnnotationProperty(rdfs + "comment");
+		AnnotationProperty comment = om.createAnnotationProperty(rdfs + "comment");
 
 		//////////////////////////////
 		// Définition des individus //
@@ -223,15 +238,11 @@ public class CreateNatclinnArgumentsAbox {
 						String idSource = getCellValue(row.getCell(0));
 						String nomSource = getCellValue(row.getCell(1));
 						String idTypeSource = getCellValue(row.getCell(2));
-						String dateSource = getCellValue(row.getCell(3));
 						
 						if (idSource != null && !idSource.isEmpty()) {
 							Resource source = om.createResource(ncl + idSource)
 								.addProperty(rdfType, Source)
 								.addProperty(prefLabel, nomSource != null ? nomSource : idSource);
-							if (dateSource != null && !dateSource.isEmpty()) {
-								source.addLiteral(date, dateSource);
-							}
 							// Lien vers le TypeSource si présent
 							if (idTypeSource != null && !idTypeSource.isEmpty() && typeSources.containsKey(idTypeSource)) {
 								source.addProperty(hasTypeSource, typeSources.get(idTypeSource));
@@ -348,8 +359,18 @@ public class CreateNatclinnArgumentsAbox {
 						String attribut = getCellValue(row.getCell(1));
 						String description = getCellValue(row.getCell(2));
 						String verbatimText = getCellValue(row.getCell(3));
-						String idSource = getCellValue(row.getCell(4));
-						String idStakeholder = getCellValue(row.getCell(5));
+						String assertionText = getCellValue(row.getCell(4));
+						String polarite = getCellValue(row.getCell(5));
+						String nomCritere = getCellValue(row.getCell(6));
+						String but = getCellValue(row.getCell(7));
+						String propriete = getCellValue(row.getCell(8));
+						String valeurPropriete = getCellValue(row.getCell(9));
+						String conditionPropriete = getCellValue(row.getCell(10));
+						String valeurInferieure = getCellValue(row.getCell(11));
+						String valeurSuperieure = getCellValue(row.getCell(12));
+						String unitePropriete = getCellValue(row.getCell(13));
+						String idSource = getCellValue(row.getCell(14));
+						String idStakeholder = getCellValue(row.getCell(15));
 						
 						if (idArgument != null && !idArgument.isEmpty()) {
 							// Créer l'argument
@@ -377,6 +398,46 @@ public class CreateNatclinnArgumentsAbox {
 							// V5: Verbatim devient une dataProperty sur ProductArgument
 							if (verbatimText != null && !verbatimText.isEmpty()) {
 								argument.addLiteral(verbatim, verbatimText);
+							}
+							
+							// Propriétés de données
+							if (assertionText != null && !assertionText.isEmpty()) {
+								argument.addLiteral(assertion, assertionText);
+							}
+							if (polarite != null && !polarite.isEmpty()) {
+								argument.addLiteral(polarity, polarite);
+							}
+							if (nomCritere != null && !nomCritere.isEmpty()) {
+								argument.addLiteral(nameCriterion, nomCritere);
+							}
+							if (but != null && !but.isEmpty()) {
+								argument.addLiteral(aim, but);
+							}
+							if (propriete != null && !propriete.isEmpty()) {
+								argument.addLiteral(nameProperty, propriete);
+							}
+							if (valeurPropriete != null && !valeurPropriete.isEmpty()) {
+								argument.addLiteral(valueProperty, valeurPropriete);
+							}
+							if (conditionPropriete != null && !conditionPropriete.isEmpty()) {
+								argument.addLiteral(condition, conditionPropriete);
+							}
+							if (valeurInferieure != null && !valeurInferieure.isEmpty()) {
+								try {
+									argument.addLiteral(infValue, Double.parseDouble(valeurInferieure));
+								} catch (NumberFormatException e) {
+									argument.addLiteral(infValue, valeurInferieure);
+								}
+							}
+							if (valeurSuperieure != null && !valeurSuperieure.isEmpty()) {
+								try {
+									argument.addLiteral(supValue, Double.parseDouble(valeurSuperieure));
+								} catch (NumberFormatException e) {
+									argument.addLiteral(supValue, valeurSuperieure);
+								}
+							}
+							if (unitePropriete != null && !unitePropriete.isEmpty()) {
+								argument.addLiteral(unit, unitePropriete);
 							}
 							
 							// Source

@@ -174,6 +174,7 @@ public class GetIngredientRole extends BaseBuiltin {
         COMMON_INGREDIENTS.put("acide malique", "acidifiant");
         COMMON_INGREDIENTS.put("acide tartrique", "acidifiant");
         COMMON_INGREDIENTS.put("bicarbonate de sodium", "regulateur_acidite");
+        COMMON_INGREDIENTS.put("carbonate de sodium", "regulateur_acidite");
         COMMON_INGREDIENTS.put("citrate de sodium", "regulateur_acidite");
 
         // Anti-agglomérants
@@ -193,6 +194,17 @@ public class GetIngredientRole extends BaseBuiltin {
         COMMON_INGREDIENTS.put("poudre à lever", "agent_levant");
         COMMON_INGREDIENTS.put("bicarbonate de soude", "agent_levant");
         COMMON_INGREDIENTS.put("pyrophosphate", "agent_levant");
+
+        // Pas de doublons possible pour l'instant 
+        // // stabilisants
+        // COMMON_INGREDIENTS.put("glycérol", "stabilisant");
+        // COMMON_INGREDIENTS.put("glycerol", "stabilisant"); // variante sans accent
+        // COMMON_INGREDIENTS.put("sirop de glucose", "stabilisant");
+
+        // // poudres à lever
+        // COMMON_INGREDIENTS.put("carbonate de sodium", "poudres_a_lever");
+        // COMMON_INGREDIENTS.put("citrate de sodium", "poudres_a_lever");
+
     }
     
     @Override

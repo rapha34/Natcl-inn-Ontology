@@ -1,0 +1,165 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.2.9 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.2.9">
+  <diagram name="Instanciation LinkToArgument" id="instantiation-link-to-argument">
+    <mxGraphModel dx="1426" dy="912" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- Métadonnées du diagramme -->
+        <mxCell id="meta-creator" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;labelBackgroundColor=none;strokeColor=#0F8B8D;fontSize=12;fontColor=#143642;size=0.23333333333333334;fillColor=#FAE5C7;" value="&lt;div&gt;&lt;b&gt;dc:creator:&lt;/b&gt; Raphaël CONDE SALAZAR&lt;/div&gt;&lt;div&gt;&lt;b&gt;dc:title:&lt;/b&gt; Instanciation LinkToArgument&lt;/div&gt;&lt;div&gt;&lt;b&gt;dc:description:&lt;/b&gt; Exemple d'instanciation du pattern de liaison Product-Argument&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="280" x="10" y="10" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="meta-namespace" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;labelBackgroundColor=none;fillColor=#FAE5C7;strokeColor=#0F8B8D;fontColor=#143642;" value="&lt;div&gt;&lt;b&gt;base:&lt;/b&gt; https://w3id.org/NCL/ontology/&lt;/div&gt;&lt;div&gt;&lt;b&gt;Légende:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;• Classes en majuscule&lt;/div&gt;&lt;div&gt;• Instances en minuscule (préfixe ex:)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="90" width="300" x="850" y="10" as="geometry" />
+        </mxCell>
+
+        <!-- NIVEAU 1: CLASSES (en haut pour référence) -->
+        <mxCell id="class-product" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#E8DCC0;dashed=1;" value="&lt;b&gt;&lt;&lt;Class&gt;&gt;&lt;/b&gt;&lt;br&gt;Product" vertex="1">
+          <mxGeometry height="50" width="140" x="80" y="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="class-tag" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#E8DCC0;dashed=1;" value="&lt;b&gt;&lt;&lt;Class&gt;&gt;&lt;/b&gt;&lt;br&gt;Tag" vertex="1">
+          <mxGeometry height="50" width="120" x="280" y="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="class-linktoargument" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#E8DCC0;dashed=1;" value="&lt;b&gt;&lt;&lt;Class&gt;&gt;&lt;/b&gt;&lt;br&gt;LinkToArgument" vertex="1">
+          <mxGeometry height="50" width="150" x="460" y="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="class-productargument" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#E8DCC0;dashed=1;" value="&lt;b&gt;&lt;&lt;Class&gt;&gt;&lt;/b&gt;&lt;br&gt;ProductArgument" vertex="1">
+          <mxGeometry height="50" width="150" x="670" y="120" as="geometry" />
+        </mxCell>
+
+        <!-- NIVEAU 2: INSTANCES DE PRODUCT -->
+        <mxCell id="inst-product" parent="1" style="rounded=0;whiteSpace=wrap;html=1;snapToPoint=1;points=[[0.1,0],[0.2,0],[0.3,0],[0.4,0],[0.5,0],[0.6,0],[0.7,0],[0.8,0],[0.9,0],[0,0.1],[0,0.3],[0,0.5],[0,0.7],[0,0.9],[0.1,1],[0.2,1],[0.3,1],[0.4,1],[0.5,1],[0.6,1],[0.7,1],[0.8,1],[0.9,1],[1,0.1],[1,0.3],[1,0.5],[1,0.7],[1,0.9]];strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;fontStyle=0" value="&lt;b&gt;ex:Product_12345&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;(Biscuits bio)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="160" x="70" y="250" as="geometry" />
+        </mxCell>
+
+        <!-- Propriétés du Product -->
+        <mxCell id="inst-product-props" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;align=left;verticalAlign=top;fontSize=9;" value="&lt;div&gt;• identifier: &quot;12345&quot;&lt;/div&gt;&lt;div&gt;• skos:prefLabel: &quot;Biscuits bio&quot;&lt;/div&gt;&lt;div&gt;• hasTag: ex:Tag_sans_plastique&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="200" x="50" y="330" as="geometry" />
+        </mxCell>
+
+        <!-- NIVEAU 3: INSTANCE DE TAG -->
+        <mxCell id="inst-tag" parent="1" style="rounded=0;whiteSpace=wrap;html=1;snapToPoint=1;points=[[0.1,0],[0.2,0],[0.3,0],[0.4,0],[0.5,0],[0.6,0],[0.7,0],[0.8,0],[0.9,0],[0,0.1],[0,0.3],[0,0.5],[0,0.7],[0,0.9],[0.1,1],[0.2,1],[0.3,1],[0.4,1],[0.5,1],[0.6,1],[0.7,1],[0.8,1],[0.9,1],[1,0.1],[1,0.3],[1,0.5],[1,0.7],[1,0.9]];strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;b&gt;ex:Tag_sans_plastique&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="310" y="255" as="geometry" />
+        </mxCell>
+
+        <mxCell id="inst-tag-props" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;align=left;verticalAlign=top;fontSize=9;" value="&lt;div&gt;• skos:prefLabel: &quot;sans plastique&quot;&lt;/div&gt;&lt;div&gt;• rdf:type: ncl:Tag&lt;/div&gt;" vertex="1">
+          <mxGeometry height="50" width="180" x="310" y="330" as="geometry" />
+        </mxCell>
+
+        <!-- NIVEAU 4: INSTANCE DE LINKTOARGUMENT (centre) -->
+        <mxCell id="inst-link" parent="1" style="rounded=0;whiteSpace=wrap;html=1;snapToPoint=1;points=[[0.1,0],[0.2,0],[0.3,0],[0.4,0],[0.5,0],[0.6,0],[0.7,0],[0.8,0],[0.9,0],[0,0.1],[0,0.3],[0,0.5],[0,0.7],[0,0.9],[0.1,1],[0.2,1],[0.3,1],[0.4,1],[0.5,1],[0.6,1],[0.7,1],[0.8,1],[0.9,1],[1,0.1],[1,0.3],[1,0.5],[1,0.7],[1,0.9]];strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;fontStyle=1" value="&lt;b&gt;ex:LinkToArgument_&lt;br&gt;sans_plastique_987654&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="220" x="390" y="480" as="geometry" />
+        </mxCell>
+
+        <mxCell id="inst-link-props" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;align=left;verticalAlign=top;fontSize=9;" value="&lt;div&gt;• rdf:type: ncl:LinkToArgument&lt;/div&gt;&lt;div&gt;• hasTagInitiator: ex:Tag_sans_plastique&lt;/div&gt;&lt;div&gt;• hasReferenceProductArgument: ex:Arg_123&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="280" x="360" y="560" as="geometry" />
+        </mxCell>
+
+        <!-- NIVEAU 5: INSTANCE DE PRODUCTARGUMENT -->
+        <mxCell id="inst-argument" parent="1" style="rounded=0;whiteSpace=wrap;html=1;snapToPoint=1;points=[[0.1,0],[0.2,0],[0.3,0],[0.4,0],[0.5,0],[0.6,0],[0.7,0],[0.8,0],[0.9,0],[0,0.1],[0,0.3],[0,0.5],[0,0.7],[0,0.9],[0.1,1],[0.2,1],[0.3,1],[0.4,1],[0.5,1],[0.6,1],[0.7,1],[0.8,1],[0.9,1],[1,0.1],[1,0.3],[1,0.5],[1,0.7],[1,0.9]];strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;b&gt;ex:ProductArgument_123&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;(Argument consommateur)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="200" x="750" y="480" as="geometry" />
+        </mxCell>
+
+        <mxCell id="inst-argument-props" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;align=left;verticalAlign=top;fontSize=9;" value="&lt;div&gt;• skos:prefLabel: &quot;Moins de déchets plastiques&quot;&lt;/div&gt;&lt;div&gt;• verbatim: &quot;J'apprécie les emballages sans plastique car...&quot;&lt;/div&gt;&lt;div&gt;• hasAttribut: ex:Attr_Environnement&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="250" x="725" y="560" as="geometry" />
+        </mxCell>
+
+        <!-- TagArgumentBinding (métadonnées de matching) -->
+        <mxCell id="inst-binding" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;b&gt;ex:Binding_sans_plastique&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 10px;&quot;&gt;(TagArgumentBinding)&lt;/font&gt;" vertex="1">
+          <mxGeometry height="60" width="200" x="550" y="255" as="geometry" />
+        </mxCell>
+
+        <mxCell id="inst-binding-props" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;align=left;verticalAlign=top;fontSize=9;" value="&lt;div&gt;• aboutTag: ex:Tag_sans_plastique&lt;/div&gt;&lt;div&gt;• tagBindingKeywords: &quot;plastique, emballage, déchet, environnement&quot;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="250" x="525" y="330" as="geometry" />
+        </mxCell>
+
+        <!-- RELATIONS -->
+        
+        <!-- Product hasTag Tag -->
+        <mxCell id="rel-product-tag" edge="1" parent="1" source="inst-product" target="inst-tag" style="endArrow=classic;html=1;endSize=8;arcSize=0;rounded=0;strokeColor=#A8201A;fontColor=#143642;fillColor=#FAE5C7;">
+          <mxGeometry relative="1" width="50" height="50" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel-product-tag-label" connectable="0" parent="rel-product-tag" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;" value="hasTag" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint x="5" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Product hasLinkToArgument LinkToArgument -->
+        <mxCell id="rel-product-link" edge="1" parent="1" source="inst-product" target="inst-link" style="endArrow=classic;html=1;endSize=8;arcSize=0;rounded=0;strokeColor=#A8201A;fontColor=#143642;fillColor=#FAE5C7;exitX=0.9;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.3;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" width="50" height="50" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel-product-link-label" connectable="0" parent="rel-product-link" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;" value="hasLinkToArgument" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint x="30" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- LinkToArgument hasTagInitiator Tag -->
+        <mxCell id="rel-link-tag" edge="1" parent="1" source="inst-link" target="inst-tag" style="endArrow=classic;html=1;endSize=8;arcSize=0;rounded=0;strokeColor=#A8201A;fontColor=#143642;fillColor=#FAE5C7;exitX=0.3;exitY=0;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" width="50" height="50" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel-link-tag-label" connectable="0" parent="rel-link-tag" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;" value="hasTagInitiator" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint x="-30" y="-5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- LinkToArgument hasReferenceProductArgument ProductArgument -->
+        <mxCell id="rel-link-argument" edge="1" parent="1" source="inst-link" target="inst-argument" style="endArrow=classic;html=1;endSize=8;arcSize=0;rounded=0;strokeColor=#A8201A;fontColor=#143642;fillColor=#FAE5C7;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" width="50" height="50" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel-link-argument-label" connectable="0" parent="rel-link-argument" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=10;" value="hasReferenceProductArgument" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint x="10" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Binding aboutTag Tag -->
+        <mxCell id="rel-binding-tag" edge="1" parent="1" source="inst-binding" target="inst-tag" style="endArrow=classic;html=1;endSize=8;arcSize=0;rounded=0;strokeColor=#A8201A;fontColor=#143642;fillColor=#FAE5C7;dashed=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" width="50" height="50" as="geometry">
+            <mxPoint x="400" y="400" as="sourcePoint" />
+            <mxPoint x="450" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rel-binding-tag-label" connectable="0" parent="rel-binding-tag" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=10;" value="aboutTag" vertex="1">
+          <mxGeometry relative="1" x="-0.1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Annotation: Processus de scoring -->
+        <mxCell id="annotation-scoring" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#FFF4E6;strokeColor=#A8201A;fontColor=#143642;align=left;verticalAlign=top;fontSize=10;" value="&lt;b&gt;Processus de scoring :&lt;/b&gt;&lt;br&gt;1. Extraction keywords du Binding&lt;br&gt;2. Matching avec ProductArgument&lt;br&gt;3. Calcul du score (0.47 seuil)&lt;br&gt;4. Création LinkToArgument si score ≥ seuil" vertex="1">
+          <mxGeometry height="110" width="240" x="60" y="450" as="geometry" />
+        </mxCell>
+
+        <!-- Légende des types de relations -->
+        <mxCell id="legend" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;align=left;verticalAlign=top;fontSize=10;" value="&lt;b&gt;Légende relations :&lt;/b&gt;&lt;br&gt;━━━ Relations structurelles&lt;br&gt;- - - Relations de métadonnées" vertex="1">
+          <mxGeometry height="70" width="200" x="60" y="590" as="geometry" />
+        </mxCell>
+
+        <!-- Code Java référencé -->
+        <mxCell id="code-reference" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;fillColor=#E8F5E9;strokeColor=#0F8B8D;fontColor=#143642;align=left;verticalAlign=top;fontSize=9;" value="&lt;b&gt;Généré par :&lt;/b&gt;&lt;br&gt;CreateLinkProductToArgument.java&lt;br&gt;Ligne 631 : génération ID unique&lt;br&gt;&lt;code&gt;linkId = &quot;LinkToArgument_&quot; + tagLabel + &quot;_&quot; + Math.abs((productNode + argumentNode).hashCode())&lt;/code&gt;" vertex="1">
+          <mxGeometry height="90" width="300" x="850" y="120" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

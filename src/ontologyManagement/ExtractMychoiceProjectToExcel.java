@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.jena.base.Sys;
 import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 
@@ -241,7 +242,11 @@ public class ExtractMychoiceProjectToExcel {
         Resource sourceRes = getObjectProperty(om, argRes, mch + "hasSource");
         if (sourceRes != null) {
             data.source = extractSource(om, sourceRes, mch);
-            
+            // Date liée à la source
+            String dateSource = getStringProperty(om, sourceRes, mch + "date");
+            if (!dateSource.isEmpty()) {
+                data.date = dateSource;
+            }
             // TypeSource lié à la source
             Resource typeSourceRes = getObjectProperty(om, sourceRes, mch + "hasTypeSource");
             if (typeSourceRes != null) {
@@ -255,7 +260,7 @@ public class ExtractMychoiceProjectToExcel {
     private static StakeholderData extractStakeholder(Model om, Resource shRes, String mch) {
         StakeholderData data = new StakeholderData();
         data.uri = shRes.getURI();
-        data.name = getStringProperty(om, shRes, mch + "nameStakeholder");
+        data.name = getStringProperty(om, shRes, mch + "stakeholderName");
         return data;
     }
     
@@ -276,16 +281,17 @@ public class ExtractMychoiceProjectToExcel {
     private static SourceData extractSource(Model om, Resource srcRes, String mch) {
         SourceData data = new SourceData();
         data.uri = srcRes.getURI();
-        data.name = getStringProperty(om, srcRes, mch + "nameSource");
+        data.name = getStringProperty(om, srcRes, mch + "sourceName");
+        data.date = getStringProperty(om, srcRes, mch + "date");
         return data;
     }
     
     private static TypeSourceData extractTypeSource(Model om, Resource tsRes, String mch) {
         TypeSourceData data = new TypeSourceData();
         data.uri = tsRes.getURI();
-        // TypeSource : récupérer nameTypeSource (pas de prefLabel nécessaire)
-        data.name = getStringProperty(om, tsRes, mch + "nameTypeSource");
-        data.fiability = getStringProperty(om, tsRes, mch + "fiability");
+        // TypeSource : récupérer typeSourceName (pas de prefLabel nécessaire)
+        data.name = getStringProperty(om, tsRes, mch + "typeSourceName");
+        data.fiability = getStringProperty(om, tsRes, mch + "typeSourceFiability");
         return data;
     }
     
@@ -342,7 +348,7 @@ public class ExtractMychoiceProjectToExcel {
         row.createCell(12).setCellValue(arg.assertion);
         row.createCell(13).setCellValue(arg.explanation);
         row.createCell(14).setCellValue(arg.isProspective);
-        row.createCell(15).setCellValue(arg.date);
+        row.createCell(15).setCellValue(arg.source != null ? arg.source.date : "");
         row.createCell(16).setCellValue(arg.source != null ? arg.source.name : "");
         row.createCell(17).setCellValue(arg.typeSource != null ? arg.typeSource.name : "");
     }
@@ -382,13 +388,14 @@ public class ExtractMychoiceProjectToExcel {
             headerRow.createCell(17).setCellValue("nameTypeSource");
 
             int rowIdx = 1;
+            int idCounter = 1; // Compteur global, s'incrémente à chaque ligne écrite
             for (ArgumentData arg : arguments) {
                 // Si l'argument a plusieurs alternatives, créer une ligne par alternative
                 // Sinon créer une seule ligne (même si liste vide)
                 if (arg.nameAlternatives.isEmpty()) {
                     // Pas d'alternative liée
                     Row row = argSheet.createRow(rowIdx++);
-                    row.createCell(0).setCellValue(arg.idArgument);
+                    row.createCell(0).setCellValue(idCounter++);
                     row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
                     row.createCell(2).setCellValue("");
                     row.createCell(3).setCellValue(arg.typeProCon);
@@ -397,7 +404,7 @@ public class ExtractMychoiceProjectToExcel {
                     // Une ligne par alternative
                     for (String altName : arg.nameAlternatives) {
                         Row row = argSheet.createRow(rowIdx++);
-                        row.createCell(0).setCellValue(arg.idArgument);
+                        row.createCell(0).setCellValue(idCounter++);
                         row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
                         row.createCell(2).setCellValue(altName);
                         row.createCell(3).setCellValue(arg.typeProCon);
@@ -582,7 +589,7 @@ public class ExtractMychoiceProjectToExcel {
     }
     
     static class SourceData {
-        String uri, name;
+        String uri, name, date;
         @Override
         public int hashCode() { return uri != null ? uri.hashCode() : 0; }
         @Override
