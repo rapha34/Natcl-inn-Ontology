@@ -90,6 +90,8 @@ public class ExtractMychoiceProjectToExcel {
         Set<SourceData> sources = new HashSet<>();
         Set<TypeSourceData> typeSources = new HashSet<>();
         Set<HasExpertiseData> hasExpertises = new HashSet<>();
+        Set<ProductData> products = new HashSet<>();
+        Set<IngredientData> ingredients = new HashSet<>();
         
         // Extraire les données du projet
         ProjectData projData = extractProject(om, projectRes, mch);
@@ -97,12 +99,112 @@ public class ExtractMychoiceProjectToExcel {
         
         // Récupérer toutes les alternatives liées au projet (Alternative -> hasProject -> Project)
         Property hasProject = om.getProperty(mch + "hasProject");
+        Property relatedToProduct = om.getProperty(mch + "relatedToProduct");
+        String ncl = "https://w3id.org/NCL/ontology/";
+        String skos = "http://www.w3.org/2004/02/skos/core#";
+        Property hasTag = om.getProperty(ncl + "hasTag");
+        Property hasTagCheck = om.getProperty(ncl + "hasTagCheck");
+        Property hasRole = om.getProperty(ncl + "hasRole");
+        Property hasIngredient = om.getProperty(ncl + "hasIngredient");
+        Property hasIngredientR = om.getProperty(ncl + "hasIngredientR");
+        Property prefLabel = om.getProperty(skos + "prefLabel");
+        
         StmtIterator altIter = om.listStatements(null, hasProject, projectRes);
         while (altIter.hasNext()) {
             Statement stmt = altIter.nextStatement();
             Resource altRes = stmt.getSubject();
             AlternativeData altData = extractAlternative(om, altRes, mch);
             alternatives.put(altRes.getURI(), altData);
+            
+            // Extraire les produits et tags liés à cette alternative
+            if (om.contains(altRes, relatedToProduct, (RDFNode)null)) {
+                Resource productRes = getObjectProperty(om, altRes, mch + "relatedToProduct");
+                if (productRes != null) {
+                    String productUri = productRes.getURI();
+                    String productName = "";
+                    if (om.contains(productRes, prefLabel, (RDFNode)null)) {
+                        productName = om.getProperty(productRes, prefLabel).getString();
+                    }
+                    
+                    // Récupérer tous les tags du produit (hasTag et hasTagCheck)
+                    StmtIterator tagIter = om.listStatements(productRes, hasTag, (RDFNode)null);
+                    while (tagIter.hasNext()) {
+                        Statement tagStmt = tagIter.nextStatement();
+                        if (tagStmt.getObject().isResource()) {
+                            Resource tagRes = tagStmt.getResource();
+                            String tagLabel = "";
+                            if (om.contains(tagRes, prefLabel, (RDFNode)null)) {
+                                tagLabel = om.getProperty(tagRes, prefLabel).getString();
+                            }
+                            
+                            ProductData prodData = new ProductData();
+                            prodData.nameAlternative = altData.name;
+                            prodData.productUri = productUri;
+                            prodData.nameProduct = productName;
+                            prodData.tagProduct = tagLabel;
+                            products.add(prodData);
+                        }
+                    }
+                    
+                    // Récupérer aussi les tags via hasTagCheck
+                    StmtIterator tagCheckIter = om.listStatements(productRes, hasTagCheck, (RDFNode)null);
+                    while (tagCheckIter.hasNext()) {
+                        Statement tagStmt = tagCheckIter.nextStatement();
+                        if (tagStmt.getObject().isResource()) {
+                            Resource tagRes = tagStmt.getResource();
+                            String tagLabel = "";
+                            if (om.contains(tagRes, prefLabel, (RDFNode)null)) {
+                                tagLabel = om.getProperty(tagRes, prefLabel).getString();
+                            }
+                            
+                            ProductData prodData = new ProductData();
+                            prodData.nameAlternative = altData.name;
+                            prodData.productUri = productUri;
+                            prodData.nameProduct = productName;
+                            prodData.tagProduct = tagLabel;
+                            products.add(prodData);
+                        }
+                    }
+                    
+                    // Récupérer tous les ingrédients du produit (hasIngredient ou hasIngredientR)
+                    StmtIterator ingredientIter = om.listStatements(productRes, hasIngredient, (RDFNode)null);
+                    if (!ingredientIter.hasNext()) {
+                        ingredientIter = om.listStatements(productRes, hasIngredientR, (RDFNode)null);
+                    }
+                    
+                    while (ingredientIter.hasNext()) {
+                        Statement ingredientStmt = ingredientIter.nextStatement();
+                        if (ingredientStmt.getObject().isResource()) {
+                            Resource ingredientRes = ingredientStmt.getResource();
+                            String ingredientUri = ingredientRes.getURI();
+                            String ingredientName = "";
+                            if (om.contains(ingredientRes, prefLabel, (RDFNode)null)) {
+                                ingredientName = om.getProperty(ingredientRes, prefLabel).getString();
+                            }
+                            
+                            // Récupérer tous les tags de l'ingrédient via hasRole
+                            StmtIterator ingredientTagIter = om.listStatements(ingredientRes, hasRole, (RDFNode)null);
+                            while (ingredientTagIter.hasNext()) {
+                                Statement ingredientTagStmt = ingredientTagIter.nextStatement();
+                                if (ingredientTagStmt.getObject().isResource()) {
+                                    Resource ingredientTagRes = ingredientTagStmt.getResource();
+                                    String ingredientTagLabel = "";
+                                    if (om.contains(ingredientTagRes, prefLabel, (RDFNode)null)) {
+                                        ingredientTagLabel = om.getProperty(ingredientTagRes, prefLabel).getString();
+                                    }
+                                    
+                                    IngredientData ingredData = new IngredientData();
+                                    ingredData.productUri = productUri;
+                                    ingredData.ingredientUri = ingredientUri;
+                                    ingredData.nameIngredient = ingredientName;
+                                    ingredData.tagIngredient = ingredientTagLabel;
+                                    ingredients.add(ingredData);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
         
         // Récupérer tous les arguments liés au projet (Argument -> belongsToProject -> Project)
@@ -140,7 +242,8 @@ public class ExtractMychoiceProjectToExcel {
                      new ArrayList<>(arguments.values()), new ArrayList<>(stakeholders),
                      new ArrayList<>(criteria), new ArrayList<>(properties),
                      new ArrayList<>(sources), new ArrayList<>(typeSources),
-                     new ArrayList<>(hasExpertises));
+                     new ArrayList<>(hasExpertises), new ArrayList<>(products),
+                     new ArrayList<>(ingredients));
     }
     
     private static ProjectData extractProject(Model om, Resource projRes, String mch) {
@@ -189,6 +292,7 @@ public class ExtractMychoiceProjectToExcel {
         data.unit = getStringProperty(om, argRes, mch + "unit");
         data.isProspective = getStringProperty(om, argRes, mch + "isProspective");
         data.date = getStringProperty(om, argRes, mch + "evaluationDate");
+        data.tagInitiator = getStringProperty(om, argRes, mch + "tagInitiator");
         
         // Relations
         Resource stakeholderRes = getObjectProperty(om, argRes, mch + "hasStakeholder");
@@ -333,7 +437,7 @@ public class ExtractMychoiceProjectToExcel {
     private static void fillArgumentRow(Row row, ArgumentData arg) {
         // nameCriterion : priorité à la string directe, sinon nom du Criterion objet
         String nameCriterion = !arg.nameCriterionStr.isEmpty() ? arg.nameCriterionStr : 
-                               (arg.criterion != null ? arg.criterion.name : "");
+                       (arg.criterion != null ? arg.criterion.name : "");
         row.createCell(4).setCellValue(nameCriterion);
         row.createCell(5).setCellValue(arg.aim);
         // nameProperty : priorité à la string directe, sinon nom du Property objet
@@ -361,7 +465,9 @@ public class ExtractMychoiceProjectToExcel {
                                      List<PropertyData> properties,
                                      List<SourceData> sources,
                                      List<TypeSourceData> typeSources,
-                                     List<HasExpertiseData> hasExpertises) throws IOException {
+                                     List<HasExpertiseData> hasExpertises,
+                                     List<ProductData> products,
+                                     List<IngredientData> ingredients) throws IOException {
         
         try (Workbook workbook = new XSSFWorkbook()) {
 
@@ -386,6 +492,7 @@ public class ExtractMychoiceProjectToExcel {
             headerRow.createCell(15).setCellValue("date");
             headerRow.createCell(16).setCellValue("nameSource");
             headerRow.createCell(17).setCellValue("nameTypeSource");
+            headerRow.createCell(18).setCellValue("tagInitiator");
 
             int rowIdx = 1;
             int idCounter = 1; // Compteur global, s'incrémente à chaque ligne écrite
@@ -399,6 +506,7 @@ public class ExtractMychoiceProjectToExcel {
                     row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
                     row.createCell(2).setCellValue("");
                     row.createCell(3).setCellValue(arg.typeProCon);
+                     row.createCell(18).setCellValue(arg.tagInitiator);
                     fillArgumentRow(row, arg);
                 } else {
                     // Une ligne par alternative
@@ -408,6 +516,7 @@ public class ExtractMychoiceProjectToExcel {
                         row.createCell(1).setCellValue(arg.stakeholder != null ? arg.stakeholder.name : "");
                         row.createCell(2).setCellValue(altName);
                         row.createCell(3).setCellValue(arg.typeProCon);
+                        row.createCell(18).setCellValue(arg.tagInitiator);
                         fillArgumentRow(row, arg);
                     }
                 }
@@ -485,12 +594,48 @@ public class ExtractMychoiceProjectToExcel {
                 row.createCell(1).setCellValue(he.criterion != null ? he.criterion.name : "");
             }
 
-            // Assurer l'ordre final des onglets (argument, project, alternative, typesource, hasexpertise)
+            // Feuille Product
+            Sheet productSheet = workbook.createSheet("product");
+            headerRow = productSheet.createRow(0);
+            headerRow.createCell(0).setCellValue("nameAlternative");
+            headerRow.createCell(1).setCellValue("productUri");
+            headerRow.createCell(2).setCellValue("nameProduct");
+            headerRow.createCell(3).setCellValue("tagProduct");
+
+            rowIdx = 1;
+            for (ProductData prod : products) {
+                Row row = productSheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(prod.nameAlternative);
+                row.createCell(1).setCellValue(prod.productUri);
+                row.createCell(2).setCellValue(prod.nameProduct);
+                row.createCell(3).setCellValue(prod.tagProduct);
+            }
+
+            // Feuille Ingredient
+            Sheet ingredientSheet = workbook.createSheet("ingredient");
+            headerRow = ingredientSheet.createRow(0);
+            headerRow.createCell(0).setCellValue("productUri");
+            headerRow.createCell(1).setCellValue("ingredientUri");
+            headerRow.createCell(2).setCellValue("nameIngredient");
+            headerRow.createCell(3).setCellValue("tagIngredient");
+
+            rowIdx = 1;
+            for (IngredientData ingred : ingredients) {
+                Row row = ingredientSheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(ingred.productUri);
+                row.createCell(1).setCellValue(ingred.ingredientUri);
+                row.createCell(2).setCellValue(ingred.nameIngredient);
+                row.createCell(3).setCellValue(ingred.tagIngredient);
+            }
+
+            // Assurer l'ordre final des onglets (argument, project, alternative, typesource, hasexpertise, product, ingredient)
             workbook.setSheetOrder("argument", 0);
             workbook.setSheetOrder("project", 1);
             workbook.setSheetOrder("alternative", 2);
             workbook.setSheetOrder("typesource", 3);
             workbook.setSheetOrder("hasexpertise", 4);
+            workbook.setSheetOrder("product", 5);
+            workbook.setSheetOrder("ingredient", 6);
 
             // Auto-ajuster la largeur des colonnes pour toutes les feuilles
             autoSizeColumns(argSheet);
@@ -498,6 +643,8 @@ public class ExtractMychoiceProjectToExcel {
             autoSizeColumns(altSheet);
             autoSizeColumns(tsSheet);
             autoSizeColumns(heSheet);
+            autoSizeColumns(productSheet);
+            autoSizeColumns(ingredientSheet);
 
             // Écrire le fichier
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
@@ -544,6 +691,7 @@ public class ExtractMychoiceProjectToExcel {
         String idArgument = "", typeProCon = "", value = "", condition = "";
         String infValue = "", supValue = "", unit = "", assertion = "", explanation = "";
         String isProspective = "", date = "", aim = "";
+        String tagInitiator = "";
         // Champs pour les strings directs (prioritaires sur les objets)
         String nameCriterionStr = "", nameProperty = "";
         // Liste des alternatives liées à cet argument
@@ -624,6 +772,40 @@ public class ExtractMychoiceProjectToExcel {
             HasExpertiseData other = (HasExpertiseData) obj;
             return (stakeholder != null && stakeholder.equals(other.stakeholder))
                 && (criterion != null && criterion.equals(other.criterion));
+        }
+    }
+    
+    static class ProductData {
+        String nameAlternative, productUri, nameProduct, tagProduct;
+        @Override
+        public int hashCode() {
+            return (productUri != null ? productUri.hashCode() : 0)
+                 + (tagProduct != null ? tagProduct.hashCode() : 0);
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof ProductData)) return false;
+            ProductData other = (ProductData) obj;
+            return (productUri != null && productUri.equals(other.productUri))
+                && (tagProduct != null && tagProduct.equals(other.tagProduct));
+        }
+    }
+    
+    static class IngredientData {
+        String productUri, ingredientUri, nameIngredient, tagIngredient;
+        @Override
+        public int hashCode() {
+            return (productUri != null ? productUri.hashCode() : 0)
+                 + (ingredientUri != null ? ingredientUri.hashCode() : 0)
+                 + (tagIngredient != null ? tagIngredient.hashCode() : 0);
+        }
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof IngredientData)) return false;
+            IngredientData other = (IngredientData) obj;
+            return (productUri != null && productUri.equals(other.productUri))
+                && (ingredientUri != null && ingredientUri.equals(other.ingredientUri))
+                && (tagIngredient != null && tagIngredient.equals(other.tagIngredient));
         }
     }
 }

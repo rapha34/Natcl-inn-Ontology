@@ -1,0 +1,78 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="emballage_plastique" id="schema-emballage-plastique">
+    <mxGraphModel dx="1426" dy="912" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tagbind" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;fontStyle=1;gradientColor=#7ea6e0;" value="&lt;b&gt;TagArgumentBinding&lt;/b&gt;&lt;br&gt;TagBind-emballage_plastique-1" vertex="1">
+          <mxGeometry height="60" width="280" x="560" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="tag" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;fontStyle=1" value="&lt;b&gt;Tag&lt;/b&gt;&lt;br&gt;emballage_plastique" vertex="1">
+          <mxGeometry height="60" width="200" x="600" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r-aboutTag" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#A8201A;fontColor=#143642;endSize=8;rounded=0;" target="tag">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl-aboutTag" connectable="0" parent="r-aboutTag" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=12;fontStyle=0" value="ncl:aboutTag" vertex="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="prop-tagType" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;" value="&lt;b&gt;tagType&lt;/b&gt;&lt;br&gt;Packaging" vertex="1">
+          <mxGeometry height="40" width="180" x="880" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="r-tagType" edge="1" parent="1" source="tag" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-tagType">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-prefLabel" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;" value="&lt;b&gt;skos:prefLabel&lt;/b&gt;&lt;br&gt;emballage_plastique" vertex="1">
+          <mxGeometry height="40" width="180" x="350" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="r-prefLabel" edge="1" parent="1" source="tag" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-prefLabel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-assertion" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagAssertion&lt;/b&gt;&lt;br&gt;Le plastique est perçu négativement&lt;br&gt;à cause des transferts et de son&lt;br&gt;caractère non naturel" vertex="1">
+          <mxGeometry height="70" width="260" x="390" y="440" as="geometry" />
+        </mxCell>
+        <mxCell id="r-assertion" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-assertion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-criterion" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagNameCriterion&lt;/b&gt;&lt;br&gt;Caractéristiques du packaging&lt;br&gt;\Matière packaging" vertex="1">
+          <mxGeometry height="60" width="240" x="130" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="r-criterion" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-criterion">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-nameProperty" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagNameProperty&lt;/b&gt;&lt;br&gt;Emballage plastique" vertex="1">
+          <mxGeometry height="50" width="200" x="130" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="r-nameProperty" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-nameProperty">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-aim" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagAim&lt;/b&gt;&lt;br&gt;Éviter les emballages&lt;br&gt;plastiques nocifs et non naturels" vertex="1">
+          <mxGeometry height="60" width="240" x="950" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="r-aim" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-aim">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-polarity" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagPolarity&lt;/b&gt;&lt;br&gt;-" vertex="1">
+          <mxGeometry height="50" width="150" x="110" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="r-polarity" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-polarity">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-valueProperty" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagValueProperty&lt;/b&gt;&lt;br&gt;Plastique" vertex="1">
+          <mxGeometry height="50" width="180" x="230" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="r-valueProperty" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-valueProperty">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="prop-keywords" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#6c8ebf;fillColor=#dae8fc;gradientColor=#7ea6e0;" value="&lt;b&gt;tagBindingKeywords&lt;/b&gt;&lt;br&gt;caracteristiques, deja, dis, enerve, fait, final,&lt;br&gt;matiere, naturel, negative, packaging, parce,&lt;br&gt;perception, plastique, produit, transfert,&lt;br&gt;utiliser, vois" vertex="1">
+          <mxGeometry height="90" width="320" x="910" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="r-keywords" edge="1" parent="1" source="tagbind" style="endArrow=classic;html=1;strokeColor=#0F8B8D;fontColor=#143642;endSize=8;rounded=0;dashed=1;" target="prop-keywords">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

@@ -165,17 +165,6 @@ public class NatclinnQueryStatistics {
 
 	/////////////////////////////////////////////////////
 
-	titleQuery = "Résumé des liens par initiator";
-	commentQuery = "Compter les LinkToArgument par type d'initiateur";
-	typeQuery = "SELECT";
-	stringQuery = prefix +
-		"SELECT ?initiator (COUNT(?link) AS ?nbLiens) " +
-		"WHERE { " +
-		"  ?product ncl:hasLinkToArgument ?link . " +
-		"  OPTIONAL { ?link ncl:initiator ?initiator } " +
-		"} GROUP BY ?initiator ORDER BY DESC(?nbLiens)";
-	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
-	idQuery++;
 
 
 	// titleQuery = "Résumé des liens ";
@@ -290,32 +279,85 @@ public class NatclinnQueryStatistics {
 	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 	idQuery++;
 
-	titleQuery = "Tous les ingrédients d'un produit donné P-3178530410105";
-	commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
+	// titleQuery = "Tous les ingrédients d'un produit donné P-3178530410105";
+	// commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
+	// typeQuery = "SELECT";
+	// stringQuery = prefix + 
+	// 	"SELECT DISTINCT ?ingredientLabel " +
+	// 	"(GROUP_CONCAT(DISTINCT ?tagLabel; separator=\", \") AS ?tags) " +
+	// 	"WHERE { " +
+	// 	"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3178530410105> } " +
+	// 	"    " +
+	// 	// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
+	// 	// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
+	// 		"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
+	// 	"    " +
+	// 	// S'assurer que c'est bien un ingrédient et récupérer son label
+	// 	"    ?ingredient a ncl:Ingredient ; " +
+	// 	"                skos:prefLabel ?ingredientLabel . " +
+	// 	"    " +
+	// 	// Optionnel : récupérer les rôles des ingrédients
+	// 	"    OPTIONAL { ?ingredient ncl:hasRole ?tag . ?tag skos:prefLabel ?tagLabel . } " +
+	// 	"} " +
+	// 	"GROUP BY ?ingredient ?ingredientLabel " +
+	// 	"ORDER BY ?ingredient";
+	// 	// System.out.println(stringQuery);
+	// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	// idQuery++;
+	
+	// titleQuery = "Tous le codes OFF des ingrédients d'un produit donné P-3178530410105";
+	// commentQuery = "Utilise les chemins de propriétés SPARQL 1.1 pour une récursivité complète";
+	// typeQuery = "SELECT";
+	// stringQuery = prefix + 
+	// 	"SELECT DISTINCT ?ingredientLabel " +
+	// 	"(GROUP_CONCAT(DISTINCT ?iDOFF; separator=\", \") AS ?IDopenFoodFacts) " +
+	// 	"WHERE { " +
+	// 	"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3178530410105> } " +
+	// 	"    " +
+	// 	// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
+	// 	// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
+	// 		"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
+	// 	"    " +
+	// 	// S'assurer que c'est bien un ingrédient et récupérer son label
+	// 	"    ?ingredient a ncl:Ingredient ; " +
+	// 	"                skos:prefLabel ?ingredientLabel . " +
+	// 	"    " +
+	// 	// Optionnel : récupérer les rôles des ingrédients
+	// 	"    OPTIONAL { ?ingredient ncl:hasIdIngredientOFF ?iDOFF. } " +
+	// 	"} " +
+	// 	"GROUP BY ?ingredient ?ingredientLabel " +
+	// 	"ORDER BY ?ingredient";
+	// 	// System.out.println(stringQuery);
+	// listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	// idQuery++;
+
+	titleQuery = "Tous les tags d'un produit donné P-3178530410105";
+	commentQuery = "Touts les tags associés au produit";
 	typeQuery = "SELECT";
 	stringQuery = prefix + 
-		"SELECT DISTINCT ?ingredientLabel " +
-		"(GROUP_CONCAT(DISTINCT ?tagLabel; separator=\", \") AS ?tags) " +
+		"SELECT DISTINCT ?tagLabel " +
 		"WHERE { " +
 		"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3178530410105> } " +
-		"    " +
-		// Naviguer récursivement : Product -> (composedOf)* -> Product -> hasIngredient -> Ingredient
-		// Naviguer récursivement : Product -> hasIngredient|composedOf -> Ingredient
-			"?targetProduct (ncl:hasIngredient|ncl:hasComposedOf)* ?ingredient ." +
-		"    " +
-		// S'assurer que c'est bien un ingrédient et récupérer son label
-		"    ?ingredient a ncl:Ingredient ; " +
-		"                skos:prefLabel ?ingredientLabel . " +
-		"    " +
-		// Optionnel : récupérer les rôles des ingrédients
-		"    OPTIONAL { ?ingredient ncl:hasRole ?tag . ?tag skos:prefLabel ?tagLabel . } " +
+		" ?targetProduct ncl:hasTag ?tag ." +
+		" ?tag skos:prefLabel ?tagLabel . " + 
 		"} " +
-		"GROUP BY ?ingredient ?ingredientLabel " +
-		"ORDER BY ?ingredient";
-		// System.out.println(stringQuery);
+		"ORDER BY ?tagLabel ";
 	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
 	idQuery++;
-	
+
+	titleQuery = "Tous les 'non' tags d'un produit donné P-3178530410105";
+	commentQuery = "Touts les 'non' tags associés au produit";
+	typeQuery = "SELECT";
+	stringQuery = prefix + 
+		"SELECT DISTINCT ?tagLabel " +
+		"WHERE { " +
+		"    VALUES ?targetProduct { <https://w3id.org/NCL/ontology/P-3178530410105> } " +
+		" ?targetProduct ncl:hasTagCheck ?tag ." +
+		" ?tag skos:prefLabel ?tagLabel . " +
+		"} " +
+		"ORDER BY ?tagLabel ";
+	listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+	idQuery++;
 
 	// titleQuery = "Vérification détail NOVA calculé";
 	// 	typeQuery = "SELECT";
@@ -1178,11 +1220,25 @@ public class NatclinnQueryStatistics {
 			// idQuery++;
 
 
+		titleQuery = "Résumé des liens par initiator";
+		commentQuery = "Compter les LinkToArgument par type d'initiateur";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT ?tagLabel (COUNT(?link) AS ?nbLiens) " +
+			"WHERE { " +
+			"  ?product ncl:hasLinkToArgument ?link . " +
+			"  ?link ncl:hasTagInitiator ?tag . " +
+				"  OPTIONAL { ?tag skos:prefLabel ?tagLabel } " +
+			"} GROUP BY ?tagLabel ORDER BY DESC(?nbLiens)";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+	
+
 		// ===================================================================
 		// Contrôle : Tags
 		// ===================================================================
 		titleQuery = "Contrôle - Tags";
-		commentQuery = "Affiche les tags Pour le type Packaging";
+		commentQuery = "Affiche les tags pour le type Packaging";
 		typeQuery = "SELECT";
 		stringQuery = prefix +
 			"SELECT DISTINCT ?tag ?tagType ?tagLabel " +
@@ -1191,6 +1247,24 @@ public class NatclinnQueryStatistics {
 			"  OPTIONAL { ?tag skos:prefLabel ?tagLabel . } " +
 			"  OPTIONAL { ?tag ncl:tagType ?tagType . } " +
 			"  FILTER (!bound(?tagType) || ?tagType = \"Packaging\") " +
+			"} " +
+			"ORDER BY ?tagType ?tagLabel";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		// ===================================================================
+		// Contrôle : Tags processing
+		// ===================================================================
+		titleQuery = "Contrôle - Tags";
+		commentQuery = "Affiche les tags pour le type ProcessingDegree";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT DISTINCT ?tag ?tagType ?tagLabel " +
+			"WHERE { " +
+			"  ?tag rdf:type ncl:Tag . " +
+			"  OPTIONAL { ?tag skos:prefLabel ?tagLabel . } " +
+			"  OPTIONAL { ?tag ncl:tagType ?tagType . } " +
+			"  FILTER (!bound(?tagType) || ?tagType = \"ProcessingDegree\") " +
 			"} " +
 			"ORDER BY ?tagType ?tagLabel";
 		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
@@ -1238,7 +1312,7 @@ public class NatclinnQueryStatistics {
 		commentQuery = "Affiche les arguments liés aux produits madeleines via LinkToArgument";
 		typeQuery = "SELECT";
 		stringQuery = prefix +
-			"SELECT ?productName ?argumentName ?initiator " +
+			"SELECT ?productName ?argumentName ?tagLabel " +
 			"WHERE { " +
 			"  ?product rdf:type ncl:Product . " +
 			"  ?product skos:prefLabel ?productName . " +
@@ -1246,7 +1320,29 @@ public class NatclinnQueryStatistics {
 			"  ?product ncl:hasLinkToArgument ?link . " +
 			"  ?link ncl:hasReferenceProductArgument ?argument . " +
 			"  ?link ncl:hasTagInitiator ?tag . " +
-			"  OPTIONAL { ?tag skos:prefLabel ?initiator } " +
+			"  OPTIONAL { ?tag skos:prefLabel ?tagLabel } " +
+			"  ?argument skos:prefLabel ?argumentName . " +
+			"} " +
+			"ORDER BY ?productName ?argumentName";
+		listQuery.add(new NatclinnQueryObject(titleQuery, commentQuery, typeQuery, stringQuery, idQuery));
+		idQuery++;
+
+		// ===================================================================
+		// Contrôle : Arguments liés aux moussakas
+		// ===================================================================
+		titleQuery = "Contrôle - Arguments liés aux moussakas";
+		commentQuery = "Affiche les arguments liés aux produits moussakas via LinkToArgument";
+		typeQuery = "SELECT";
+		stringQuery = prefix +
+			"SELECT ?productName ?argumentName ?tagLabel " +
+			"WHERE { " +
+			"  ?product rdf:type ncl:Product . " +
+			"  ?product skos:prefLabel ?productName . " +
+			"  FILTER(CONTAINS(?productName, \"Moussaka\")) . " +
+			"  ?product ncl:hasLinkToArgument ?link . " +
+			"  ?link ncl:hasReferenceProductArgument ?argument . " +
+			"  ?link ncl:hasTagInitiator ?tag . " +
+			"  OPTIONAL { ?tag skos:prefLabel ?tagLabel } " +
 			"  ?argument skos:prefLabel ?argumentName . " +
 			"} " +
 			"ORDER BY ?productName ?argumentName";

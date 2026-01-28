@@ -142,6 +142,23 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                 System.err.println("Erreur lors de l'extraction Excel : " + e.getMessage());
                 e.printStackTrace();
             }
+            
+            // Extraction automatique vers DAMN (JSON et texte)
+            String damnJsonFileName = fileName.replaceFirst("[.][^.]+$", "_damn.json");
+            String damnTextFileName = fileName.replaceFirst("[.][^.]+$", "_damn.txt");
+            String damnJsonFilePath = NatclinnConf.folderForResults + "/" + damnJsonFileName;
+            String damnTextFilePath = NatclinnConf.folderForResults + "/" + damnTextFileName;
+            
+            try {
+                System.out.println("Extraction vers DAMN (JSON et texte)...");
+                ExportMychoiceProjectToDamn.exportProjectToDamn(xmlFilePath, damnJsonFilePath, damnTextFilePath);
+                System.out.println("Fichiers DAMN générés :");
+                System.out.println("  - JSON : " + damnJsonFilePath);
+                System.out.println("  - Texte : " + damnTextFilePath);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'extraction DAMN : " + e.getMessage());
+                e.printStackTrace();
+            }
         }
         
         qexec.close();
@@ -376,6 +393,34 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                         while (productProps.hasNext()) {
                             Statement prodStmt = productProps.nextStatement();
                             mychoiceModel.add(prodStmt);
+                            
+                            // Copier aussi les tags et ingrédients pointés par le produit
+                            Property hasTag = infModel.getProperty(ncl + "hasTag");
+                            Property hasTagCheck = infModel.getProperty(ncl + "hasTagCheck");
+                            Property hasIngredientR = infModel.getProperty(ncl + "hasIngredientR");
+                            Property hasRole = infModel.getProperty(ncl + "hasRole");
+                            
+                            if (prodStmt.getPredicate().equals(hasTag) || prodStmt.getPredicate().equals(hasTagCheck) || prodStmt.getPredicate().equals(hasIngredientR)) {
+                                if (prodStmt.getObject().isResource()) {
+                                    Resource linkedResource = prodStmt.getResource();
+                                    // Copier toutes les propriétés du tag/ingrédient
+                                    StmtIterator linkedProps = infModel.listStatements(linkedResource, null, (RDFNode)null);
+                                    while (linkedProps.hasNext()) {
+                                        Statement linkedStmt = linkedProps.nextStatement();
+                                        mychoiceModel.add(linkedStmt);
+
+                                        // Si l'ingrédient a des hasRole, copier aussi les ressources cibles
+                                        if (linkedStmt.getPredicate().equals(hasRole) && linkedStmt.getObject().isResource()) {
+                                            Resource roleRes = linkedStmt.getResource();
+                                            StmtIterator roleProps = infModel.listStatements(roleRes, null, (RDFNode) null);
+                                            while (roleProps.hasNext()) {
+                                                Statement roleStmt = roleProps.nextStatement();
+                                                mychoiceModel.add(roleStmt);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                         
                         productToAlternative.put(productUri, alternative);
@@ -505,10 +550,10 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             // Création de l'argument MyChoice si il n'existe pas encore
             // Clé = mychArgumentUri (URI complète incluant le tag) pour permettre plusieurs arguments
             // MyChoice différents basés sur le même ProductArgument mais avec des tags différents
-            String mychArgumentUri = mch + "Argument-" + tagLabel + "_" + argumentUri.substring(argumentUri.lastIndexOf("/") + 1);
+            String mychArgumentUri = mch + "Argument-" + productUriStr.substring(productUriStr.lastIndexOf("/") + 1) + tagLabel + "_" + argumentUri.substring(argumentUri.lastIndexOf("/") + 1);
             if (!argumentToMychArgument.containsKey(mychArgumentUri)) {
-                System.out.println("   - Création de l'argument MyChoice : " + mychArgumentUri);
-                System.out.println("   - avec tag : " + tagResource.toString());
+                // System.out.println("   - Création de l'argument MyChoice : " + mychArgumentUri);
+                // System.out.println("   - avec tag : " + tagResource.toString());
                 Individual mychArgument = mychoiceModel.createIndividual(mychArgumentUri, Argument);
                 
                 // Copier TOUTES les propriétés de ncl:ProductArgument vers mch:Argument
@@ -541,6 +586,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                 DatatypeProperty infValueProp = mychoiceModel.createDatatypeProperty(mch + "infValue");
                 DatatypeProperty supValueProp = mychoiceModel.createDatatypeProperty(mch + "supValue");
                 DatatypeProperty unitProp = mychoiceModel.createDatatypeProperty(mch + "unit");
+                DatatypeProperty tagInitiatorProp = mychoiceModel.createDatatypeProperty(mch + "tagInitiator");
                 
                 if (polarityLit != null) mychArgument.addProperty(polarityProp, polarityLit.getString());
                 if (nameCriterionLit != null) mychArgument.addProperty(nameCriterionProp, nameCriterionLit.getString());
@@ -551,6 +597,17 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                 if (infValueLit != null) mychArgument.addProperty(infValueProp, infValueLit.getString());
                 if (supValueLit != null) mychArgument.addProperty(supValueProp, supValueLit.getString());
                 if (unitLit != null) mychArgument.addProperty(unitProp, unitLit.getString());
+
+                // Tag initiateur : label prioritaire, sinon localName du tag
+                String tagInitiatorVal = "";
+                if (tagLabel != null) {
+                    tagInitiatorVal = tagLabel.getString();
+                } else if (tagResource != null) {
+                    tagInitiatorVal = tagResource.getLocalName();
+                }
+                if (!tagInitiatorVal.isEmpty()) {
+                    mychArgument.addProperty(tagInitiatorProp, tagInitiatorVal);
+                }
                 
                 // Créer ou récupérer la source MyChoice
                 if (sourceResource != null) {
@@ -691,7 +748,6 @@ public class CreateMychoiceProjectFromPreliminaryProject {
     Property rdfType = model.getProperty(rdf + "type");
     Property hasIngredientR = model.getProperty(ncl + "hasIngredientR");
     Property aboutFunction = model.getProperty(ncl + "aboutFunction");
-    Property hasRole = model.getProperty(ncl + "hasRole");
         StmtIterator iter = model.listStatements();
         while (iter.hasNext()) {
             Statement stmt = iter.nextStatement();
@@ -716,9 +772,6 @@ public class CreateMychoiceProjectFromPreliminaryProject {
         // Filtrer ncl:aboutFunction (lien AdditiveFunctionArgumentBinding -> AdditiveFunction)
         boolean isAboutFunction = stmt.getPredicate().equals(aboutFunction);
 
-        // Filtrer ncl:hasRole (lien Ingredient -> AdditiveFunction)
-        boolean isHasRole = stmt.getPredicate().equals(hasRole);
-
         if (!stmt.getPredicate().equals(differentFrom)
             && !isBlankSubject
             && (stmt.getObject().isLiteral() || !isBlankObject)
@@ -726,8 +779,7 @@ public class CreateMychoiceProjectFromPreliminaryProject {
             && !objectIsNullIRI
             && !isTypeRdfsResource
             && !isHasIngredientR
-            && !isAboutFunction
-            && !isHasRole) {
+            && !isAboutFunction) {
         cleanModel.add(stmt);
         }
         }

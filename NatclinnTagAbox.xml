@@ -1,0 +1,1403 @@
+<rdf:RDF
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dcterms="http://purl.org/dc/terms/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:ncl="https://w3id.org/NCL/ontology/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Ontology rdf:about="https://w3id.org/NCL/ontology/NatclinnTagAbox">
+    <rdfs:label>Ontology of Natclinn Tags</rdfs:label>
+    <dc:description>ABox for tags and related parameters to link product arguments in Natclinn.</dc:description>
+  </owl:Ontology>
+  <owl:Class rdf:about="https://w3id.org/NCL/ontology/TagArgumentBinding">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/NCL/ontology/NCLTAG"/>
+    </rdfs:subClassOf>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/NCL/ontology/NCL">
+    <rdfs:comment xml:lang="en">NCL is the set of product and arguments.</rdfs:comment>
+    <rdfs:comment xml:lang="fr">NCL est l'ensemble des produits et des arguments.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/NCL/ontology/NCLTAG">
+    <rdfs:subClassOf rdf:resource="https://w3id.org/NCL/ontology/NCL"/>
+    <rdfs:comment xml:lang="en">NCLTAG is the set of tags.</rdfs:comment>
+    <rdfs:comment xml:lang="fr">NCLTAG est l'ensemble des tags.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/NCL/ontology/Tag">
+    <rdfs:subClassOf rdf:resource="https://w3id.org/NCL/ontology/NCLTAG"/>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="https://w3id.org/NCL/ontology/aboutTag"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagAssertion"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagInfValue"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagFilteringRule"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagSynonymLabels"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagSelectionRule"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagType"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagValueProperty"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagBindingKeywords"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagPolarity"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagExplanation"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagNameCriterion"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagNameProperty"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagAim"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagCondition"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagSupValue"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagUnit"/>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/NCL/ontology/tagAntinomyProperties"/>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Viande_bovine_francaise-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Viande_bovine_francaise">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Viande_bovine_francaise</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Lait_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Lait_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Lait_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_souffles-1">
+    <ncl:tagValueProperty>Souflage</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Type de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>juste, maintenant, naturel, percu, process, production, riz, soufflage, souffle, transformation, trouve, type</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La souflage ne  réduit pas la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser le souflage.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_souffles">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_souffles</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_anti_agglomerant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_anti_agglomerant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emballage_bois-1">
+    <ncl:tagValueProperty>Visuel</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Codes visuels naturels</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging  \Visuel du packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aspect, associes, beige, bio, bleu, brut, caracteristiques, carrefour, ciel, code, coin, cote, couleur, couleurs, culture, disait, elements, etait, fait, final, heure, image, images, mode, naturalite, nature, packaging, papier, petit, peu, produit, renforcer, representer, rizieres, vert, visuel, visuels</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Les codes visuels naturels (beige, vert, images nature) renforcent la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Utiliser des codes visuels évoquant la naturalité (couleurs brutes, images nature).</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_bois">
+        <ncl:tagType>Packaging</ncl:tagType>
+        <skos:prefLabel>emballage_bois</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Boeuf_charolais_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Boeuf_charolais_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Boeuf_charolais_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_colorant-1">
+    <ncl:tagValueProperty>Sans colorants</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence de colorants</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>artificiels, blanc, chewing-gums, colorants, composition, compositions, dragee, ingredients, mauvais, production, retrouve, sante</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence de colorants artificiels renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence de colorants renforce la naturalité perçue.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_colorant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_colorant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emballage_sans_plastique-1">
+    <ncl:tagValueProperty>sans plastique</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Emballage verre</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging  \Matière packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>caracteristiques, deja, dis, enerve, fait, final, matiere, naturel, negative, packaging, parce, perception, plastique, produit, transfert, utiliser, vois</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Le plastique réduit la naturalité perçue et cause des transferts nocifs.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les emballages plastiques source de transferts.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_sans_plastique">
+        <ncl:tagType>Packaging</ncl:tagType>
+        <skos:prefLabel>emballage_sans_plastique</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Miel_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Miel_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Miel_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-edulcorant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/edulcorant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>edulcorant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_composite">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_composite</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Beurre_de_Normandie-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Beurre_de_Normandie">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Beurre_de_Normandie</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_extrudes-1">
+    <ncl:tagValueProperty>Extrusion</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Type de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>cereale, cereales, denaturer, elle-meme, exemple, extrudees, extrusion, mettre, naturelle, process, production, transformation, type, viens, vois</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'extrusion réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les aliments extrudés</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_extrudes">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_extrudes</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-agent_texture-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/agent_texture">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>agent_texture</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Pommes_de_terre_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Pommes_de_terre_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Pommes_de_terre_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_sirop_de_glucose_fructose-1">
+    <ncl:tagValueProperty>Glucose-Fructose</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence de sirop</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>autorise, charte, composition, compositions, fructose, glucose, ingredients, interdit, production, sirop</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Un produit avec du sirop de glucose/fructose perd sa naturalité.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter le sirop de glucose fructose</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_sirop_de_glucose_fructose">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_sirop_de_glucose_fructose</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-agent_charge_fibre-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/agent_charge_fibre">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>agent_charge_fibre</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-agent_levant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/agent_levant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>agent_levant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_agent_levant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_agent_levant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-colorant_naturel-2">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/colorant_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>colorant_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Canard_du_Sud_Ouest-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Canard_du_Sud_Ouest">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Canard_du_Sud_Ouest</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Porc_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Porc_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Porc_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-colorant_naturel-1">
+    <ncl:tagValueProperty>Naturels</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de colorants</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition AVEC</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>ajout, beaucoup, betterave, chimique, colorant, colorants, composition, compositions, dessus, ingredients, liste, naturel, naturelle, naturels, origine, production, sais, utilise</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Les colorants d'origine naturelle renforcent la naturalité perçue</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser les colorants d'origine naturelle sans ajouts chimiques.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/colorant_naturel"/>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_regulateur_acidite">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_regulateur_acidite</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Veau_francais-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Veau_francais">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Veau_francais</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_stabilisant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_stabilisant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Vin_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Vin_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Vin_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_exhausteur_de_gout-1">
+    <ncl:tagValueProperty>Sans exhausteurs de goût</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'exhausteurs de goût</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, celle, cochonneries, composition, compositions, cuisine, exhausteur, exhausteurs, gout, industrielle, ingredients, justement, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence d'exhausteurs de goût chimiques nocifs renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'exhausteurs de goût.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_exhausteur_de_gout">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_exhausteur_de_gout</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_gelifiant_naturel">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_gelifiant_naturel</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Boeuf_francais-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Boeuf_francais">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Boeuf_francais</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_gelifiant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_gelifiant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_textile">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_textile</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_peu_ou_non_transformes-1">
+    <ncl:tagValueProperty>Très peu transformé</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Niveau de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Degré de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>ajoute, dedans, degre, etre, legerement, peu, process, production, produit, raisin, sec, seche, soleil, transformation, transforme, tres</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Une transformation légère sans ajouts préserve la naturalité.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les transformations minimales sans ajouts</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_peu_ou_non_transformes">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_peu_ou_non_transformes</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Vanille_de_Madagascar">
+    <ncl:tagType>ControlledOrigin</ncl:tagType>
+    <skos:prefLabel>Vanille_de_Madagascar</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_agent_charge">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_agent_charge</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-regulateur_acidite-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/regulateur_acidite">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>regulateur_acidite</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_sel_ajoute-1">
+    <ncl:tagValueProperty>Réduite/minimaliste</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Teneur sucre/sel</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>attention, basse, composition, compositions, effectivement, fais, ingredients, moins, possible, production, produits, sel, sucre, teneur</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'excès de sucre/sel réduit la qualité nutritionnelle perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Réduire au minimum la teneur en sucre et sel ajoutés.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_sel_ajoute">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_sel_ajoute</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Viande_bovine_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Viande_bovine_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Viande_bovine_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-conservateur_naturel-1">
+    <ncl:tagValueProperty>Naturels/sans conservateurs</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de conservateurs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition AVEC</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>accord, air, alcool, composition, compositions, conservateur, conservateurs, depend, fait, huile, ingredients, isoler, liste, naturel, naturels, peux, production, produit, sel, utiliser, vas</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence de conservateurs chimiques nocifs renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éliminer les conservateurs chimiques et les nitrates.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/conservateur_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>conservateur_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-conservateur_naturel-2">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/conservateur_naturel"/>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-conservateur_naturel-3">
+    <ncl:tagValueProperty>Avec conservateurs naturels</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence de conservateur</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>averes, cancerogenes, charcuterie, composition, compositions, conservateurs, ingredients, justement, mauvais, meme, nitrates, point, production, sante, vraiment, vue</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence de conservateurs chimiques nocifs renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser les conservateurs naturels.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/conservateur_naturel"/>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Viande_de_porc_Label_Rouge_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Viande_de_porc_Label_Rouge_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Viande_de_porc_Label_Rouge_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_dehydrates-1">
+    <ncl:tagValueProperty>Déhydratation</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Type de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>deshydratation, process, production, transformation, type</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La déhydratation réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les aliments déhydratés</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_dehydrates">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_dehydrates</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-epaississant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/epaississant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>epaississant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Cacao_de_Cote_d_Ivoire">
+    <ncl:tagType>ControlledOrigin</ncl:tagType>
+    <skos:prefLabel>Cacao_de_Cote_d_Ivoire</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_transformes-1">
+    <ncl:tagValueProperty>Produit transformé</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Niveau de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Degré de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>degre, naturel, process, production, produit, transformation, transforme</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Un produit transformé perd sa naturalité.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter la transformation industrielle des produits alimentaires</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_transformes">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_transformes</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_antioxydant_acidifiant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_antioxydant_acidifiant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_agent_charge_fibre">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_agent_charge_fibre</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_compostable">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_compostable</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emulsifiant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emulsifiant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>emulsifiant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/sel">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>sel</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_edulcorant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_edulcorant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_sans_emballage">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_sans_emballage</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Porc_de_Bretagne-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Porc_de_Bretagne">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Porc_de_Bretagne</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_conservateur_naturel-1">
+    <ncl:tagValueProperty>Chimiques/cancérogènes</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de conservateurs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition AVEC</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>accord, air, alcool, composition, compositions, conservateur, conservateurs, depend, fait, huile, ingredients, isoler, liste, naturel, naturels, peux, production, produit, sel, utiliser, vas</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence de conservateurs chimiques nocifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les conservateurs chimiques et les nitrates.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_conservateur_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_conservateur_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_lyophylises-1">
+    <ncl:tagValueProperty>Lyophilisation</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Type de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>action, amene, certain, complique, degre, lyophilisation, lyophiliser, lyphilisation, meme, naturelle, process, production, reste, transformation, type</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La lyophilisation réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter la lyophilisation.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_lyophylises">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_lyophylises</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-peche_durable-1">
+    <ncl:tagValueProperty>Durable</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de pêche</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Mode de culture</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>culture, durable, elevage, ici, mode, naturalite, peche, peu, raccrocher, ressources</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Un produit avec des ingrédients issus de la pêche durable renforce sa naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser la pêche durable</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/peche_durable">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>peche_durable</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-conservateur-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/conservateur">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>conservateur</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-conservateur-2">
+    <ncl:tagValueProperty>Avec conservateurs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence de conservateur</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>averes, cancerogenes, charcuterie, composition, compositions, conservateurs, ingredients, justement, mauvais, meme, nitrates, point, production, sante, vraiment, vue</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence de conservateurs chimiques nocifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éliminer les conservateurs chimiques et les nitrates.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/conservateur"/>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_edulcorant_naturel">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_edulcorant_naturel</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-antioxydant_naturel-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/antioxydant_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>antioxydant_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_antioxydant_naturel">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_antioxydant_naturel</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-antioxydant_acidifiant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/antioxydant_acidifiant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>antioxydant_acidifiant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_ultratransformes-1">
+    <ncl:tagValueProperty>Ultra-transformé</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Niveau de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Degré de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>degre, emballage, environnement, issus, manger, nuire, parce, possibles, process, production, produits, retrouver, sante, sens, transformation, transformations, transformes, trucs, ultra, ultra-transformation, ultra-transforme, vont</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Les produits ultra-transformés nuisent à la santé et à l'environnement.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les produits ayant subi de multiples transformations industrielles</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_ultratransformes">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_ultratransformes</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Oeufs_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Oeufs_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Oeufs_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-colorant-2">
+    <ncl:tagValueProperty>Avec colorants</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence de colorants</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>artificiels, blanc, chewing-gums, colorants, composition, compositions, dragee, ingredients, mauvais, production, retrouve, sante</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence de colorants artificiels réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les colorants potentiellement nocifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/colorant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>colorant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-colorant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/colorant"/>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-antioxydant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/antioxydant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>antioxydant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-gelifiant_naturel-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/gelifiant_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>gelifiant_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Thon_peche_en_Atlantique">
+    <ncl:tagType>ControlledOrigin</ncl:tagType>
+    <skos:prefLabel>Thon_peche_en_Atlantique</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_antioxydant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_antioxydant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Viande_de_volaille_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Viande_de_volaille_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Viande_de_volaille_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_origine_controlee-1">
+    <ncl:tagValueProperty>Origine lointaine/inconnue</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Une origine lointaine ou inconnue réduit la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les produits d'origine lointaine ou non tracée.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_origine_controlee">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>pas_origine_controlee</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_exhausteur_gout_naturel">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_exhausteur_gout_naturel</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Saumon_de_Norvege">
+    <ncl:tagType>ControlledOrigin</ncl:tagType>
+    <skos:prefLabel>Saumon_de_Norvege</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_epaississant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_epaississant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_acidifiant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_acidifiant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-ingrdients_culinaires-1">
+    <ncl:tagValueProperty>Très peu transformé</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Niveau de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Degré de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>ajoute, dedans, degre, etre, legerement, peu, process, production, produit, raisin, sec, seche, soleil, transformation, transforme, tres</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Une transformation légère sans ajouts préserve la naturalité.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les transformations minimales sans ajouts</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/ingrédients_culinaires">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>ingrédients_culinaires</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-anti_agglomerant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/anti_agglomerant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>anti_agglomerant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Huile_de_tournesol_francaise-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Huile_de_tournesol_francaise">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Huile_de_tournesol_francaise</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_agent_texture">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_agent_texture</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_biosource">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_biosource</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emballage_verre-1">
+    <ncl:tagValueProperty>Verre</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Emballage plastique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging  \Matière packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>bocaux, caracteristiques, emballage, final, histoire, matiere, packaging, preferais, principalement, produit, puis, recyclage, sante, verre</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Le verre est préféré pour des raisons de santé et de recyclage</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les matériaux sains et recyclables pour l'emballage</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_verre">
+        <ncl:tagType>Packaging</ncl:tagType>
+        <skos:prefLabel>emballage_verre</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-gelifiant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/gelifiant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>gelifiant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_conservateur-1">
+    <ncl:tagValueProperty>Sans conservateurs</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence de conservateur</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>averes, cancerogenes, charcuterie, composition, compositions, conservateurs, ingredients, justement, mauvais, meme, nitrates, point, production, sante, vraiment, vue</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence de conservateurs chimiques nocifs renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence de concervateurs</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_conservateur">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_conservateur</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Ble_francais-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Ble_francais">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Ble_francais</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Farine_de_ble_francais-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Farine_de_ble_francais">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Farine_de_ble_francais</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-exhausteur_gout_naturel-2">
+    <ncl:tagValueProperty>Avec exhausteurs de goût naturels</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'exhausteurs de goût</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, celle, cochonneries, composition, compositions, cuisine, exhausteur, exhausteurs, gout, industrielle, ingredients, justement, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence d'exhausteurs de goût chimiques nocifs renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser les exhausteurs de goût naturels.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/exhausteur_gout_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>exhausteur_gout_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_colorant_naturel-1">
+    <ncl:tagValueProperty>Artificiels/synthétiques</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de colorants</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition AVEC</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>ajout, beaucoup, betterave, chimique, colorant, colorants, composition, compositions, dessus, ingredients, liste, naturel, naturelle, naturels, origine, production, sais, utilise</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Les colorants artificiels réduisent la naturalité perçue</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les colorants artificiels ou de synthèse.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_colorant_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_colorant_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-exhausteur_gout_naturel-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/exhausteur_gout_naturel"/>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_additif-1">
+    <ncl:tagValueProperty>Sans additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence d'additifs perçus comme artificiels renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_additif">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_additif</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emulsifiant_stabilisant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emulsifiant_stabilisant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>emulsifiant_stabilisant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Legumes_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Legumes_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Legumes_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-acidifiant-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/acidifiant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>acidifiant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_emulsifiant-1">
+    <ncl:tagValueProperty>Sans émulsifiants</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'emulsifiants</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>autrement, ble, cereale, composee, composition, compositions, e471, emulsifiant, emulsifiants, exemple, farine, grasse, ingredients, matiere, naturel, parce, production, sait, technologiquement</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'absence d'émulsifiants renforce la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les emulsifiants.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_emulsifiant">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_emulsifiant</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_liege">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_liege</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_emulsifiant_stabilisant">
+    <ncl:tagType>AdditiveRole</ncl:tagType>
+    <skos:prefLabel>pas_de_emulsifiant_stabilisant</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Fruits_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Fruits_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Fruits_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Agneau_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Agneau_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Agneau_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Poulet_origine_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Poulet_origine_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Poulet_origine_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-produit_cru-1">
+    <ncl:tagValueProperty>Quatriéme gamme</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Niveau de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Type de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>4eme, antinaturel, ben, conservation, considere, crus, emploi, gamme, mode, naturelle, prets, process, production, produits, sachet, salade, tres</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La quatrième gamme réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter la quatiéme gamme.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/produit_cru">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>produit_cru</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-edulcorant_naturel-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/edulcorant_naturel">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>edulcorant_naturel</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Fromage_au_lait_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Fromage_au_lait_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Fromage_au_lait_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-aliments_fermentes-1">
+    <ncl:tagValueProperty>Fermentation</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Type de transformation</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Type de transformation</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>alteration, definition, fermentation, fromage, naturelle, process, production, transformation, type</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La fermentation réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les aliments fermentés</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/aliments_fermentes">
+        <ncl:tagType>ProcessingDegree</ncl:tagType>
+        <skos:prefLabel>aliments_fermentes</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_metal">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_metal</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_biodegradable">
+    <ncl:tagType>Packaging</ncl:tagType>
+    <skos:prefLabel>emballage_biodegradable</skos:prefLabel>
+  </ncl:Tag>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-exhausteur_gout-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/exhausteur_gout">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>exhausteur_gout</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-exhausteur_gout-2">
+    <ncl:tagValueProperty>Avec exhausteurs de goût</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'exhausteurs de goût</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, celle, cochonneries, composition, compositions, cuisine, exhausteur, exhausteurs, gout, industrielle, ingredients, justement, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'exhausteurs de goût chimiques nocifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'exhausteurs de goût industriels.</ncl:tagAim>
+    <ncl:aboutTag rdf:resource="https://w3id.org/NCL/ontology/exhausteur_gout"/>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Viande_de_porc_francaise-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Viande_de_porc_francaise">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Viande_de_porc_francaise</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emballage_plastique-1">
+    <ncl:tagSynonymLabels>emballage_plastique,Présence de plastique</ncl:tagSynonymLabels>
+    <ncl:tagAntinomyProperties>Présence de plastique</ncl:tagAntinomyProperties>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_plastique">
+        <ncl:tagType>Packaging</ncl:tagType>
+        <skos:prefLabel>emballage_plastique</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+    <ncl:tagAssertion>Le plastique est perçu négativement à cause des transferts et de son caractère non naturel</ncl:tagAssertion>
+    <ncl:tagFilteringRule>plastique</ncl:tagFilteringRule>
+    <ncl:tagNameCriterion>Caractéristiques du packaging  \Matière packaging</ncl:tagNameCriterion>
+    <ncl:tagNameProperty>Emballage plastique</ncl:tagNameProperty>
+    <ncl:tagAim>Éviter les emballages plastiques nocifs et non naturels</ncl:tagAim>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagValueProperty>Plastique</ncl:tagValueProperty>
+    <ncl:tagBindingKeywords>caracteristiques, deja, dis, enerve, fait, final, matiere, naturel, negative, packaging, parce, perception, plastique, produit, transfert, utiliser, vois</ncl:tagBindingKeywords>
+    <ncl:tagSelectionRule>avec</ncl:tagSelectionRule>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-pas_de_OGM-1">
+    <ncl:tagValueProperty>OGM</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'OGM</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>bruts, composition, compositions, derriere, ingredients, mets, naturels, ogm, production, produits, sauf</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Un produit avec des ingrédients OGM perd sa naturalité.</ncl:tagAssertion>
+    <ncl:tagAim>Éviter les OGM</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/pas_de_OGM">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>pas_de_OGM</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Tomates_de_France-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Tomates_de_France">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Tomates_de_France</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-agent_charge-1">
+    <ncl:tagValueProperty>Avec additifs</ncl:tagValueProperty>
+    <ncl:tagPolarity>-</ncl:tagPolarity>
+    <ncl:tagNameProperty>Présence d'additifs</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Composition SANS</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>additifs, beaucoup, cancerigenes, cause, commencant, composition, compositions, crois, decrits, endocriniens, ingredients, perturbateurs, production</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>La présence d'additifs réduit la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Favoriser l'absence d'additifs.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/agent_charge">
+        <ncl:tagType>AdditiveRole</ncl:tagType>
+        <skos:prefLabel>agent_charge</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-emballage_carton-1">
+    <ncl:tagValueProperty>Visuel</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Codes visuels naturels</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging  \Visuel du packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aspect, associes, beige, bio, bleu, brut, caracteristiques, carrefour, ciel, code, coin, cote, couleur, couleurs, culture, disait, elements, etait, fait, final, heure, image, images, mode, naturalite, nature, packaging, papier, petit, peu, produit, renforcer, representer, rizieres, vert, visuel, visuels</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>Les codes visuels naturels (beige, vert, images nature) renforcent la naturalité perçue.</ncl:tagAssertion>
+    <ncl:tagAim>Utiliser des codes visuels évoquant la naturalité (couleurs brutes, images nature).</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/emballage_carton">
+        <ncl:tagType>Packaging</ncl:tagType>
+        <skos:prefLabel>emballage_carton</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+  <ncl:TagArgumentBinding rdf:about="https://w3id.org/NCL/ontology/TagBind-Sel_de_Guerande-1">
+    <ncl:tagValueProperty>Origine France/locale</ncl:tagValueProperty>
+    <ncl:tagPolarity>+</ncl:tagPolarity>
+    <ncl:tagNameProperty>Origine géographique</ncl:tagNameProperty>
+    <ncl:tagNameCriterion>Caractéristiques du packaging \Infos packaging</ncl:tagNameCriterion>
+    <ncl:tagBindingKeywords>aime, caracteristiques, final, france, infos, origine, packaging, produit, provenance, tracabilite</ncl:tagBindingKeywords>
+    <ncl:tagAssertion>L'origine France renforce la traçabilité et la naturalité perçues.</ncl:tagAssertion>
+    <ncl:tagAim>Privilégier les produits d'origine française ou locale.</ncl:tagAim>
+    <ncl:aboutTag>
+      <ncl:Tag rdf:about="https://w3id.org/NCL/ontology/Sel_de_Guerande">
+        <ncl:tagType>ControlledOrigin</ncl:tagType>
+        <skos:prefLabel>Sel_de_Guerande</skos:prefLabel>
+      </ncl:Tag>
+    </ncl:aboutTag>
+  </ncl:TagArgumentBinding>
+</rdf:RDF>

@@ -1,4 +1,4 @@
-﻿package natclinn.util;
+package natclinn.util;
 
 import org.apache.jena.graph.Graph;
 import org.apache.jena.graph.Node;
@@ -252,7 +252,7 @@ public class CreateLinkProductToArgument extends BaseBuiltin {
         checkArgs(length, context);
 
         Node productNode = getArg(0, args, context);
-        System.out.println("Comparing tag for product: " + productNode.toString());
+        //System.out.println("Comparing tag for product: " + productNode.toString());
 
         if (!productNode.isURI() && !productNode.isBlank()) {
             return false;
@@ -315,15 +315,15 @@ public class CreateLinkProductToArgument extends BaseBuiltin {
             }
 
             if (keywordList.isEmpty()) {
-                System.out.println("   Aucun keyword valide après parsing - skip");
+                //System.out.println("   Aucun keyword valide après parsing - skip");
                 continue;
             }
 
-            System.out.println("\n====================================================");
-            System.out.println(" Processing tag: " + tag);
-            System.out.println("====================================================");
-            System.out.println("  Keywords du tag: " + keywordList);
-            System.out.println("  Évaluation de " + productArguments.size() + " arguments...\n");
+            // System.out.println("\n====================================================");
+            // System.out.println(" Processing tag: " + tag);
+            // System.out.println("====================================================");
+            // System.out.println("  Keywords du tag: " + keywordList);
+            // System.out.println("  Évaluation de " + productArguments.size() + " arguments...\n");
 
             List<ArgumentMatch> matches = new ArrayList<>();
 
@@ -363,8 +363,8 @@ public class CreateLinkProductToArgument extends BaseBuiltin {
 
             matches.sort(null); // Tri par compareTo (score décroissant)
 
-            System.out.println("  Résultats de scoring (" + matches.size() + " arguments matchés) :");
-            System.out.println("  " + repeat("-", 70));
+            // System.out.println("  Résultats de scoring (" + matches.size() + " arguments matchés) :");
+            // System.out.println("  " + repeat("-", 70));
 
             int linksCreated = 0;
             for (int i = 0; i < matches.size(); i++) {
@@ -372,13 +372,13 @@ public class CreateLinkProductToArgument extends BaseBuiltin {
                 String argumentUri = match.argumentNode.isURI() ? match.argumentNode.getURI() : match.argumentNode.toString();
 
                 String status = match.score >= SCORE_THRESHOLD ? " ACCEPTÉ" : " REJETÉ";
-                System.out.println("  [" + (i + 1) + "] " + status + " - " + match);
-                System.out.println("      Argument: " + argumentUri);
+                    // System.out.println("  [" + (i + 1) + "] " + status + " - " + match);
+                    // System.out.println("      Argument: " + argumentUri);
 
                 if (match.score >= SCORE_THRESHOLD && !match.matchedPairs.isEmpty()) {
-                    System.out.println("      Matchings:");
+                    // System.out.println("      Matchings:");
                     for (String pair : match.matchedPairs) {
-                        System.out.println("         " + pair);
+                        // System.out.println("         " + pair);
                     }
                 }
 
@@ -387,12 +387,25 @@ public class CreateLinkProductToArgument extends BaseBuiltin {
                     createLinkToArgument(g, productNode, match.argumentNode, NodeFactory.createURI(tag), tagLabel, context);
                     linksCreated++;
                 }
-                System.out.println();
+                // System.out.println();
             }
 
-            System.out.println("  ====================================================");
-            System.out.println("   " + linksCreated + " lien(s) créé(s) pour ce tag");
-            System.out.println("  ====================================================\n");
+            // System.out.println("  ====================================================");
+            // System.out.println("   " + linksCreated + " lien(s) créé(s) pour ce tag");
+            // System.out.println("  ====================================================\n");
+            
+            // Affichage des tags sans lien créé
+            if (linksCreated == 0) {
+                String tagLabel = getTagLabel(g, tag);
+                System.out.println("⚠ Tag sans lien avec argument : " + (tagLabel != null ? tagLabel : tag));
+                System.out.println("   URI: " + tag);
+                System.out.println("   Keywords: " + keywordList);
+                System.out.println("   Arguments évalués: " + matches.size());
+                if (!matches.isEmpty()) {
+                    System.out.println("   Meilleur score obtenu: " + String.format("%.3f", matches.get(0).score) + " (seuil: " + SCORE_THRESHOLD + ")");
+                }
+                System.out.println();
+            }
         }
 
         return true;
@@ -643,7 +656,7 @@ public class CreateLinkProductToArgument extends BaseBuiltin {
         Triple t3 = Triple.create(linkNode, HAS_REFERENCE_PRODUCT_ARGUMENT, argumentNode);
         context.add(t3);
 
-        System.out.println(" Created LinkToArgument: " + linkNode.toString() + " between Product: " + productNode.toString() + " and Argument: " + argumentNode.toString());
+        //System.out.println(" Created LinkToArgument: " + linkNode.toString() + " between Product: " + productNode.toString() + " and Argument: " + argumentNode.toString());
     }
 
     /**

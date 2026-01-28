@@ -1,0 +1,529 @@
+<rdf:RDF
+    xmlns:dct="http://purl.org/dc/terms/"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:aif="http://www.arg.dundee.ac.uk/aif#"
+    xmlns:owl="http://www.w3.org/2002/07/owl#"
+    xmlns:prov="http://www.w3.org/ns/prov#"
+    xmlns:mch="https://w3id.org/MCH/ontology/"
+    xmlns:skos="http://www.w3.org/2004/02/skos/core#"
+    xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+    xmlns:dcat="http://www.w3.org/ns/dcat#/"
+    xmlns:foaf="http://xmlns.com/foaf/0.1/"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+  <owl:Ontology rdf:about="https://w3id.org/MCH/ontology/MyChoiceTbox">
+    <rdfs:label xml:lang="en">Model Ontology of MyChoice</rdfs:label>
+    <rdfs:comment xml:lang="fr">Ontologie pour la modélisation d'un système d'aide à la décision multicritère avec parties prenantes, projets, critères et alternatives</rdfs:comment>
+    <dc:description>Tbox for the Mychoice ontology</dc:description>
+    <dc:creator>Pierre BISQUERT</dc:creator>
+    <dc:creator>Raphaël CONDE SALAZAR</dc:creator>
+    <dc:creator>Rallou THOMOPOULOS</dc:creator>
+  </owl:Ontology>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Stakeholder">
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Aim"/>
+    </owl:disjointWith>
+    <rdfs:label xml:lang="fr">Partie Prenante</rdfs:label>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Property"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <rdfs:label xml:lang="en">Stakeholder</rdfs:label>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Project"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Criterion"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Alternative"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="fr">Une partie prenante impliquée dans le processus de décision.</rdfs:comment>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/QualValue"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/TypeSource"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">A stakeholder involved in the decision-making process.</rdfs:comment>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Argument"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Criterion">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/QualValue"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/TypeSource"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Argument"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Property"/>
+    </owl:disjointWith>
+    <rdfs:label xml:lang="fr">Critère</rdfs:label>
+    <rdfs:comment xml:lang="fr">Un critère d'évaluation utilisé pour juger les alternatives.</rdfs:comment>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Aim"/>
+    </owl:disjointWith>
+    <rdfs:label xml:lang="en">Criterion</rdfs:label>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Alternative"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">An evaluation criterion used to judge alternatives.</rdfs:comment>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/TypeSource">
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="fr">Type de Source</rdfs:label>
+    <rdfs:label xml:lang="en">Source Type</rdfs:label>
+    <rdfs:comment xml:lang="fr">Le type ou la catégorie d'une source.</rdfs:comment>
+    <rdfs:comment xml:lang="en">The type or category of a source.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Property">
+    <rdfs:comment xml:lang="en">A measurable property of an alternative.</rdfs:comment>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="fr">Propriété</rdfs:label>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:label xml:lang="en">Property</rdfs:label>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/QualValue"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="fr">Une propriété mesurable d'une alternative.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/QualValue">
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="fr">Valeur Qualitative</rdfs:label>
+    <rdfs:label xml:lang="en">Qualitative Value</rdfs:label>
+    <rdfs:comment xml:lang="fr">Une valeur qualitative attribuée à une propriété.</rdfs:comment>
+    <rdfs:comment xml:lang="en">A qualitative value assigned to a property.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Alternative">
+    <rdfs:comment xml:lang="en">An alternative evaluated according to different criteria.</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/belongsToProject"/>
+        </owl:onProperty>
+        <owl:minCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:minCardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="fr">Alternative</rdfs:label>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+    <rdfs:label xml:lang="en">Alternative</rdfs:label>
+    <rdfs:comment xml:lang="fr">Une alternative évaluée selon différents critères.</rdfs:comment>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Argument"/>
+    </owl:disjointWith>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Aim">
+    <rdfs:label xml:lang="fr">Objectif</rdfs:label>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Argument"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+    <rdfs:label xml:lang="en">Aim</rdfs:label>
+    <rdfs:comment xml:lang="fr">Un objectif ou but associé à un critère.</rdfs:comment>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+    <rdfs:comment xml:lang="en">An objective or goal associated with a criterion.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Argument">
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasAlternative"/>
+        </owl:onProperty>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+    <rdfs:label xml:lang="fr">Argument</rdfs:label>
+    <rdfs:comment xml:lang="fr">Un argument ou justification lié à une évaluation.</rdfs:comment>
+    <rdfs:comment xml:lang="en">An argument or justification related to an evaluation.</rdfs:comment>
+    <rdfs:subClassOf>
+      <owl:Restriction>
+        <owl:onProperty>
+          <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasStakeholder"/>
+        </owl:onProperty>
+        <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#int"
+        >1</owl:cardinality>
+      </owl:Restriction>
+    </rdfs:subClassOf>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+    <rdfs:label xml:lang="en">Argument</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Project">
+    <rdfs:label xml:lang="fr">Projet</rdfs:label>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Criterion"/>
+    <rdfs:label xml:lang="en">Project</rdfs:label>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:comment xml:lang="en">A project subject to evaluation in the decision-making process.</rdfs:comment>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source"/>
+    </owl:disjointWith>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Aim"/>
+    <rdfs:comment xml:lang="fr">Un projet soumis à évaluation dans le processus de décision.</rdfs:comment>
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/Source">
+    <owl:disjointWith rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <owl:disjointWith>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    </owl:disjointWith>
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="fr">Source</rdfs:label>
+    <rdfs:label xml:lang="en">Source</rdfs:label>
+    <rdfs:comment xml:lang="fr">Une source d'information ou de données.</rdfs:comment>
+    <rdfs:comment xml:lang="en">A source of information or data.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/IncompatibleValues">
+    <rdfs:subClassOf>
+      <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH"/>
+    </rdfs:subClassOf>
+    <rdfs:label xml:lang="fr">Valeurs Incompatibles</rdfs:label>
+    <rdfs:label xml:lang="en">Incompatible Values</rdfs:label>
+    <rdfs:comment xml:lang="fr">Ensemble de valeurs mutuellement incompatibles.</rdfs:comment>
+    <rdfs:comment xml:lang="en">Set of mutually incompatible values.</rdfs:comment>
+  </owl:Class>
+  <owl:Class rdf:about="https://w3id.org/MCH/ontology/MCH">
+    <rdfs:comment xml:lang="en">MCH is the set of product and arguments pour My Choice.</rdfs:comment>
+    <rdfs:comment xml:lang="fr">MCH est l'ensemble des produits et des arguments pour My Choice.</rdfs:comment>
+  </owl:Class>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasExpertise">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Criterion"/>
+    <rdfs:label xml:lang="fr">a pour expertise</rdfs:label>
+    <rdfs:label xml:lang="en">has expertise</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Stakeholder"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasSource">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Source"/>
+    <rdfs:label xml:lang="fr">a pour source</rdfs:label>
+    <rdfs:label xml:lang="en">has source</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasTypeSource">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+    <rdfs:label xml:lang="fr">a pour type de source</rdfs:label>
+    <rdfs:label xml:lang="en">has source type</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Source"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasProject">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Project"/>
+    <rdfs:label xml:lang="fr">a pour projet</rdfs:label>
+    <rdfs:label xml:lang="en">has project</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasProperty">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+    <rdfs:label xml:lang="fr">a pour propriété</rdfs:label>
+    <rdfs:label xml:lang="en">has property</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasCriterion">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Criterion"/>
+    <rdfs:label xml:lang="fr">a pour critère</rdfs:label>
+    <rdfs:label xml:lang="en">has criterion</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Aim"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasStakeholder">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Stakeholder"/>
+    <rdfs:label xml:lang="fr">a pour partie prenante</rdfs:label>
+    <rdfs:label xml:lang="en">has stakeholder</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasIncompatibleValues">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+    <rdfs:label xml:lang="fr">a des valeurs incompatibles</rdfs:label>
+    <rdfs:label xml:lang="en">has incompatible values</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasAim">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Aim"/>
+    <rdfs:label xml:lang="fr">a pour objectif</rdfs:label>
+    <rdfs:label xml:lang="en">has aim</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/belongsToProject">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Project"/>
+    <rdfs:label xml:lang="fr">appartient au projet</rdfs:label>
+    <rdfs:label xml:lang="en">belongs to project</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasQualValue">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+    <rdfs:label xml:lang="fr">a pour valeur qualitative</rdfs:label>
+    <rdfs:label xml:lang="en">has qualitative value</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="https://w3id.org/MCH/ontology/hasAlternative">
+    <rdfs:range rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+    <rdfs:label xml:lang="fr">a pour alternative</rdfs:label>
+    <rdfs:label xml:lang="en">has alternative</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:ObjectProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/qualitativeValue">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">valeur qualitative</rdfs:label>
+    <rdfs:label xml:lang="en">qualitative value</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/QualValue"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/projectDescription">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">description du projet</rdfs:label>
+    <rdfs:label xml:lang="en">project description</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Project"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/criterionName">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom du critère</rdfs:label>
+    <rdfs:label xml:lang="en">criterion name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Criterion"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/infValue">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:label xml:lang="fr">valeur inférieure</rdfs:label>
+    <rdfs:label xml:lang="en">lower value</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/alternativeDescription">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">description de l'alternative</rdfs:label>
+    <rdfs:label xml:lang="en">alternative description</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/propertyName">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom de la propriété</rdfs:label>
+    <rdfs:label xml:lang="en">property name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/evaluationDate">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#date"/>
+    <rdfs:label xml:lang="fr">date d'évaluation</rdfs:label>
+    <rdfs:label xml:lang="en">evaluation date</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/projectNumber">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <rdfs:label xml:lang="fr">numéro de projet</rdfs:label>
+    <rdfs:label xml:lang="en">project number</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Project"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/unit">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">unité</rdfs:label>
+    <rdfs:label xml:lang="en">unit</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/aimDescription">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">description de l'objectif</rdfs:label>
+    <rdfs:label xml:lang="en">aim description</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Aim"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/typeProCon">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">type pour/contre</rdfs:label>
+    <rdfs:label xml:lang="en">pro/con type</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/incompatibleValue1">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <rdfs:label xml:lang="fr">valeur incompatible 1</rdfs:label>
+    <rdfs:label xml:lang="en">incompatible value 1</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/supValue">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#float"/>
+    <rdfs:label xml:lang="fr">valeur supérieure</rdfs:label>
+    <rdfs:label xml:lang="en">upper value</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/propertyUnit">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">unité de la propriété</rdfs:label>
+    <rdfs:label xml:lang="en">property unit</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Property"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/projectName">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom du projet</rdfs:label>
+    <rdfs:label xml:lang="en">project name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Project"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/sourceDate">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#gYear"/>
+    <rdfs:label xml:lang="fr">date de la source</rdfs:label>
+    <rdfs:label xml:lang="en">source date</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Source"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/obtention">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">obtention</rdfs:label>
+    <rdfs:label xml:lang="en">obtention</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Source"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/incompatibleValue2">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <rdfs:label xml:lang="fr">valeur incompatible 2</rdfs:label>
+    <rdfs:label xml:lang="en">incompatible value 2</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/IncompatibleValues"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/nameAlternative">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom de l'alternative</rdfs:label>
+    <rdfs:label xml:lang="en">alternative name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/typeSourceName">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom du type de source</rdfs:label>
+    <rdfs:label xml:lang="en">source type name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/hasCoverage">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <rdfs:label xml:lang="fr">a une couverture</rdfs:label>
+    <rdfs:label xml:lang="en">has coverage</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/sourceName">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom de la source</rdfs:label>
+    <rdfs:label xml:lang="en">source name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Source"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/typeSourceFiability">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#integer"/>
+    <rdfs:label xml:lang="fr">fiabilité du type</rdfs:label>
+    <rdfs:label xml:lang="en">type reliability</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/TypeSource"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/isProspective">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:label xml:lang="fr">est prospectif</rdfs:label>
+    <rdfs:label xml:lang="en">is prospective</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/stakeholderName">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">nom de la partie prenante</rdfs:label>
+    <rdfs:label xml:lang="en">stakeholder name</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Stakeholder"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/projectImage">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">image du projet</rdfs:label>
+    <rdfs:label xml:lang="en">project image</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Project"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/confidenceLevel">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#boolean"/>
+    <rdfs:label xml:lang="fr">niveau de confiance</rdfs:label>
+    <rdfs:label xml:lang="en">confidence level</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Alternative"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/explanation">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">explication</rdfs:label>
+    <rdfs:label xml:lang="en">explanation</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:DatatypeProperty>
+  <owl:DatatypeProperty rdf:about="https://w3id.org/MCH/ontology/assertion">
+    <rdfs:range rdf:resource="http://www.w3.org/2001/XMLSchema#string"/>
+    <rdfs:label xml:lang="fr">assertion</rdfs:label>
+    <rdfs:label xml:lang="en">assertion</rdfs:label>
+    <rdfs:domain rdf:resource="https://w3id.org/MCH/ontology/Argument"/>
+  </owl:DatatypeProperty>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#label"/>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2000/01/rdf-schema#comment"/>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#prefLabel"/>
+  <owl:AnnotationProperty rdf:about="http://purl.org/dc/terms/created"/>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#definition"/>
+  <owl:AnnotationProperty rdf:about="http://www.w3.org/2004/02/skos/core#altLabel"/>
+</rdf:RDF>

@@ -1,0 +1,111 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.3.0 Chrome/140.0.7339.249 Electron/38.7.2 Safari/537.36" version="29.3.0">
+  <diagram name="P-3178530410105 Tags" id="instantiation-p-3178530410105-tags">
+    <mxGraphModel dx="1426" dy="912" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Métadonnées -->
+        <mxCell id="meta" parent="1" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;labelBackgroundColor=none;strokeColor=#0F8B8D;fontSize=12;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;div&gt;&lt;b&gt;dc:title:&lt;/b&gt; P-3178530410105 - Tags&lt;/div&gt;&lt;div&gt;&lt;b&gt;dc:description:&lt;/b&gt; Tous les tags d'un produit donn\u00e9&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="320" x="20" y="10" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ns" parent="1" style="shape=note;whiteSpace=wrap;html=1;backgroundOutline=1;darkOpacity=0.05;labelBackgroundColor=none;fillColor=#FAE5C7;strokeColor=#0F8B8D;fontColor=#143642;" value="&lt;div&gt;&lt;b&gt;Relation :&lt;/b&gt; ncl:hasTag&lt;/div&gt;&lt;div&gt;5 tags associ\u00e9s au produit&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="280" x="860" y="10" as="geometry" />
+        </mxCell>
+
+        <!-- Produit (au centre) -->
+        <mxCell id="prod" parent="1" style="rounded=0;whiteSpace=wrap;html=1;snapToPoint=1;points=[[0.1,0],[0.2,0],[0.3,0],[0.4,0],[0.5,0],[0.6,0],[0.7,0],[0.8,0],[0.9,0],[0,0.1],[0,0.3],[0,0.5],[0,0.7],[0,0.9],[0.1,1],[0.2,1],[0.3,1],[0.4,1],[0.5,1],[0.6,1],[0.7,1],[0.8,1],[0.9,1],[1,0.1],[1,0.3],[1,0.5],[1,0.7],[1,0.9]];strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;fontStyle=1;" value="&lt;b&gt;ncl:P-3178530410105&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size: 11px;&quot;&gt;&amp;quot;Petites Madeleines&amp;quot;&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="240" x="480" y="360" as="geometry" />
+        </mxCell>
+
+        <!-- Tags (position radiale) -->
+        <!-- Tag 1: agent_charge (haut-gauche) -->
+        <mxCell id="tag-charge" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;b&gt;ncl:agent_charge&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="200" x="100" y="150" as="geometry" />
+        </mxCell>
+
+        <!-- Tag 2: conservateur_naturel (haut) -->
+        <mxCell id="tag-conservateur" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor:#FAE5C7;" value="&lt;b&gt;ncl:conservateur_naturel&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="220" x="480" y="120" as="geometry" />
+        </mxCell>
+
+        <!-- Tag 3: emballage_plastique (haut-droit) -->
+        <mxCell id="tag-emballage" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;b&gt;ncl:emballage_plastique&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="220" x="860" y="150" as="geometry" />
+        </mxCell>
+
+        <!-- Tag 4: regulateur_acidite (bas-droit) -->
+        <mxCell id="tag-acidite" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#FAE5C7;" value="&lt;b&gt;ncl:regulateur_acidite&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="240" x="820" y="570" as="geometry" />
+        </mxCell>
+
+        <!-- Tag 5: sel (bas-gauche) -->
+        <mxCell id="tag-sel" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor:#FAE5C7;" value="&lt;b&gt;ncl:sel&lt;/b&gt;" vertex="1">
+          <mxGeometry height="50" width="150" x="140" y="570" as="geometry" />
+        </mxCell>
+
+        <!-- Relations hasTag -->
+        <mxCell id="r-prod-charge" edge="1" parent="1" source="prod" target="tag-charge" style="endArrow=classic;html=1;strokeColor=#A8201A;fontColor=#143642;endSize=8;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl-charge" connectable="0" parent="r-prod-charge" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;fontStyle=1" value="ncl:hasTag" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="r-prod-conservateur" edge="1" parent="1" source="prod" target="tag-conservateur" style="endArrow=classic;html=1;strokeColor=#A8201A;fontColor=#143642;endSize=8;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl-conservateur" connectable="0" parent="r-prod-conservateur" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;fontStyle=1" value="ncl:hasTag" vertex="1">
+          <mxGeometry relative="1" x="0" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="r-prod-emballage" edge="1" parent="1" source="prod" target="tag-emballage" style="endArrow=classic;html=1;strokeColor=#A8201A;fontColor=#143642;endSize=8;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl-emballage" connectable="0" parent="r-prod-emballage" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;fontStyle=1" value="ncl:hasTag" vertex="1">
+          <mxGeometry relative="1" x="0.2" as="geometry">
+            <mxPoint y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="r-prod-acidite" edge="1" parent="1" source="prod" target="tag-acidite" style="endArrow=classic;html=1;strokeColor=#A8201A;fontColor=#143642;endSize=8;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl-acidite" connectable="0" parent="r-prod-acidite" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;fontStyle=1" value="ncl:hasTag" vertex="1">
+          <mxGeometry relative="1" x="0.2" as="geometry">
+            <mxPoint y="10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="r-prod-sel" edge="1" parent="1" source="prod" target="tag-sel" style="endArrow=classic;html=1;strokeColor=#A8201A;fontColor=#143642;endSize=8;rounded=0;">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lbl-sel" connectable="0" parent="r-prod-sel" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];labelBackgroundColor=#ffffff;fontColor=#143642;fontSize=11;fontStyle=1" value="ncl:hasTag" vertex="1">
+          <mxGeometry relative="1" x="-0.2" as="geometry">
+            <mxPoint y="10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Classes de référence -->
+        <mxCell id="class-product" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#E8DCC0;dashed=1;" value="&lt;b&gt;&lt;&lt;Class&gt;&gt;&lt;/b&gt; Product" vertex="1">
+          <mxGeometry height="40" width="120" x="510" y="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="class-tag" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor=#E8DCC0;dashed=1;" value="&lt;b&gt;&lt;&lt;Class&gt;&gt;&lt;/b&gt; Tag" vertex="1">
+          <mxGeometry height="40" width="100" x="920" y="100" as="geometry" />
+        </mxCell>
+
+        <!-- Légende -->
+        <mxCell id="legend" parent="1" style="rounded=0;whiteSpace=wrap;html=1;strokeColor=#0F8B8D;fontColor=#143642;fillColor:#FAE5C7;align=left;verticalAlign=top;fontSize=11;" value="&lt;b&gt;Schéma : Tags du produit P-3178530410105&lt;/b&gt;&lt;br&gt;&lt;br&gt;&lt;b&gt;Tags :&lt;/b&gt;&lt;br&gt;• agent_charge&lt;br&gt;• conservateur_naturel&lt;br&gt;• emballage_plastique&lt;br&gt;• regulateur_acidite&lt;br&gt;• sel&lt;br&gt;&lt;br&gt;&lt;b&gt;Relation :&lt;/b&gt; ncl:hasTag" vertex="1">
+          <mxGeometry height="190" width="280" x="10" y="630" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
