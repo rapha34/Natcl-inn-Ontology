@@ -1,0 +1,72 @@
+1. Vérifier les faits stricts
+
+% Tous les produits
+product(X).
+
+% Tous les arguments
+argument(X).
+
+% Arguments d'un produit spécifique
+argument(Arg), argProduct(Arg, madeleine_x).
+
+% Arguments PRO vs CON
+argument(Arg), argProduct(Arg, madeleine_x), argPolarity(Arg, pro).
+argument(Arg), argProduct(Arg, madeleine_x), argPolarity(Arg, con).
+
+2. Vérifier les déductions (règles)
+
+% Produits naturels
+naturalProduct(X).
+
+% Produits NON naturels
+notNaturalProduct(X).
+
+% Produits à soutenir
+support(X).
+
+% Produits à éviter
+avoid(X).
+
+% Arguments forts
+strongArgument(X).
+
+% Produits avec arguments PRO forts
+hasStrongPro(X).
+
+% Produits avec arguments CON forts
+hasStrongCon(X).
+
+3. Cas d'étude spécifiques
+
+% Cas madeleine_x : devrait être "avoid" (conservateur artificiel critique)
+support(madeleine_x).           % ✗ devrait être faux
+avoid(madeleine_x).             % ✓ devrait être vrai
+naturalProduct(madeleine_x).    % ✗ devrait être faux
+
+% Cas madeleine_biscuiterie : devrait être "support"
+support(madeleine_biscuiterie).     % ✓ devrait être vrai
+avoid(madeleine_biscuiterie).       % ✗ devrait être faux
+naturalProduct(madeleine_biscuiterie). % ✓ devrait être vrai
+
+4. Debugging : Tracer la logique
+
+% Pour madeleine_x, vérifier tous les arguments
+argument(Arg), argProduct(Arg, madeleine_x), 
+argPolarity(Arg, Polarity), argTag(Arg, Tag).
+
+% Voir si arg1 est vraiment "strong"
+strongArgument(arg1).
+
+% Vérifier les arguments critiques
+argument(Arg), argTag(Arg, Tag), criticalTag(Tag).
+
+% Voir tous les produits avec arguments critiques
+hasCriticalCon(X).
+
+5. Tester les contradictions
+
+% Produits qui violent la contrainte (impossible)
+naturalProduct(X), notNaturalProduct(X).
+
+% Produits contradictoires (support ET avoid)
+support(X), avoid(X).

@@ -143,20 +143,37 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                 e.printStackTrace();
             }
             
-            // Extraction automatique vers DAMN (JSON et texte)
+            // Extraction automatique vers DAMN (JSON et texte) - V1
             String damnJsonFileName = fileName.replaceFirst("[.][^.]+$", "_damn.json");
             String damnTextFileName = fileName.replaceFirst("[.][^.]+$", "_damn.txt");
             String damnJsonFilePath = NatclinnConf.folderForResults + "/" + damnJsonFileName;
             String damnTextFilePath = NatclinnConf.folderForResults + "/" + damnTextFileName;
             
             try {
-                System.out.println("Extraction vers DAMN (JSON et texte)...");
+                System.out.println("Extraction vers DAMN V1 (JSON et texte)...");
                 ExportMychoiceProjectToDamn.exportProjectToDamn(xmlFilePath, damnJsonFilePath, damnTextFilePath);
-                System.out.println("Fichiers DAMN générés :");
+                System.out.println("Fichiers DAMN V1 générés :");
                 System.out.println("  - JSON : " + damnJsonFilePath);
                 System.out.println("  - Texte : " + damnTextFilePath);
             } catch (Exception e) {
-                System.err.println("Erreur lors de l'extraction DAMN : " + e.getMessage());
+                System.err.println("Erreur lors de l'extraction DAMN V1 : " + e.getMessage());
+                e.printStackTrace();
+            }
+            
+            // Extraction automatique vers DAMN V2 (JSON et texte)
+            String damnV2JsonFileName = fileName.replaceFirst("[.][^.]+$", "_damn_v2.json");
+            String damnV2TextFileName = fileName.replaceFirst("[.][^.]+$", "_damn_v2.txt");
+            String damnV2JsonFilePath = NatclinnConf.folderForResults + "/" + damnV2JsonFileName;
+            String damnV2TextFilePath = NatclinnConf.folderForResults + "/" + damnV2TextFileName;
+            
+            try {
+                System.out.println("Extraction vers DAMN V2 (JSON et texte)...");
+                ExportMychoiceProjectToDamn.exportProjectToDamnV2(xmlFilePath, damnV2JsonFilePath, damnV2TextFilePath);
+                System.out.println("Fichiers DAMN V2 générés :");
+                System.out.println("  - JSON : " + damnV2JsonFilePath);
+                System.out.println("  - Texte : " + damnV2TextFilePath);
+            } catch (Exception e) {
+                System.err.println("Erreur lors de l'extraction DAMN V2 : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -399,8 +416,13 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                             Property hasTagCheck = infModel.getProperty(ncl + "hasTagCheck");
                             Property hasIngredientR = infModel.getProperty(ncl + "hasIngredientR");
                             Property hasRole = infModel.getProperty(ncl + "hasRole");
+                            Property hasQuantifiedElement = infModel.getProperty(ncl + "hasQuantifiedElement");
+                            Property refersTo = infModel.getProperty(ncl + "refersTo");
                             
-                            if (prodStmt.getPredicate().equals(hasTag) || prodStmt.getPredicate().equals(hasTagCheck) || prodStmt.getPredicate().equals(hasIngredientR)) {
+                            if (prodStmt.getPredicate().equals(hasTag)
+                                || prodStmt.getPredicate().equals(hasTagCheck)
+                                || prodStmt.getPredicate().equals(hasIngredientR)
+                                || prodStmt.getPredicate().equals(hasQuantifiedElement)) {
                                 if (prodStmt.getObject().isResource()) {
                                     Resource linkedResource = prodStmt.getResource();
                                     // Copier toutes les propriétés du tag/ingrédient
@@ -416,6 +438,38 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                                             while (roleProps.hasNext()) {
                                                 Statement roleStmt = roleProps.nextStatement();
                                                 mychoiceModel.add(roleStmt);
+                                            }
+                                        }
+
+                                        // Si c'est un QuantifiedElement, copier aussi le composant référencé
+                                        if (linkedStmt.getPredicate().equals(refersTo) && linkedStmt.getObject().isResource()) {
+                                            Resource compRes = linkedStmt.getResource();
+                                            StmtIterator compProps = infModel.listStatements(compRes, null, (RDFNode) null);
+                                            while (compProps.hasNext()) {
+                                                Statement compStmt = compProps.nextStatement();
+                                                mychoiceModel.add(compStmt);
+
+                                                // Copier les tags/roles du composant
+                                                if ((compStmt.getPredicate().equals(hasTag)
+                                                     || compStmt.getPredicate().equals(hasTagCheck)
+                                                     || compStmt.getPredicate().equals(hasIngredientR)
+                                                     || compStmt.getPredicate().equals(hasQuantifiedElement))
+                                                    && compStmt.getObject().isResource()) {
+                                                    Resource compLinkedRes = compStmt.getResource();
+                                                    StmtIterator compLinkedProps = infModel.listStatements(compLinkedRes, null, (RDFNode) null);
+                                                    while (compLinkedProps.hasNext()) {
+                                                        Statement compLinkedStmt = compLinkedProps.nextStatement();
+                                                        mychoiceModel.add(compLinkedStmt);
+                                                    }
+                                                }
+                                                if (compStmt.getPredicate().equals(hasRole) && compStmt.getObject().isResource()) {
+                                                    Resource roleRes = compStmt.getResource();
+                                                    StmtIterator roleProps = infModel.listStatements(roleRes, null, (RDFNode) null);
+                                                    while (roleProps.hasNext()) {
+                                                        Statement roleStmt = roleProps.nextStatement();
+                                                        mychoiceModel.add(roleStmt);
+                                                    }
+                                                }
                                             }
                                         }
                                     }

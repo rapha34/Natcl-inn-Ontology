@@ -91,7 +91,7 @@ public class ExtractMychoiceProjectToExcel {
         Set<TypeSourceData> typeSources = new HashSet<>();
         Set<HasExpertiseData> hasExpertises = new HashSet<>();
         Set<ProductData> products = new HashSet<>();
-        Set<IngredientData> ingredients = new HashSet<>();
+        List<CompositionData> compositions = new ArrayList<>();
         
         // Extraire les données du projet
         ProjectData projData = extractProject(om, projectRes, mch);
@@ -105,8 +105,9 @@ public class ExtractMychoiceProjectToExcel {
         Property hasTag = om.getProperty(ncl + "hasTag");
         Property hasTagCheck = om.getProperty(ncl + "hasTagCheck");
         Property hasRole = om.getProperty(ncl + "hasRole");
-        Property hasIngredient = om.getProperty(ncl + "hasIngredient");
-        Property hasIngredientR = om.getProperty(ncl + "hasIngredientR");
+        Property hasQuantifiedElement = om.getProperty(ncl + "hasQuantifiedElement");
+        Property refersTo = om.getProperty(ncl + "refersTo");
+        Property rank = om.getProperty(ncl + "rank");
         Property prefLabel = om.getProperty(skos + "prefLabel");
         
         StmtIterator altIter = om.listStatements(null, hasProject, projectRes);
@@ -166,43 +167,9 @@ public class ExtractMychoiceProjectToExcel {
                         }
                     }
                     
-                    // Récupérer tous les ingrédients du produit (hasIngredient ou hasIngredientR)
-                    StmtIterator ingredientIter = om.listStatements(productRes, hasIngredient, (RDFNode)null);
-                    if (!ingredientIter.hasNext()) {
-                        ingredientIter = om.listStatements(productRes, hasIngredientR, (RDFNode)null);
-                    }
-                    
-                    while (ingredientIter.hasNext()) {
-                        Statement ingredientStmt = ingredientIter.nextStatement();
-                        if (ingredientStmt.getObject().isResource()) {
-                            Resource ingredientRes = ingredientStmt.getResource();
-                            String ingredientUri = ingredientRes.getURI();
-                            String ingredientName = "";
-                            if (om.contains(ingredientRes, prefLabel, (RDFNode)null)) {
-                                ingredientName = om.getProperty(ingredientRes, prefLabel).getString();
-                            }
-                            
-                            // Récupérer tous les tags de l'ingrédient via hasRole
-                            StmtIterator ingredientTagIter = om.listStatements(ingredientRes, hasRole, (RDFNode)null);
-                            while (ingredientTagIter.hasNext()) {
-                                Statement ingredientTagStmt = ingredientTagIter.nextStatement();
-                                if (ingredientTagStmt.getObject().isResource()) {
-                                    Resource ingredientTagRes = ingredientTagStmt.getResource();
-                                    String ingredientTagLabel = "";
-                                    if (om.contains(ingredientTagRes, prefLabel, (RDFNode)null)) {
-                                        ingredientTagLabel = om.getProperty(ingredientTagRes, prefLabel).getString();
-                                    }
-                                    
-                                    IngredientData ingredData = new IngredientData();
-                                    ingredData.productUri = productUri;
-                                    ingredData.ingredientUri = ingredientUri;
-                                    ingredData.nameIngredient = ingredientName;
-                                    ingredData.tagIngredient = ingredientTagLabel;
-                                    ingredients.add(ingredData);
-                                }
-                            }
-                        }
-                    }
+                    // Récupérer toute la composition via hasQuantifiedElement (produits + ingrédients)
+                    collectCompositions(om, productRes, compositions, hasQuantifiedElement, refersTo, rank,
+                                        hasTag, hasTagCheck, hasRole, prefLabel, ncl);
                 }
             }
         }
@@ -239,11 +206,11 @@ public class ExtractMychoiceProjectToExcel {
         
         // Créer le fichier Excel
         writeToExcel(outputExcel, projData, new ArrayList<>(alternatives.values()), 
-                     new ArrayList<>(arguments.values()), new ArrayList<>(stakeholders),
-                     new ArrayList<>(criteria), new ArrayList<>(properties),
-                     new ArrayList<>(sources), new ArrayList<>(typeSources),
-                     new ArrayList<>(hasExpertises), new ArrayList<>(products),
-                     new ArrayList<>(ingredients));
+                 new ArrayList<>(arguments.values()), new ArrayList<>(stakeholders),
+                 new ArrayList<>(criteria), new ArrayList<>(properties),
+                 new ArrayList<>(sources), new ArrayList<>(typeSources),
+                 new ArrayList<>(hasExpertises), new ArrayList<>(products),
+                 compositions);
     }
     
     private static ProjectData extractProject(Model om, Resource projRes, String mch) {
@@ -414,6 +381,141 @@ public class ExtractMychoiceProjectToExcel {
         
         return (data.stakeholder != null && data.criterion != null) ? data : null;
     }
+
+    private static void collectCompositions(Model om, Resource startCompound, List<CompositionData> compositions,
+                                            Property hasQuantifiedElement, Property refersTo, Property rank,
+                                            Property hasTag, Property hasTagCheck, Property hasRole, Property prefLabel,
+                                            String ncl) {
+        if (startCompound == null) return;
+
+        Set<String> visited = new HashSet<>();
+        List<Resource> queue = new ArrayList<>();
+        queue.add(startCompound);
+
+        while (!queue.isEmpty()) {
+            Resource compound = queue.remove(0);
+            if (compound == null || compound.getURI() == null) continue;
+            if (!visited.add(compound.getURI())) continue;
+
+            String compoundUri = compound.getURI();
+            String compoundName = getPrefLabel(om, compound, prefLabel);
+
+            StmtIterator qIter = om.listStatements(compound, hasQuantifiedElement, (RDFNode) null);
+            while (qIter.hasNext()) {
+                Statement qStmt = qIter.nextStatement();
+                if (!qStmt.getObject().isResource()) continue;
+                Resource qRes = qStmt.getResource();
+
+                Resource component = getObjectProperty(om, qRes, refersTo.getURI());
+                if (component == null || component.getURI() == null) continue;
+
+                String componentUri = component.getURI();
+                String componentName = getPrefLabel(om, component, prefLabel);
+                String componentType = getComponentType(om, component, ncl);
+                String rankVal = getLiteralProperty(om, qRes, rank);
+
+                List<String> tags = getComponentTags(om, component, componentType, hasTag, hasTagCheck, hasRole, prefLabel);
+                if (tags.isEmpty()) {
+                    CompositionData comp = new CompositionData();
+                    comp.uriCompose = compoundUri;
+                    comp.nameCompose = compoundName;
+                    comp.typeComposant = componentType;
+                    comp.uriComposant = componentUri;
+                    comp.nameComposant = componentName;
+                    comp.rank = rankVal;
+                    comp.tagComposant = "";
+                    compositions.add(comp);
+                } else {
+                    for (String tag : tags) {
+                        CompositionData comp = new CompositionData();
+                        comp.uriCompose = compoundUri;
+                        comp.nameCompose = compoundName;
+                        comp.typeComposant = componentType;
+                        comp.uriComposant = componentUri;
+                        comp.nameComposant = componentName;
+                        comp.rank = rankVal;
+                        comp.tagComposant = tag;
+                        compositions.add(comp);
+                    }
+                }
+
+                if (om.contains(component, hasQuantifiedElement, (RDFNode) null)) {
+                    queue.add(component);
+                }
+            }
+        }
+    }
+
+    private static String getComponentType(Model om, Resource res, String ncl) {
+        if (hasType(om, res, ncl + "Product")
+                || hasType(om, res, ncl + "SimpleProduct")
+                || hasType(om, res, ncl + "CompositeProduct")) {
+            return "Product";
+        }
+        if (hasType(om, res, ncl + "Ingredient")
+                || hasType(om, res, ncl + "SimpleIngredient")
+                || hasType(om, res, ncl + "CompositeIngredient")) {
+            return "Ingredient";
+        }
+        return "";
+    }
+
+    private static boolean hasType(Model om, Resource res, String typeUri) {
+        return om.contains(res, RDF.type, om.getResource(typeUri));
+    }
+
+    private static String getPrefLabel(Model om, Resource res, Property prefLabel) {
+        if (res == null || prefLabel == null) return "";
+        Statement stmt = om.getProperty(res, prefLabel);
+        return (stmt != null) ? stmt.getString() : "";
+    }
+
+    private static String getLiteralProperty(Model om, Resource res, Property prop) {
+        if (res == null || prop == null) return "";
+        Statement stmt = om.getProperty(res, prop);
+        if (stmt != null && stmt.getObject().isLiteral()) {
+            Literal lit = stmt.getLiteral();
+            return lit.getLexicalForm();
+        }
+        return "";
+    }
+
+    private static List<String> getComponentTags(Model om, Resource component, String componentType,
+                                                 Property hasTag, Property hasTagCheck, Property hasRole,
+                                                 Property prefLabel) {
+        List<String> tags = new ArrayList<>();
+        if (component == null) return tags;
+
+        if ("Product".equals(componentType)) {
+            StmtIterator tagIter = om.listStatements(component, hasTag, (RDFNode) null);
+            while (tagIter.hasNext()) {
+                Statement tagStmt = tagIter.nextStatement();
+                if (tagStmt.getObject().isResource()) {
+                    String tagLabel = getPrefLabel(om, tagStmt.getResource(), prefLabel);
+                    if (!tagLabel.isEmpty()) tags.add(tagLabel);
+                }
+            }
+            StmtIterator tagCheckIter = om.listStatements(component, hasTagCheck, (RDFNode) null);
+            while (tagCheckIter.hasNext()) {
+                Statement tagStmt = tagCheckIter.nextStatement();
+                if (tagStmt.getObject().isResource()) {
+                    String tagLabel = getPrefLabel(om, tagStmt.getResource(), prefLabel);
+                    if (!tagLabel.isEmpty()) tags.add(tagLabel);
+                }
+            }
+        } else if ("Ingredient".equals(componentType)) {
+            StmtIterator roleIter = om.listStatements(component, hasRole, (RDFNode) null);
+            while (roleIter.hasNext()) {
+                Statement roleStmt = roleIter.nextStatement();
+                if (roleStmt.getObject().isResource()) {
+                    String tagLabel = getPrefLabel(om, roleStmt.getResource(), prefLabel);
+                    if (!tagLabel.isEmpty()) tags.add(tagLabel);
+                }
+            }
+        }
+
+        return tags;
+    }
     
     private static String getStringProperty(Model om, Resource res, String propURI) {
         Statement stmt = om.getProperty(res, om.getProperty(propURI));
@@ -467,7 +569,7 @@ public class ExtractMychoiceProjectToExcel {
                                      List<TypeSourceData> typeSources,
                                      List<HasExpertiseData> hasExpertises,
                                      List<ProductData> products,
-                                     List<IngredientData> ingredients) throws IOException {
+                                     List<CompositionData> compositions) throws IOException {
         
         try (Workbook workbook = new XSSFWorkbook()) {
 
@@ -594,7 +696,7 @@ public class ExtractMychoiceProjectToExcel {
                 row.createCell(1).setCellValue(he.criterion != null ? he.criterion.name : "");
             }
 
-            // Feuille Product
+            // Feuille Product (tags agrégés)
             Sheet productSheet = workbook.createSheet("product");
             headerRow = productSheet.createRow(0);
             headerRow.createCell(0).setCellValue("nameAlternative");
@@ -602,40 +704,84 @@ public class ExtractMychoiceProjectToExcel {
             headerRow.createCell(2).setCellValue("nameProduct");
             headerRow.createCell(3).setCellValue("tagProduct");
 
-            rowIdx = 1;
+            Map<String, ProductAgg> productAggMap = new HashMap<>();
             for (ProductData prod : products) {
-                Row row = productSheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(prod.nameAlternative);
-                row.createCell(1).setCellValue(prod.productUri);
-                row.createCell(2).setCellValue(prod.nameProduct);
-                row.createCell(3).setCellValue(prod.tagProduct);
+                String key = (prod.nameAlternative != null ? prod.nameAlternative : "") + "||" +
+                             (prod.productUri != null ? prod.productUri : "");
+                ProductAgg agg = productAggMap.computeIfAbsent(key, k -> {
+                    ProductAgg pa = new ProductAgg();
+                    pa.nameAlternative = prod.nameAlternative;
+                    pa.productUri = prod.productUri;
+                    pa.nameProduct = prod.nameProduct;
+                    return pa;
+                });
+                if (prod.tagProduct != null && !prod.tagProduct.isEmpty()) {
+                    agg.tags.add(prod.tagProduct);
+                }
             }
-
-            // Feuille Ingredient
-            Sheet ingredientSheet = workbook.createSheet("ingredient");
-            headerRow = ingredientSheet.createRow(0);
-            headerRow.createCell(0).setCellValue("productUri");
-            headerRow.createCell(1).setCellValue("ingredientUri");
-            headerRow.createCell(2).setCellValue("nameIngredient");
-            headerRow.createCell(3).setCellValue("tagIngredient");
 
             rowIdx = 1;
-            for (IngredientData ingred : ingredients) {
-                Row row = ingredientSheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(ingred.productUri);
-                row.createCell(1).setCellValue(ingred.ingredientUri);
-                row.createCell(2).setCellValue(ingred.nameIngredient);
-                row.createCell(3).setCellValue(ingred.tagIngredient);
+            for (ProductAgg agg : productAggMap.values()) {
+                Row row = productSheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(agg.nameAlternative);
+                row.createCell(1).setCellValue(agg.productUri);
+                row.createCell(2).setCellValue(agg.nameProduct);
+                row.createCell(3).setCellValue(joinTags(agg.tags));
             }
 
-            // Assurer l'ordre final des onglets (argument, project, alternative, typesource, hasexpertise, product, ingredient)
+            // Feuille Composition (tags agrégés)
+            Sheet compositionSheet = workbook.createSheet("composition");
+            headerRow = compositionSheet.createRow(0);
+            headerRow.createCell(0).setCellValue("uriCompose");
+            headerRow.createCell(1).setCellValue("nameCompose");
+            headerRow.createCell(2).setCellValue("typeComposant");
+            headerRow.createCell(3).setCellValue("uriComposant");
+            headerRow.createCell(4).setCellValue("nameComposant");
+            headerRow.createCell(5).setCellValue("Rang");
+            headerRow.createCell(6).setCellValue("tagComposant");
+
+            Map<String, CompositionAgg> compositionAggMap = new HashMap<>();
+            for (CompositionData comp : compositions) {
+                String key = (comp.uriCompose != null ? comp.uriCompose : "") + "||" +
+                             (comp.uriComposant != null ? comp.uriComposant : "") + "||" +
+                             (comp.rank != null ? comp.rank : "");
+                CompositionAgg agg = compositionAggMap.computeIfAbsent(key, k -> {
+                    CompositionAgg ca = new CompositionAgg();
+                    ca.uriCompose = comp.uriCompose;
+                    ca.nameCompose = comp.nameCompose;
+                    ca.typeComposant = comp.typeComposant;
+                    ca.uriComposant = comp.uriComposant;
+                    ca.nameComposant = comp.nameComposant;
+                    ca.rank = comp.rank;
+                    return ca;
+                });
+                if (comp.tagComposant != null && !comp.tagComposant.isEmpty()) {
+                    agg.tags.add(comp.tagComposant);
+                }
+            }
+
+            List<CompositionAgg> orderedCompositions = orderCompositions(new ArrayList<>(compositionAggMap.values()));
+
+            rowIdx = 1;
+            for (CompositionAgg agg : orderedCompositions) {
+                Row row = compositionSheet.createRow(rowIdx++);
+                row.createCell(0).setCellValue(agg.uriCompose);
+                row.createCell(1).setCellValue(agg.nameCompose);
+                row.createCell(2).setCellValue(agg.typeComposant);
+                row.createCell(3).setCellValue(agg.uriComposant);
+                row.createCell(4).setCellValue(agg.nameComposant);
+                row.createCell(5).setCellValue(agg.rank);
+                row.createCell(6).setCellValue(joinTags(agg.tags));
+            }
+
+            // Assurer l'ordre final des onglets (argument, project, alternative, typesource, hasexpertise, product, composition)
             workbook.setSheetOrder("argument", 0);
             workbook.setSheetOrder("project", 1);
             workbook.setSheetOrder("alternative", 2);
             workbook.setSheetOrder("typesource", 3);
             workbook.setSheetOrder("hasexpertise", 4);
             workbook.setSheetOrder("product", 5);
-            workbook.setSheetOrder("ingredient", 6);
+            workbook.setSheetOrder("composition", 6);
 
             // Auto-ajuster la largeur des colonnes pour toutes les feuilles
             autoSizeColumns(argSheet);
@@ -644,7 +790,7 @@ public class ExtractMychoiceProjectToExcel {
             autoSizeColumns(tsSheet);
             autoSizeColumns(heSheet);
             autoSizeColumns(productSheet);
-            autoSizeColumns(ingredientSheet);
+            autoSizeColumns(compositionSheet);
 
             // Écrire le fichier
             try (FileOutputStream fos = new FileOutputStream(outputFile)) {
@@ -675,6 +821,105 @@ public class ExtractMychoiceProjectToExcel {
                     sheet.setColumnWidth(i, newWidth);
                 }
             }
+        }
+    }
+
+    private static String joinTags(Set<String> tags) {
+        if (tags == null || tags.isEmpty()) return "";
+        List<String> sorted = new ArrayList<>(tags);
+        sorted.removeIf(t -> t == null || t.isEmpty());
+        sorted.sort(String.CASE_INSENSITIVE_ORDER);
+        StringBuilder sb = new StringBuilder();
+        for (String tag : sorted) {
+            if (tag == null || tag.isEmpty()) continue;
+            if (sb.length() > 0) sb.append(", ");
+            sb.append(tag);
+        }
+        return sb.toString();
+    }
+
+    private static List<CompositionAgg> orderCompositions(List<CompositionAgg> compositions) {
+        Map<String, List<CompositionAgg>> byCompose = new HashMap<>();
+        Set<String> componentUris = new HashSet<>();
+        Set<String> composeUris = new HashSet<>();
+
+        for (CompositionAgg comp : compositions) {
+            if (comp.uriCompose != null) {
+                composeUris.add(comp.uriCompose);
+                byCompose.computeIfAbsent(comp.uriCompose, k -> new ArrayList<>()).add(comp);
+            }
+            // Enregistrer TOUS les composants (Product ET Ingredient) qui sont référencés
+            if (comp.uriComposant != null) {
+                componentUris.add(comp.uriComposant);
+            }
+        }
+
+        // Trier chaque groupe par rang
+        for (List<CompositionAgg> list : byCompose.values()) {
+            list.sort((a, b) -> compareRankThenName(a, b));
+        }
+
+        // Racines = compose qui ne sont pas des composants d'un autre compose
+        List<String> roots = new ArrayList<>();
+        for (String uri : composeUris) {
+            if (!componentUris.contains(uri)) {
+                roots.add(uri);
+            }
+        }
+        roots.sort(String.CASE_INSENSITIVE_ORDER);
+
+        List<CompositionAgg> ordered = new ArrayList<>();
+        Set<String> visitedCompose = new HashSet<>();
+
+        for (String root : roots) {
+            appendCompositionTree(root, byCompose, visitedCompose, ordered);
+        }
+
+        // Ajouter tout compose restant (si cycles ou racines non détectées)
+        for (String uri : composeUris) {
+            if (!visitedCompose.contains(uri)) {
+                appendCompositionTree(uri, byCompose, visitedCompose, ordered);
+            }
+        }
+
+        return ordered;
+    }
+
+    private static void appendCompositionTree(String composeUri,
+                                              Map<String, List<CompositionAgg>> byCompose,
+                                              Set<String> visitedCompose,
+                                              List<CompositionAgg> ordered) {
+        if (composeUri == null || visitedCompose.contains(composeUri)) return;
+        visitedCompose.add(composeUri);
+
+        List<CompositionAgg> children = byCompose.get(composeUri);
+        if (children == null) return;
+
+        for (CompositionAgg child : children) {
+            ordered.add(child);
+            // Vérifier si ce composant est lui-même un produit composite (a des enfants)
+            if (child.uriComposant != null && byCompose.containsKey(child.uriComposant)) {
+                appendCompositionTree(child.uriComposant, byCompose, visitedCompose, ordered);
+            }
+        }
+    }
+
+    private static int compareRankThenName(CompositionAgg a, CompositionAgg b) {
+        int ra = parseRank(a.rank);
+        int rb = parseRank(b.rank);
+        if (ra != rb) return Integer.compare(ra, rb);
+        String na = a.nameComposant != null ? a.nameComposant : "";
+        String nb = b.nameComposant != null ? b.nameComposant : "";
+        return na.compareToIgnoreCase(nb);
+    }
+
+    private static int parseRank(String rank) {
+        if (rank == null || rank.trim().isEmpty()) return Integer.MAX_VALUE;
+        try {
+            double d = Double.parseDouble(rank.trim());
+            return (int) Math.round(d);
+        } catch (NumberFormatException e) {
+            return Integer.MAX_VALUE;
         }
     }
     
@@ -790,22 +1035,20 @@ public class ExtractMychoiceProjectToExcel {
                 && (tagProduct != null && tagProduct.equals(other.tagProduct));
         }
     }
-    
-    static class IngredientData {
-        String productUri, ingredientUri, nameIngredient, tagIngredient;
-        @Override
-        public int hashCode() {
-            return (productUri != null ? productUri.hashCode() : 0)
-                 + (ingredientUri != null ? ingredientUri.hashCode() : 0)
-                 + (tagIngredient != null ? tagIngredient.hashCode() : 0);
-        }
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof IngredientData)) return false;
-            IngredientData other = (IngredientData) obj;
-            return (productUri != null && productUri.equals(other.productUri))
-                && (ingredientUri != null && ingredientUri.equals(other.ingredientUri))
-                && (tagIngredient != null && tagIngredient.equals(other.tagIngredient));
-        }
+
+    static class ProductAgg {
+        String nameAlternative, productUri, nameProduct;
+        Set<String> tags = new HashSet<>();
+    }
+
+    static class CompositionData {
+        String uriCompose, nameCompose, typeComposant;
+        String uriComposant, nameComposant, rank, tagComposant;
+    }
+
+    static class CompositionAgg {
+        String uriCompose, nameCompose, typeComposant;
+        String uriComposant, nameComposant, rank;
+        Set<String> tags = new HashSet<>();
     }
 }

@@ -40,12 +40,19 @@ public class ExportMychoiceProjectToDamn {
         String baseName = inputFileName.replaceFirst("[.][^.]+$", ""); // Retire l'extension
         String outputJson = NatclinnConf.folderForResults + "/" + baseName + "_damn.json";
         String outputText = NatclinnConf.folderForResults + "/" + baseName + "_damn.txt";
+        String outputJsonV2 = NatclinnConf.folderForResults + "/" + baseName + "_damn_v2.json";
+        String outputTextV2 = NatclinnConf.folderForResults + "/" + baseName + "_damn_v2.txt";
         
         try {
             exportProjectToDamn(aboxFile, outputJson, outputText);
-            System.out.println("Export réussi :");
+            System.out.println("Export V1 réussi :");
             System.out.println("  - JSON : " + outputJson);
             System.out.println("  - Texte : " + outputText);
+            
+            exportProjectToDamnV2(aboxFile, outputJsonV2, outputTextV2);
+            System.out.println("Export V2 réussi :");
+            System.out.println("  - JSON : " + outputJsonV2);
+            System.out.println("  - Texte : " + outputTextV2);
         } catch (Exception e) {
             System.err.println("Erreur lors de l'export : " + e.getMessage());
             e.printStackTrace();
@@ -119,6 +126,66 @@ public class ExportMychoiceProjectToDamn {
     }
     
     /**
+     * Exporte un projet MyChoice vers les formats JSON et texte DAMN V2.
+     * 
+     * @param aboxFile Chemin du fichier RDF/XML contenant le projet MyChoice
+     * @param outputJson Chemin du fichier JSON de sortie V2
+     * @param outputText Chemin du fichier texte de sortie V2
+     */
+    public static void exportProjectToDamnV2(String aboxFile, String outputJson, String outputText) 
+            throws FileNotFoundException, IOException {
+        
+        // Charger le modèle RDF
+        Model om = ModelFactory.createDefaultModel();
+        try (FileInputStream fis = new FileInputStream(aboxFile)) {
+            om.read(fis, null, "RDF/XML");
+        }
+        
+        String mch = "https://w3id.org/MCH/ontology/";
+        
+        // Détecter automatiquement le projet dans le fichier
+        StmtIterator projectIter = om.listStatements(null, RDF.type, om.getResource(mch + "Project"));
+        if (!projectIter.hasNext()) {
+            throw new IllegalArgumentException("Aucun projet (mch:Project) trouvé dans le fichier : " + aboxFile);
+        }
+        
+        Resource projectRes = projectIter.nextStatement().getSubject();
+        String projectURI = projectRes.getURI();
+        
+        // Structures pour stocker les données extraites
+        Map<String, AlternativeData> alternatives = new HashMap<>();
+        Map<String, ArgumentData> arguments = new HashMap<>();
+        
+        // Récupérer toutes les alternatives liées au projet (Alternative -> hasProject -> Project)
+        Property hasProject = om.getProperty(mch + "hasProject");
+        StmtIterator altIter = om.listStatements((Resource) null, hasProject, projectRes);
+        
+        while (altIter.hasNext()) {
+            Resource altRes = altIter.nextStatement().getSubject();
+            AlternativeData altData = extractAlternative(om, altRes, mch);
+            alternatives.put(altRes.getURI(), altData);
+            
+            // Récupérer tous les arguments liés à cette alternative
+            Property hasArgument = om.getProperty(mch + "hasArgument");
+            StmtIterator argIter = om.listStatements((Resource) altRes, (Property) hasArgument, (RDFNode) null);
+            
+            while (argIter.hasNext()) {
+                Resource argRes = argIter.nextStatement().getObject().asResource();
+                ArgumentData argData = extractArgument(om, argRes, mch);
+                argData.alternativeName = altData.name;  // Associer le nom de l'alternative
+                arguments.put(argRes.getURI(), argData);
+                altData.arguments.add(argData);
+            }
+        }
+        
+        // Exporter en JSON V2
+        ExportMychoiceProjectToDamnJsonV2.exportToJson(alternatives, arguments, projectURI, outputJson);
+        
+        // Exporter en texte DAMN V2
+        ExportMychoiceProjectToDamnTextV2.exportToText(alternatives, arguments, projectURI, outputText);
+    }
+    
+    /**
      * Extrait les données d'une alternative MyChoice.
      */
     private static AlternativeData extractAlternative(Model om, Resource altRes, String mch) {
@@ -139,10 +206,13 @@ public class ExportMychoiceProjectToDamn {
         ArgumentData data = new ArgumentData();
         data.uri = argRes.getURI();
         data.assertion = getStringProperty(om, argRes, mch + "assertion");
+        data.polarity = getStringProperty(om, argRes, mch + "polarity");
+        data.aim = getStringProperty(om, argRes, mch + "aim");
         data.explanation = getStringProperty(om, argRes, mch + "explanation");
-        data.value = getStringProperty(om, argRes, mch + "value");
+        data.value = getStringProperty(om, argRes, mch + "valueProperty");
         data.nameCriterion = getStringProperty(om, argRes, mch + "nameCriterion");
         data.nameProperty = getStringProperty(om, argRes, mch + "nameProperty");
+        data.tagInitiator = getStringProperty(om, argRes, mch + "tagInitiator");
         data.condition = getStringProperty(om, argRes, mch + "condition");
         data.infValue = getStringProperty(om, argRes, mch + "infValue");
         data.supValue = getStringProperty(om, argRes, mch + "supValue");
@@ -174,7 +244,7 @@ public class ExportMychoiceProjectToDamn {
     private static StakeholderData extractStakeholder(Model om, Resource stakeholderRes, String mch) {
         StakeholderData data = new StakeholderData();
         data.uri = stakeholderRes.getURI();
-        data.name = getStringProperty(om, stakeholderRes, mch + "nameStakeholder");
+        data.name = getStringProperty(om, stakeholderRes, mch + "stakeholderName");
         return data;
     }
     
@@ -184,12 +254,23 @@ public class ExportMychoiceProjectToDamn {
     private static SourceData extractSource(Model om, Resource sourceRes, String mch) {
         SourceData data = new SourceData();
         data.uri = sourceRes.getURI();
-        data.name = getStringProperty(om, sourceRes, mch + "nameSource");
+        data.name = getStringProperty(om, sourceRes, mch + "sourceName");
         data.date = getStringProperty(om, sourceRes, mch + "date");
         
         Resource typeSourceRes = getObjectProperty(om, sourceRes, mch + "hasTypeSource");
         if (typeSourceRes != null) {
-            data.typeSource = getStringProperty(om, typeSourceRes, mch + "nameTypeSource");
+            data.typeSource = getStringProperty(om, typeSourceRes, mch + "typeSourceName");
+            String fiabilityStr = getStringProperty(om, typeSourceRes, mch + "typeSourceFiability");
+            try {
+                // Parser en entier naturel, ignorer la partie décimale si présente
+                if (!fiabilityStr.isEmpty()) {
+                    data.typeSourceFiability = (int) Double.parseDouble(fiabilityStr.replaceAll("[^0-9.]", ""));
+                } else {
+                    data.typeSourceFiability = 0;
+                }
+            } catch (NumberFormatException e) {
+                data.typeSourceFiability = 0;
+            }
         }
         
         return data;
@@ -245,10 +326,13 @@ public class ExportMychoiceProjectToDamn {
     static class ArgumentData {
         String uri;
         String assertion;
+        String polarity;
+        String aim;
         String explanation;
         String value;
         String nameCriterion;  // Critère de l'argument
         String nameProperty;   // Propriété de l'argument
+        String tagInitiator;   // Tag initiateur
         String condition;
         String infValue;
         String supValue;
@@ -270,5 +354,6 @@ public class ExportMychoiceProjectToDamn {
         String name;
         String date;
         String typeSource;
+        int typeSourceFiability;  // Fiabilité en entier naturel
     }
 }

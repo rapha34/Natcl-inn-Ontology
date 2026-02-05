@@ -142,6 +142,9 @@ public class ExportMychoiceProjectToDamnText {
                         if (!source.typeSource.isEmpty()) {
                             bw.write("nameTypeSource(" + argId + "," + format(source.typeSource) + ").\n");
                         }
+                        if (source.typeSourceFiability > 0) {
+                            bw.write("typeSourceFiability(" + argId + "," + source.typeSourceFiability + ").\n");
+                        }
                     }
                 }
                 

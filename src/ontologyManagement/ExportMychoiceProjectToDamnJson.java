@@ -159,7 +159,13 @@ public class ExportMychoiceProjectToDamnJson {
             }
             
             // Type pro/con
-            String procon = arg.assertion.toLowerCase().contains("harm") ? "con" : "pro";
+            String procon = "";
+            if (arg.polarity != null && !arg.polarity.isEmpty()) {
+                String polarity = arg.polarity.toLowerCase();
+                procon = polarity.contains("con") || polarity.contains("neg") ? "con" : "pro";
+            } else {
+                procon = arg.assertion.toLowerCase().contains("harm") ? "con" : "pro";
+            }
             sb.append("typeProCon(").append(argId).append(",").append(procon).append(").\n");
             
             // Critère
@@ -168,7 +174,9 @@ public class ExportMychoiceProjectToDamnJson {
             }
             
             // Aim
-            if (!arg.assertion.isEmpty()) {
+            if (!arg.aim.isEmpty()) {
+                sb.append("aim(").append(argId).append(",").append(format(arg.aim)).append(").\n");
+            } else if (!arg.assertion.isEmpty()) {
                 sb.append("aim(").append(argId).append(",").append(format(arg.assertion)).append(").\n");
             }
             
@@ -209,6 +217,9 @@ public class ExportMychoiceProjectToDamnJson {
                     }
                     if (!source.typeSource.isEmpty()) {
                         sb.append("nameTypeSource(").append(argId).append(",").append(format(source.typeSource)).append(").\n");
+                    }
+                    if (source.typeSourceFiability > 0) {
+                        sb.append("typeSourceFiability(").append(argId).append(",").append(source.typeSourceFiability).append(").\n");
                     }
                 }
             }
