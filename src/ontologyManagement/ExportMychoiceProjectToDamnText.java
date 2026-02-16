@@ -56,94 +56,56 @@ public class ExportMychoiceProjectToDamnText {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(outputFile))) {
             
             // En-tête
-            bw.write("%%% EXPORT MyChoice vers DAMN\n");
+            bw.write("%%% === EXPORT MyChoice vers DAMN ===\n");
             bw.write("%%% Projet : " + projectUri + "\n");
-            bw.write("%%% Format : Defeasible Reasoning Tool for Multi-Agent Reasoning\n");
-            bw.write("%%% Ce fichier contient les faits, règles et contraintes générés\n");
-            bw.write("%%%\n");
+            bw.write("%%%\n\n");
+            
+            // FAITS STRICTS - Produits (toutes les alternatives)
+            bw.write("%%% === FAITS STRICTS - Produits ===\n\n");
+            for (ExportMychoiceProjectToDamn.AlternativeData alt : alternatives.values()) {
+                bw.write("product(" + format(alt.name) + ").\n");
+            }
             bw.write("\n");
             
-            // Section FAITS
-            bw.write("%%% === FAITS : Déclaration des arguments et leurs propriétés ===\n");
-            bw.write("\n");
+            // FAITS STRICTS - Arguments
+            bw.write("%%% === FAITS STRICTS - Arguments ===\n\n");
             
             int argumentIndex = 1;
-            Map<String, String> argumentIdMap = new HashMap<>(); // Mapping URI -> a1, a2, etc.
-            
             for (ExportMychoiceProjectToDamn.ArgumentData arg : arguments.values()) {
-                String argId = "a" + argumentIndex;
-                argumentIdMap.put(arg.uri, argId);
+                String argId = "arg" + argumentIndex;
                 
-                // Déclaration de l'argument
                 bw.write("argument(" + argId + ").\n");
+                bw.write("argProduct(" + argId + "," + format(arg.alternativeName) + ").\n");
                 
-                // Propriétés de base
-                if (arg.stakeholder != null && !arg.stakeholder.name.isEmpty()) {
-                    bw.write("nameStakeHolder(" + argId + "," + format(arg.stakeholder.name) + ").\n");
-                }
-                
-                // Utiliser le nom de l'alternative associée à cet argument
-                if (arg.alternativeName != null && !arg.alternativeName.isEmpty()) {
-                    bw.write("nameAlternative(" + argId + "," + format(arg.alternativeName) + ").\n");
+                // Tag
+                String tag = "";
+                if (!arg.nameProperty.isEmpty() && !arg.value.isEmpty()) {
+                    tag = format(arg.nameProperty + "_" + arg.value);
+                } else if (!arg.nameProperty.isEmpty()) {
+                    tag = format(arg.nameProperty);
+                } else if (!arg.nameCriterion.isEmpty()) {
+                    tag = format(arg.nameCriterion);
+                } else if (!arg.tagInitiator.isEmpty()) {
+                    tag = format(arg.tagInitiator);
                 } else if (!arg.value.isEmpty()) {
-                    // Fallback sur value si alternativeName n'est pas disponible
-                    bw.write("nameAlternative(" + argId + "," + format(arg.value) + ").\n");
+                    tag = format(arg.value);
+                }
+                if (!tag.isEmpty()) {
+                    bw.write("argTag(" + argId + "," + tag + ").\n");
                 }
                 
-                // Type pro/con - déterminé par la présence de "harms" ou "serves" dans l'assertion
-                String procon = arg.assertion.toLowerCase().contains("harm") ? "con" : "pro";
-                bw.write("typeProCon(" + argId + "," + procon + ").\n");
-                
-                // Critère - utiliser nameCriterion s'il existe
-                if (!arg.nameCriterion.isEmpty()) {
-                    bw.write("nameCriterion(" + argId + "," + format(arg.nameCriterion) + ").\n");
+                // Polarité
+                if (arg.polarity != null && !arg.polarity.isEmpty()) {
+                    String polarity = arg.polarity.equals("-") ? "con" : "pro";
+                    bw.write("argPolarity(" + argId + "," + polarity + ").\n");
                 }
                 
-                // Aim (objectif) - extrait de l'assertion ou du value
-                if (!arg.assertion.isEmpty()) {
-                    bw.write("aim(" + argId + "," + format(arg.assertion) + ").\n");
-                }
-                
-                // Property - utiliser nameProperty s'il existe
-                if (!arg.nameProperty.isEmpty()) {
-                    bw.write("nameProperty(" + argId + "," + format(arg.nameProperty) + ").\n");
-                }
-                
-                // Valeur
-                if (!arg.value.isEmpty()) {
-                    bw.write("value(" + argId + "," + format(arg.value) + ").\n");
-                }
-                
-                // Assertion
-                if (!arg.assertion.isEmpty()) {
-                    bw.write("assertion(" + argId + "," + format(arg.assertion) + ").\n");
-                }
-                
-                // Explication
-                if (!arg.explanation.isEmpty()) {
-                    bw.write("explanation(" + argId + "," + format(arg.explanation) + ").\n");
-                }
-                
-                // Prospectif
-                int prospective = arg.isProspective.isEmpty() ? 0 : Integer.parseInt(arg.isProspective);
-                bw.write("isProspective(" + argId + "," + prospective + ").\n");
-                
-                // Date
-                if (!arg.date.isEmpty()) {
-                    bw.write("date(" + argId + "," + format(arg.date) + ").\n");
-                }
-                
-                // Sources
+                // Fiabilité
                 if (arg.sources != null && !arg.sources.isEmpty()) {
                     for (ExportMychoiceProjectToDamn.SourceData source : arg.sources) {
-                        if (!source.name.isEmpty()) {
-                            bw.write("nameSource(" + argId + "," + format(source.name) + ").\n");
-                        }
-                        if (!source.typeSource.isEmpty()) {
-                            bw.write("nameTypeSource(" + argId + "," + format(source.typeSource) + ").\n");
-                        }
                         if (source.typeSourceFiability > 0) {
-                            bw.write("typeSourceFiability(" + argId + "," + source.typeSourceFiability + ").\n");
+                            bw.write("argFiability(" + argId + "," + source.typeSourceFiability + ").\n");
+                            break;
                         }
                     }
                 }
@@ -151,41 +113,114 @@ public class ExportMychoiceProjectToDamnText {
                 bw.write("\n");
                 argumentIndex++;
             }
-            
-            // Section RÈGLES
-            bw.write("%%% === RÈGLES : Raisonnement défaisable ===\n");
             bw.write("\n");
             
-            bw.write("serves(ALT,AIM,PROP) <= argument(ARG), nameAlternative(ARG,ALT), typeProCon(ARG,pro), aim(ARG,AIM), nameProperty(ARG,PROP).\n");
-            bw.write("harms(ALT,AIM,PROP) <= argument(ARG), nameAlternative(ARG,ALT), typeProCon(ARG,con), aim(ARG,AIM), nameProperty(ARG,PROP).\n");
-            bw.write("hasCriterion(AIM,CRIT) <= argument(ARG), aim(ARG,AIM), nameCriterion(ARG,CRIT).\n");
-            bw.write("serves(ALT,CRIT,PROP) <= serves(ALT,AIM,PROP), hasCriterion(AIM,CRIT).\n");
-            bw.write("harms(ALT,CRIT,PROP) <= harms(ALT,AIM,PROP), hasCriterion(AIM,CRIT).\n");
-            bw.write("support(ALT) <= serves(ALT,CRIT,PROP).\n");
-            bw.write("avoid(ALT) <= harms(ALT,CRIT,PROP).\n");
-            bw.write("\n");
+            // REGLES STRICTS
+            bw.write("%%% === REGLES STRICTS  ===\n\n");
+            bw.write("%%% Niveaux de force des arguments basés sur la fiabilité\n");
+            bw.write("%%% 1: très fiable, 2: fiable, 3: moins fiable, 4: peu fiable, 5: très peu fiable\n\n");
+            bw.write("veryStrongArgument(Arg) :- argFiability(Arg,1).\n");
+            bw.write("strongArgument(Arg) :- argFiability(Arg,2).\n");
+            bw.write("moderateArgument(Arg) :- argFiability(Arg,3).\n");
+            bw.write("weakArgument(Arg) :- argFiability(Arg,4).\n");
+            bw.write("veryWeakArgument(Arg) :- argFiability(Arg,5).\n\n");
             
-            // Section CONTRAINTES
-            bw.write("%%% === CONTRAINTES : Inconsistances et contradictions ===\n");
-            bw.write("\n");
+            bw.write("hasVeryStrongPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), veryStrongArgument(Arg).\n");
+            bw.write("hasStrongPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), strongArgument(Arg).\n");
+            bw.write("hasModeratePro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), moderateArgument(Arg).\n");
+            bw.write("hasWeakPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), weakArgument(Arg).\n");
+            bw.write("hasVeryWeakPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), veryWeakArgument(Arg).\n\n");
             
-            bw.write("! :- serves(ALT,AIM,PROP), harms(ALT,AIM,PROP).\n");
-            bw.write("! :- serves(ALT,CRIT,PROP), harms(ALT,CRIT,PROP).\n");
-            bw.write("! :- support(ALT), avoid(ALT).\n");
-            bw.write("\n");
+            bw.write("hasVeryStrongCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), veryStrongArgument(Arg).\n");
+            bw.write("hasStrongCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), strongArgument(Arg).\n");
+            bw.write("hasModerateCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), moderateArgument(Arg).\n");
+            bw.write("hasWeakCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), weakArgument(Arg).\n");
+            bw.write("hasVeryWeakCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), veryWeakArgument(Arg).\n\n");
             
-            // Statistiques en commentaire
+            // REGLES DEFAISABLES
+            bw.write("%%% === REGLES DEFAISABLES ===\n\n");
+            bw.write("[r1] hasGoodNaturalness(X) <= hasVeryStrongPro(X).\n");
+            bw.write("[r2] hasGoodNaturalness(X) <= hasStrongPro(X).\n");
+            bw.write("[r3] hasGoodNaturalness(X) <= hasModeratePro(X).\n");
+            bw.write("[r4] hasGoodNaturalness(X) <= hasWeakPro(X).\n");
+            bw.write("[r5] hasGoodNaturalness(X) <= hasVeryWeakPro(X).\n\n");
+            
+            bw.write("[r6] hasNoGoodNaturalness(X) <= hasVeryStrongCon(X).\n");
+            bw.write("[r7] hasNoGoodNaturalness(X) <= hasStrongCon(X).\n");
+            bw.write("[r8] hasNoGoodNaturalness(X) <= hasModerateCon(X).\n");
+            bw.write("[r9] hasNoGoodNaturalness(X) <= hasWeakCon(X).\n");
+            bw.write("[r10] hasNoGoodNaturalness(X) <= hasVeryWeakCon(X).\n\n\n");
+            
+            // PRIORISATION DES REGLES
+            bw.write("%%% === PRIORISATION DES REGLES ===\n\n");
+            bw.write("%%% Les arguments con forts l'emportent sur les arguments pro\n\n");
+            bw.write("r6 >> r1.\n");
+            bw.write("r6 >> r2.\n");
+            bw.write("r6 >> r3.\n");
+            bw.write("r6 >> r4.\n");
+            bw.write("r6 >> r5.\n\n");
+            
+            bw.write("r1 >> r8.\n");
+            bw.write("r1 >> r9.\n");
+            bw.write("r1 >> r10.\n\n");
+            
+            bw.write("r2 >> r8.\n");
+            bw.write("r2 >> r9.\n");
+            bw.write("r2 >> r10.\n\n");
+            
+            // CONTRAINTES
+            bw.write("%%% === CONTRAINTES ===\n\n");
+            bw.write("! :- hasGoodNaturalness(X), hasNoGoodNaturalness(X).\n\n\n");
+            
+            // STATISTIQUES
             bw.write("%%% === STATISTIQUES ===\n");
             bw.write("%%% Arguments : " + arguments.size() + "\n");
-            bw.write("%%% Alternatives : " + alternatives.size() + "\n");
-            bw.write("%%% Règles : 7\n");
-            bw.write("%%% Contraintes : 3\n");
+            bw.write("%%% Produits : " + alternatives.size() + "\n");
+            bw.write("%%% Règles défaisables : 10\n");
+            bw.write("%%% Priorités : 11\n");
+            bw.write("%%% Contraintes : 1\n");
+            bw.write("\n\n");
+            
+            // EXEMPLES DE QUERY
+            bw.write("%%% === EXEMPLES DE QUERY ===\n\n");
+            bw.write("%%% Queries sur les Arguments :\n");
+            bw.write("%%% argument(Arg), argProduct(Arg, petites_madeleines).\n");
+            bw.write("%%% argument(Arg), argProduct(Arg, X), argPolarity(Arg, pro).\n");
+            bw.write("%%% argument(Arg), argProduct(Arg, X), argPolarity(Arg, con).\n");
+            bw.write("%%% argument(Arg), argFiability(Arg, 1).\n");
+            bw.write("%%% argument(Arg), argTag(Arg, Tag).\n\n");
+            
+            bw.write("%%% Queries sur les Niveaux de Force :\n");
+            bw.write("%%% hasVeryStrongPro(Product).\n");
+            bw.write("%%% hasVeryStrongCon(Product).\n");
+            bw.write("%%% hasStrongPro(Product).\n");
+            bw.write("%%% hasStrongCon(Product).\n");
+            bw.write("%%% argument(Arg), argProduct(Arg, Product), argPolarity(Arg, pro), veryStrongArgument(Arg).\n\n");
+            
+            bw.write("%%% Queries sur la Naturalité :\n");
+            bw.write("%%% hasGoodNaturalness(X).\n");
+            bw.write("%%% hasNoGoodNaturalness(X).\n");
+            bw.write("%%% hasGoodNaturalness(X), hasNoGoodNaturalness(X).\n");
+            bw.write("%%% product(X), \\+ hasGoodNaturalness(X), \\+ hasNoGoodNaturalness(X).\n\n");
+            
+            bw.write("%%% Queries Comparatives :\n");
+            bw.write("%%% product(X), product(Y), X < Y, hasStrongPro(X), hasStrongPro(Y).\n");
+            bw.write("%%% argument(Arg), argProduct(Arg, Product), argPolarity(Arg, pro).\n");
+            bw.write("%%% argument(Arg), argProduct(Arg, Product), argPolarity(Arg, con).\n\n");
+            
+            bw.write("%%% Queries Complexes :\n");
+            bw.write("%%% hasStrongPro(Product), hasStrongCon(Product).\n");
+            bw.write("%%% argument(Arg1), argument(Arg2), argProduct(Arg1, Product), argProduct(Arg2, Product), argFiability(Arg1, 1), argFiability(Arg2, 1), argPolarity(Arg1, pro), argPolarity(Arg2, con).\n\n");
+            
+            bw.write("%%% Queries avec Exclusions :\n");
+            bw.write("%%% product(Product), argument(Arg), argProduct(Arg, Product), argPolarity(Arg, pro), \\+ (argument(Arg2), argProduct(Arg2, Product), argPolarity(Arg2, con)).\n");
             
         }
         
         System.out.println("Export texte DAMN réussi : " + outputFile);
         System.out.println("  - " + arguments.size() + " arguments exportés");
-        System.out.println("  - 7 règles incluses");
-        System.out.println("  - 3 contraintes incluses");
+        System.out.println("  - 10 règles défaisables incluses");
+        System.out.println("  - 11 priorités incluses");
+        System.out.println("  - 1 contrainte incluse");
     }
 }

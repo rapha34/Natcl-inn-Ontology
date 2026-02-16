@@ -160,20 +160,18 @@ public class CreateMychoiceProjectFromPreliminaryProject {
                 e.printStackTrace();
             }
             
-            // Extraction automatique vers DAMN V2 (JSON et texte)
-            String damnV2JsonFileName = fileName.replaceFirst("[.][^.]+$", "_damn_v2.json");
-            String damnV2TextFileName = fileName.replaceFirst("[.][^.]+$", "_damn_v2.txt");
-            String damnV2JsonFilePath = NatclinnConf.folderForResults + "/" + damnV2JsonFileName;
-            String damnV2TextFilePath = NatclinnConf.folderForResults + "/" + damnV2TextFileName;
+            // Extraction automatique vers DAMN (JSON et texte - un fichier par produit)
+            String damnByAltJsonFileName = fileName.replaceFirst("[.][^.]+$", "_damn_by_alternative.json");
+            String damnByAltTextFileName = fileName.replaceFirst("[.][^.]+$", "_damn_by_alternative.txt");
+            String damnByAltJsonFilePath = NatclinnConf.folderForResults + "/" + damnByAltJsonFileName;
+            String damnByAltTextFilePath = NatclinnConf.folderForResults + "/" + damnByAltTextFileName;
             
             try {
-                System.out.println("Extraction vers DAMN V2 (JSON et texte)...");
-                ExportMychoiceProjectToDamn.exportProjectToDamnV2(xmlFilePath, damnV2JsonFilePath, damnV2TextFilePath);
-                System.out.println("Fichiers DAMN V2 générés :");
-                System.out.println("  - JSON : " + damnV2JsonFilePath);
-                System.out.println("  - Texte : " + damnV2TextFilePath);
+                System.out.println("Extraction vers DAMN (JSON et texte - un fichier par produit)...");
+                ExportMychoiceProjectToDamn.exportProjectToDamnByAlternative(xmlFilePath, damnByAltJsonFilePath, damnByAltTextFilePath);
+                System.out.println("Fichiers DAMN générés (par produit)");
             } catch (Exception e) {
-                System.err.println("Erreur lors de l'extraction DAMN V2 : " + e.getMessage());
+                System.err.println("Erreur lors de l'extraction DAMN : " + e.getMessage());
                 e.printStackTrace();
             }
         }

@@ -69,6 +69,18 @@ public class ExportMychoiceProjectToDamnJson {
         // Générer le texte DAMN
         String dlgpContent = generateDamnText(alternatives, arguments, projectUri);
         
+        // Construire la query avec tous les produits
+        StringBuilder queryBuilder = new StringBuilder();
+        boolean first = true;
+        for (ExportMychoiceProjectToDamn.AlternativeData alt : alternatives.values()) {
+            if (!first) {
+                queryBuilder.append(", ");
+            }
+            queryBuilder.append("hasGoodNaturalness(").append(format(alt.name)).append(")");
+            first = false;
+        }
+        String query = queryBuilder.toString();
+        
         // Créer la structure JSON principale
         ObjectNode root = mapper.createObjectNode();
         
@@ -77,7 +89,7 @@ public class ExportMychoiceProjectToDamnJson {
         root.put("name", extractProjectName(projectUri));
         root.put("description", "Damn project from Natclinn project\n");
         root.put("semantic", "PDLwithoutTD");
-        root.put("query", "");
+        root.put("query", query);
         root.put("creator_id", "natclinn_creator");
         
         // Contributors
@@ -125,101 +137,56 @@ public class ExportMychoiceProjectToDamnJson {
         StringBuilder sb = new StringBuilder();
         
         // En-tête
-        sb.append("%%% EXPORT MyChoice vers DAMN\n");
+        sb.append("%%% === EXPORT MyChoice vers DAMN ===\n");
         sb.append("%%% Projet : ").append(projectUri).append("\n");
-        sb.append("%%% Format : Defeasible Reasoning Tool for Multi-Agent Reasoning\n");
-        sb.append("%%% Ce fichier contient les faits, règles et contraintes générés\n");
-        sb.append("%%%\n");
+        sb.append("%%%\n\n");
+        
+        // FAITS STRICTS - Produits (toutes les alternatives)
+        sb.append("%%% === FAITS STRICTS - Produits ===\n\n");
+        for (ExportMychoiceProjectToDamn.AlternativeData alt : alternatives.values()) {
+            sb.append("product(").append(format(alt.name)).append(").\n");
+        }
         sb.append("\n");
         
-        // Section FAITS
-        sb.append("%%% === FAITS : Déclaration des arguments et leurs propriétés ===\n");
-        sb.append("\n");
+        // FAITS STRICTS - Arguments
+        sb.append("%%% === FAITS STRICTS - Arguments ===\n\n");
         
         int argumentIndex = 1;
-        Map<String, String> argumentIdMap = new HashMap<>();
-        
         for (ExportMychoiceProjectToDamn.ArgumentData arg : arguments.values()) {
-            String argId = "a" + argumentIndex;
-            argumentIdMap.put(arg.uri, argId);
+            String argId = "arg" + argumentIndex;
             
-            // Déclaration de l'argument
             sb.append("argument(").append(argId).append(").\n");
+            sb.append("argProduct(").append(argId).append(",").append(format(arg.alternativeName)).append(").\n");
             
-            // Propriétés de base
-            if (arg.stakeholder != null && !arg.stakeholder.name.isEmpty()) {
-                sb.append("nameStakeHolder(").append(argId).append(",").append(format(arg.stakeholder.name)).append(").\n");
-            }
-            
-            // Nom de l'alternative associée
-            if (arg.alternativeName != null && !arg.alternativeName.isEmpty()) {
-                sb.append("nameAlternative(").append(argId).append(",").append(format(arg.alternativeName)).append(").\n");
+            // Tag
+            String tag = "";
+            if (!arg.nameProperty.isEmpty() && !arg.value.isEmpty()) {
+                tag = format(arg.nameProperty + "_" + arg.value);
+            } else if (!arg.nameProperty.isEmpty()) {
+                tag = format(arg.nameProperty);
+            } else if (!arg.nameCriterion.isEmpty()) {
+                tag = format(arg.nameCriterion);
+            } else if (!arg.tagInitiator.isEmpty()) {
+                tag = format(arg.tagInitiator);
             } else if (!arg.value.isEmpty()) {
-                sb.append("nameAlternative(").append(argId).append(",").append(format(arg.value)).append(").\n");
+                tag = format(arg.value);
+            }
+            if (!tag.isEmpty()) {
+                sb.append("argTag(").append(argId).append(",").append(tag).append(").\n");
             }
             
-            // Type pro/con
-            String procon = "";
+            // Polarité
             if (arg.polarity != null && !arg.polarity.isEmpty()) {
-                String polarity = arg.polarity.toLowerCase();
-                procon = polarity.contains("con") || polarity.contains("neg") ? "con" : "pro";
-            } else {
-                procon = arg.assertion.toLowerCase().contains("harm") ? "con" : "pro";
-            }
-            sb.append("typeProCon(").append(argId).append(",").append(procon).append(").\n");
-            
-            // Critère
-            if (!arg.nameCriterion.isEmpty()) {
-                sb.append("nameCriterion(").append(argId).append(",").append(format(arg.nameCriterion)).append(").\n");
+                String polarity = arg.polarity.equals("-") ? "con" : "pro";
+                sb.append("argPolarity(").append(argId).append(",").append(polarity).append(").\n");
             }
             
-            // Aim
-            if (!arg.aim.isEmpty()) {
-                sb.append("aim(").append(argId).append(",").append(format(arg.aim)).append(").\n");
-            } else if (!arg.assertion.isEmpty()) {
-                sb.append("aim(").append(argId).append(",").append(format(arg.assertion)).append(").\n");
-            }
-            
-            // Property
-            if (!arg.nameProperty.isEmpty()) {
-                sb.append("nameProperty(").append(argId).append(",").append(format(arg.nameProperty)).append(").\n");
-            }
-            
-            // Value
-            if (!arg.value.isEmpty()) {
-                sb.append("value(").append(argId).append(",").append(format(arg.value)).append(").\n");
-            }
-            
-            // Assertion
-            if (!arg.assertion.isEmpty()) {
-                sb.append("assertion(").append(argId).append(",").append(format(arg.assertion)).append(").\n");
-            }
-            
-            // Explication
-            if (!arg.explanation.isEmpty()) {
-                sb.append("explanation(").append(argId).append(",").append(format(arg.explanation)).append(").\n");
-            }
-            
-            // Prospectif
-            int prospective = arg.isProspective.isEmpty() ? 0 : Integer.parseInt(arg.isProspective);
-            sb.append("isProspective(").append(argId).append(",").append(prospective).append(").\n");
-            
-            // Date
-            if (!arg.date.isEmpty()) {
-                sb.append("date(").append(argId).append(",").append(format(arg.date)).append(").\n");
-            }
-            
-            // Sources
+            // Fiabilité
             if (arg.sources != null && !arg.sources.isEmpty()) {
                 for (ExportMychoiceProjectToDamn.SourceData source : arg.sources) {
-                    if (!source.name.isEmpty()) {
-                        sb.append("nameSource(").append(argId).append(",").append(format(source.name)).append(").\n");
-                    }
-                    if (!source.typeSource.isEmpty()) {
-                        sb.append("nameTypeSource(").append(argId).append(",").append(format(source.typeSource)).append(").\n");
-                    }
                     if (source.typeSourceFiability > 0) {
-                        sb.append("typeSourceFiability(").append(argId).append(",").append(source.typeSourceFiability).append(").\n");
+                        sb.append("argFiability(").append(argId).append(",").append(source.typeSourceFiability).append(").\n");
+                        break;
                     }
                 }
             }
@@ -227,33 +194,107 @@ public class ExportMychoiceProjectToDamnJson {
             sb.append("\n");
             argumentIndex++;
         }
-        
-        // Section RÈGLES
-        sb.append("%%% === RÈGLES : Raisonnement défaisable ===\n");
-        sb.append("\n");
-        sb.append("serves(ALT,AIM,PROP) <= argument(ARG), nameAlternative(ARG,ALT), typeProCon(ARG,pro), aim(ARG,AIM), nameProperty(ARG,PROP).\n");
-        sb.append("harms(ALT,AIM,PROP) <= argument(ARG), nameAlternative(ARG,ALT), typeProCon(ARG,con), aim(ARG,AIM), nameProperty(ARG,PROP).\n");
-        sb.append("hasCriterion(AIM,CRIT) <= argument(ARG), aim(ARG,AIM), nameCriterion(ARG,CRIT).\n");
-        sb.append("serves(ALT,CRIT,PROP) <= serves(ALT,AIM,PROP), hasCriterion(AIM,CRIT).\n");
-        sb.append("harms(ALT,CRIT,PROP) <= harms(ALT,AIM,PROP), hasCriterion(AIM,CRIT).\n");
-        sb.append("support(ALT) <= serves(ALT,CRIT,PROP).\n");
-        sb.append("avoid(ALT) <= harms(ALT,CRIT,PROP).\n");
         sb.append("\n");
         
-        // Section CONTRAINTES
-        sb.append("%%% === CONTRAINTES : Inconsistances et contradictions ===\n");
-        sb.append("\n");
-        sb.append("! :- serves(ALT,AIM,PROP), harms(ALT,AIM,PROP).\n");
-        sb.append("! :- serves(ALT,CRIT,PROP), harms(ALT,CRIT,PROP).\n");
-        sb.append("! :- support(ALT), avoid(ALT).\n");
-        sb.append("\n");
+        // REGLES STRICTS
+        sb.append("%%% === REGLES STRICTS  ===\n\n");
+        sb.append("%%% Niveaux de force des arguments basés sur la fiabilité\n");
+        sb.append("%%% 1: très fiable, 2: fiable, 3: moins fiable, 4: peu fiable, 5: très peu fiable\n\n");
+        sb.append("veryStrongArgument(Arg) :- argFiability(Arg,1).\n");
+        sb.append("strongArgument(Arg) :- argFiability(Arg,2).\n");
+        sb.append("moderateArgument(Arg) :- argFiability(Arg,3).\n");
+        sb.append("weakArgument(Arg) :- argFiability(Arg,4).\n");
+        sb.append("veryWeakArgument(Arg) :- argFiability(Arg,5).\n\n");
         
-        // Statistiques
+        sb.append("hasVeryStrongPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), veryStrongArgument(Arg).\n");
+        sb.append("hasStrongPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), strongArgument(Arg).\n");
+        sb.append("hasModeratePro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), moderateArgument(Arg).\n");
+        sb.append("hasWeakPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), weakArgument(Arg).\n");
+        sb.append("hasVeryWeakPro(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,pro), veryWeakArgument(Arg).\n\n");
+        
+        sb.append("hasVeryStrongCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), veryStrongArgument(Arg).\n");
+        sb.append("hasStrongCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), strongArgument(Arg).\n");
+        sb.append("hasModerateCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), moderateArgument(Arg).\n");
+        sb.append("hasWeakCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), weakArgument(Arg).\n");
+        sb.append("hasVeryWeakCon(Product) :- argument(Arg), argProduct(Arg,Product), argPolarity(Arg,con), veryWeakArgument(Arg).\n\n");
+        
+        // REGLES DEFAISABLES
+        sb.append("%%% === REGLES DEFAISABLES ===\n\n");
+        sb.append("[r1] hasGoodNaturalness(X) <= hasVeryStrongPro(X).\n");
+        sb.append("[r2] hasGoodNaturalness(X) <= hasStrongPro(X).\n");
+        sb.append("[r3] hasGoodNaturalness(X) <= hasModeratePro(X).\n");
+        sb.append("[r4] hasGoodNaturalness(X) <= hasWeakPro(X).\n");
+        sb.append("[r5] hasGoodNaturalness(X) <= hasVeryWeakPro(X).\n\n");
+        
+        sb.append("[r6] hasNoGoodNaturalness(X) <= hasVeryStrongCon(X).\n");
+        sb.append("[r7] hasNoGoodNaturalness(X) <= hasStrongCon(X).\n");
+        sb.append("[r8] hasNoGoodNaturalness(X) <= hasModerateCon(X).\n");
+        sb.append("[r9] hasNoGoodNaturalness(X) <= hasWeakCon(X).\n");
+        sb.append("[r10] hasNoGoodNaturalness(X) <= hasVeryWeakCon(X).\n\n\n");
+        
+        // PRIORISATION DES REGLES
+        sb.append("%%% === PRIORISATION DES REGLES ===\n\n");
+        sb.append("%%% Les arguments con forts l'emportent sur les arguments pro\n\n");
+        sb.append("r6 >> r1.\n");
+        sb.append("r6 >> r2.\n");
+        sb.append("r6 >> r3.\n");
+        sb.append("r6 >> r4.\n");
+        sb.append("r6 >> r5.\n\n");
+        
+        sb.append("r1 >> r8.\n");
+        sb.append("r1 >> r9.\n");
+        sb.append("r1 >> r10.\n\n");
+        
+        sb.append("r2 >> r8.\n");
+        sb.append("r2 >> r9.\n");
+        sb.append("r2 >> r10.\n\n");
+        
+        // CONTRAINTES
+        sb.append("%%% === CONTRAINTES ===\n\n");
+        sb.append("! :- hasGoodNaturalness(X), hasNoGoodNaturalness(X).\n\n\n");
+        
+        // STATISTIQUES
         sb.append("%%% === STATISTIQUES ===\n");
         sb.append("%%% Arguments : ").append(arguments.size()).append("\n");
-        sb.append("%%% Alternatives : ").append(alternatives.size()).append("\n");
-        sb.append("%%% Règles : 7\n");
-        sb.append("%%% Contraintes : 3\n");
+        sb.append("%%% Produits : ").append(alternatives.size()).append("\n");
+        sb.append("%%% Règles défaisables : 10\n");
+        sb.append("%%% Priorités : 11\n");
+        sb.append("%%% Contraintes : 1\n");
+        sb.append("\n\n");
+        
+        // EXEMPLES DE QUERY
+        sb.append("%%% === EXEMPLES DE QUERY ===\n\n");
+        sb.append("%%% Queries sur les Arguments :\n");
+        sb.append("%%% argument(Arg), argProduct(Arg, petites_madeleines).\n");
+        sb.append("%%% argument(Arg), argProduct(Arg, X), argPolarity(Arg, pro).\n");
+        sb.append("%%% argument(Arg), argProduct(Arg, X), argPolarity(Arg, con).\n");
+        sb.append("%%% argument(Arg), argFiability(Arg, 1).\n");
+        sb.append("%%% argument(Arg), argTag(Arg, Tag).\n\n");
+        
+        sb.append("%%% Queries sur les Niveaux de Force :\n");
+        sb.append("%%% hasVeryStrongPro(Product).\n");
+        sb.append("%%% hasVeryStrongCon(Product).\n");
+        sb.append("%%% hasStrongPro(Product).\n");
+        sb.append("%%% hasStrongCon(Product).\n");
+        sb.append("%%% argument(Arg), argProduct(Arg, Product), argPolarity(Arg, pro), veryStrongArgument(Arg).\n\n");
+        
+        sb.append("%%% Queries sur la Naturalité :\n");
+        sb.append("%%% hasGoodNaturalness(X).\n");
+        sb.append("%%% hasNoGoodNaturalness(X).\n");
+        sb.append("%%% hasGoodNaturalness(X), hasNoGoodNaturalness(X).\n");
+        sb.append("%%% product(X), \\+ hasGoodNaturalness(X), \\+ hasNoGoodNaturalness(X).\n\n");
+        
+        sb.append("%%% Queries Comparatives :\n");
+        sb.append("%%% product(X), product(Y), X < Y, hasStrongPro(X), hasStrongPro(Y).\n");
+        sb.append("%%% argument(Arg), argProduct(Arg, Product), argPolarity(Arg, pro).\n");
+        sb.append("%%% argument(Arg), argProduct(Arg, Product), argPolarity(Arg, con).\n\n");
+        
+        sb.append("%%% Queries Complexes :\n");
+        sb.append("%%% hasStrongPro(Product), hasStrongCon(Product).\n");
+        sb.append("%%% argument(Arg1), argument(Arg2), argProduct(Arg1, Product), argProduct(Arg2, Product), argFiability(Arg1, 1), argFiability(Arg2, 1), argPolarity(Arg1, pro), argPolarity(Arg2, con).\n\n");
+        
+        sb.append("%%% Queries avec Exclusions :\\n");
+        sb.append("%%% product(Product), argument(Arg), argProduct(Arg, Product), argPolarity(Arg, pro), \\+ (argument(Arg2), argProduct(Arg2, Product), argPolarity(Arg2, con)).\n");
         
         return sb.toString();
     }

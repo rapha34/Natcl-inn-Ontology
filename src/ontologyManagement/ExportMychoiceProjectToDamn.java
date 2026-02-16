@@ -40,8 +40,8 @@ public class ExportMychoiceProjectToDamn {
         String baseName = inputFileName.replaceFirst("[.][^.]+$", ""); // Retire l'extension
         String outputJson = NatclinnConf.folderForResults + "/" + baseName + "_damn.json";
         String outputText = NatclinnConf.folderForResults + "/" + baseName + "_damn.txt";
-        String outputJsonV2 = NatclinnConf.folderForResults + "/" + baseName + "_damn_v2.json";
-        String outputTextV2 = NatclinnConf.folderForResults + "/" + baseName + "_damn_v2.txt";
+        String outputJsonByAlt = NatclinnConf.folderForResults + "/" + baseName + "_damn_by_alternative.json";
+        String outputTextByAlt = NatclinnConf.folderForResults + "/" + baseName + "_damn_by_alternative.txt";
         
         try {
             exportProjectToDamn(aboxFile, outputJson, outputText);
@@ -49,10 +49,8 @@ public class ExportMychoiceProjectToDamn {
             System.out.println("  - JSON : " + outputJson);
             System.out.println("  - Texte : " + outputText);
             
-            exportProjectToDamnV2(aboxFile, outputJsonV2, outputTextV2);
-            System.out.println("Export V2 réussi :");
-            System.out.println("  - JSON : " + outputJsonV2);
-            System.out.println("  - Texte : " + outputTextV2);
+            exportProjectToDamnByAlternative(aboxFile, outputJsonByAlt, outputTextByAlt);
+            System.out.println("Export par produit réussi (un fichier par alternative)");
         } catch (Exception e) {
             System.err.println("Erreur lors de l'export : " + e.getMessage());
             e.printStackTrace();
@@ -125,14 +123,15 @@ public class ExportMychoiceProjectToDamn {
         ExportMychoiceProjectToDamnText.exportToText(alternatives, arguments, projectURI, outputText);
     }
     
+    
     /**
-     * Exporte un projet MyChoice vers les formats JSON et texte DAMN V2.
+     * Exporte un projet MyChoice vers les formats JSON et texte DAMN (un fichier par produit).
      * 
      * @param aboxFile Chemin du fichier RDF/XML contenant le projet MyChoice
-     * @param outputJson Chemin du fichier JSON de sortie V2
-     * @param outputText Chemin du fichier texte de sortie V2
+     * @param outputJson Chemin de base du fichier JSON de sortie
+     * @param outputText Chemin de base du fichier texte de sortie
      */
-    public static void exportProjectToDamnV2(String aboxFile, String outputJson, String outputText) 
+    public static void exportProjectToDamnByAlternative(String aboxFile, String outputJson, String outputText) 
             throws FileNotFoundException, IOException {
         
         // Charger le modèle RDF
@@ -178,12 +177,13 @@ public class ExportMychoiceProjectToDamn {
             }
         }
         
-        // Exporter en JSON V2
-        ExportMychoiceProjectToDamnJsonV2.exportToJson(alternatives, arguments, projectURI, outputJson);
+        // Exporter en JSON (un fichier par produit)
+        ExportMychoiceProjectToDamnJsonByAlternative.exportToJson(alternatives, arguments, projectURI, outputJson);
         
-        // Exporter en texte DAMN V2
-        ExportMychoiceProjectToDamnTextV2.exportToText(alternatives, arguments, projectURI, outputText);
+        // Exporter en texte DAMN (un fichier par produit)
+        ExportMychoiceProjectToDamnTextByAlternative.exportToText(alternatives, arguments, projectURI, outputText);
     }
+
     
     /**
      * Extrait les données d'une alternative MyChoice.
